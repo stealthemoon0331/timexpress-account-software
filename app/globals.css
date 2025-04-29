@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 114 100% 0%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 114 100% 0%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 114 100% 0%;
+
+    --primary: 114 100% 33%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 114 20% 96%;
+    --secondary-foreground: 114 100% 0%;
+
+    --muted: 114 20% 96%;
+    --muted-foreground: 114 10% 39%;
+
+    --accent: 114 20% 96%;
+    --accent-foreground: 114 100% 0%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 114 20% 87%;
+    --input: 114 20% 87%;
+    --ring: 114 100% 33%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 114 100% 0%;
+    --foreground: 0 0% 98%;
+
+    --card: 114 100% 0%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 114 100% 0%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 114 100% 33%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 114 50% 8%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 114 50% 8%;
+    --muted-foreground: 114 10% 70%;
+
+    --accent: 114 50% 8%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 114 50% 15%;
+    --input: 114 50% 15%;
+    --ring: 114 100% 33%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom button styles to match Upwork */
+.btn-upwork {
+  @apply bg-upwork-green hover:bg-upwork-darkgreen text-white font-medium rounded-md transition-colors;
+}
+
+.btn-upwork-outline {
+  @apply border border-upwork-green text-upwork-green hover:bg-upwork-lightgreen font-medium rounded-md transition-colors;
+}

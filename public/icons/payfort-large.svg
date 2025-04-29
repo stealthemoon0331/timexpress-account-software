@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 30" width="120" height="30">
+  <rect width="120" height="30" rx="4" fill="#00A1DF"/>
+  <path d="M30 15h60M60 5v20" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+  <text x="60" y="22" font-family="Arial, sans-serif" font-size="8" fill="#FFFFFF" text-anchor="middle">PAYFORT</text>
+</svg>
