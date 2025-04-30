@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -80,18 +80,22 @@ export default function RegisterPage() {
       });
 
       if (res.ok) {
-        router.push("/auth/signin");
+        toast({
+          title: "Account created!",
+          description: "Please check your email to verify your account.",
+        });
+
+        router.push(`/verify-email?email=${encodeURIComponent(values.email)}`);
       } else {
-        const error = await res.json();
-        alert(error.error);
+        let errorMessage = "Something went wrong.";
+        try {
+          const error = await res.json();
+          errorMessage = error.error || errorMessage;
+        } catch (e) {
+          // fallback error if JSON parse fails
+        }
+        alert(errorMessage);
       }
-
-      toast({
-        title: "Account created!",
-        description: "Please check your email to verify your account.",
-      });
-
-      router.push("/verify-email");
     } catch (error) {
       toast({
         title: "Something went wrong.",
@@ -129,6 +133,8 @@ export default function RegisterPage() {
       setIsLoading(false);
     }
   };
+
+
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
