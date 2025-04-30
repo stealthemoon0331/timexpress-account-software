@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
 import { Icons } from "@/components/icons"
 import { SocialButton } from "@/components/ui/social-buttons"
+import { signIn } from "next-auth/react";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -47,7 +48,11 @@ export default function LoginPage() {
       console.log(values)
 
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await signIn("credentials", {
+        email: values.email,
+        password: values.password,
+        callbackUrl: "/dashboard"
+      });
 
       toast({
         title: "Login successful",
@@ -65,7 +70,6 @@ export default function LoginPage() {
       setIsLoading(false)
     }
   }
-
   const handleSocialLogin = async (provider: string) => {
     setIsLoading(true)
 
@@ -74,8 +78,10 @@ export default function LoginPage() {
       console.log(`Logging in with ${provider}`)
 
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
+      await signIn(provider, {
+        callbackUrl: "/dashboard"
+      })
+      
       toast({
         title: "Social login initiated",
         description: `Redirecting to ${provider} for authentication...`,
@@ -105,10 +111,10 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="grid grid-cols-1 gap-4">
-              <SocialButton provider="google" onClick={() => handleSocialLogin("Google")} disabled={isLoading}>
+              <SocialButton provider="google" onClick={() => handleSocialLogin("google")} disabled={isLoading}>
                 Continue with Google
               </SocialButton>
-              <SocialButton provider="facebook" onClick={() => handleSocialLogin("Facebook")} disabled={isLoading}>
+              <SocialButton provider="facebook" onClick={() => handleSocialLogin("facebook")} disabled={isLoading}>
                 Continue with Facebook
               </SocialButton>
             </div>

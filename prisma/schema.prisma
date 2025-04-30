@@ -24,17 +24,19 @@ model User {
 model Account {
   id                String  @id @default(cuid())
   userId            String
-  type              String
+  type              String  // Keep as "oauth" for OAuth providers like Google/Facebook
   provider          String
-  providerAccountId String
-  access_token      String?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  expires_at        Int?
-  refresh_token     String?
+  providerAccountId String  // Unique identifier for the provider account
+  access_token      String? @db.Text // OAuth access token
+  token_type        String? // OAuth token type
+  scope             String? // OAuth scope
+  id_token          String? @db.Text // OAuth ID token
+  expires_at        Int?    // OAuth token expiration time (if available)
+  refresh_token     String? @db.Text // OAuth refresh token
 
   user User @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
 }
 
 model Session {
@@ -45,3 +47,4 @@ model Session {
 
   user User @relation(fields: [userId], references: [id])
 }
+

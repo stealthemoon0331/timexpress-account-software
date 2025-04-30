@@ -27,6 +27,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { signOut } from 'next-auth/react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -135,7 +136,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/login' })}>
                     <Icons.logout className="mr-2 h-4 w-4" />
                     <span>Logout</span>
                   </DropdownMenuItem>
@@ -180,7 +181,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/login' })}>
                     <Icons.logout className="mr-2 h-4 w-4" />
                     <span>Logout</span>
                   </DropdownMenuItem>
