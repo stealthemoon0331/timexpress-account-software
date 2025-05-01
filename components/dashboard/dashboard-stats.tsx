@@ -1,39 +1,56 @@
 "use client"
 
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Icons } from "@/components/icons"
 
 export function DashboardStats() {
   // Mock data - in a real app, this would come from an API
   const stats = [
     {
-      title: "Total Users",
-      value: "1,234",
-      change: "+12%",
-      trend: "up",
-      icon: Icons.users,
-    },
-    {
-      title: "Active Organizations",
-      value: "56",
-      change: "+3%",
-      trend: "up",
-      icon: Icons.layers,
-    },
-    {
-      title: "Revenue (MTD)",
-      value: "$12,543",
-      change: "+8%",
-      trend: "up",
+      title: "Subscription Status",
+      value: "Active",
       icon: Icons.creditCard,
+      bottom: "Free Trial (25 days remaining)"
     },
     {
-      title: "Active Subscriptions",
-      value: "987",
-      change: "-2%",
-      trend: "down",
-      icon: Icons.barChart,
+      title: "Current Plan",
+      value: "Free Trial",
+      icon: Icons.package,
+      bottom: "All Features Included"
     },
+    {
+      title: "Next Billing Date",
+      value: "May 20, 2025",
+      icon: Icons.calendar,
+      bottom: "$ 15/month after trial"
+    },
+    {
+      title: "Active Products",
+      value: "6",
+      icon: Icons.grid,
+      bottom: "All products included in trial"
+    },
+    // {
+    //   title: "Active Organizations",
+    //   value: "56",
+    //   change: "+3%",
+    //   trend: "up",
+    //   icon: Icons.layers,
+    // },
+    // {
+    //   title: "Revenue (MTD)",
+    //   value: "$12,543",
+    //   change: "+8%",
+    //   trend: "up",
+    //   icon: Icons.creditCard,
+    // },
+    // {
+    //   title: "Active Subscriptions",
+    //   value: "987",
+    //   change: "-2%",
+    //   trend: "down",
+    //   icon: Icons.barChart,
+    // },
   ]
 
   return (
@@ -46,9 +63,6 @@ export function DashboardStats() {
                 <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
                 <div className="flex items-baseline gap-2">
                   <p className="text-3xl font-bold">{stat.value}</p>
-                  <p className={`text-sm font-medium ${stat.trend === "up" ? "text-upwork-green" : "text-red-500"}`}>
-                    {stat.change}
-                  </p>
                 </div>
               </div>
               <div className="rounded-full bg-upwork-lightgreen p-2">
@@ -56,6 +70,9 @@ export function DashboardStats() {
               </div>
             </div>
           </CardContent>
+          <CardFooter>
+            {stat.bottom}
+          </CardFooter>
         </Card>
       ))}
     </div>

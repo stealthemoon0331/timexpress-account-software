@@ -39,29 +39,63 @@ export default function BillingPage() {
       current: true,
     },
     {
-      id: "monthly",
-      name: "Monthly",
-      description: "Billed monthly, cancel anytime",
-      price: "$27.50/month",
-      features: ["All Shiper.io products", "Unlimited usage", "Priority email support", "API access", "Data export"],
+      id: "starter",
+      name: "Starter",
+      description: "30-day free trial, then $15/month",
+      price: "$15/month",
+      features: [
+        "CRM",
+        "Accounting",
+        "To Do",
+        "Planner",
+        "Quote",
+        "Analytics",
+        "HR",
+      ],
       current: false,
     },
     {
-      id: "annual",
-      name: "Annual",
-      description: "Billed annually, save 20%",
-      price: "$264/year",
+      id: "pro-suite",
+      name: "Pro Suite",
+      description: "30-day free trial, then $29/month",
+      price: "$29/month",
       features: [
-        "All Shiper.io products",
-        "Unlimited usage",
-        "Priority email & phone support",
-        "API access",
-        "Data export",
-        "Dedicated account manager",
+        "CRM",
+        "WMS",
+        "Accounting",
+        "To Do",
+        "Planner",
+        "Quote",
+        "Analytics",
+        "HR",
+      ],
+      current: false,
+    },
+    {
+      id: "elite",
+      name: "Elite",
+      description: "30-day free trial, then $49/month",
+      price: "$49/month",
+      features: [
+        "CRM",
+        "WMS",
+        "FMS",
+        "Accounting",
+        "To Do",
+        "Planner",
+        "Quote",
+        "Analytics",
+        "HR",
       ],
       current: false,
     },
   ]
+
+  const planImages: { [key: string]: string } = {
+    starter: "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
+    "pro-suite": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d",
+    elite: "https://images.unsplash.com/photo-1518770660439-4636190af475",
+  }
 
   const handleChangePlan = async () => {
     if (selectedPlan === "free-trial") {
@@ -197,6 +231,13 @@ export default function BillingPage() {
                     className={`flex h-full cursor-pointer flex-col rounded-md border p-4 hover:border-upwork-green ${
                       selectedPlan === plan.id ? "border-2 border-upwork-green" : ""
                     }`}
+                    // style={{
+                    //   backgroundImage: `url(${planImages[plan.id]})`,
+                    //   backgroundSize: "cover",
+                    //   backgroundPosition: "center",
+                    //   backgroundBlendMode: "overlay",
+                    //   backgroundColor: "rgba(255, 255, 255, 0.85)",
+                    // }}
                   >
                     {plan.current && (
                       <div className="absolute -right-2 -top-2 rounded-full bg-upwork-green px-2 py-1 text-xs text-white">

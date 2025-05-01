@@ -75,12 +75,12 @@ export default function DashboardLayout({
       icon: Icons.dashboard,
       active: pathname === "/dashboard",
     },
-    {
-      href: "/dashboard/organizations",
-      label: "Organizations",
-      icon: Icons.users,
-      active: pathname.startsWith("/dashboard/organizations"),
-    },
+    // {
+    //   href: "/dashboard/organizations",
+    //   label: "Organizations",
+    //   icon: Icons.users,
+    //   active: pathname.startsWith("/dashboard/organizations"),
+    // },
     {
       href: "/dashboard/users",
       label: "Users",
@@ -99,12 +99,12 @@ export default function DashboardLayout({
       icon: Icons.creditCard,
       active: pathname.startsWith("/dashboard/billing"),
     },
-    {
-      href: "/dashboard/usage",
-      label: "Usage",
-      icon: Icons.barChart,
-      active: pathname.startsWith("/dashboard/usage"),
-    },
+    // {
+    //   href: "/dashboard/usage",
+    //   label: "Usage",
+    //   icon: Icons.barChart,
+    //   active: pathname.startsWith("/dashboard/usage"),
+    // },
     {
       href: "/dashboard/account",
       label: "Account",

@@ -44,7 +44,7 @@ export default function ProductsPage() {
     },
     {
       id: "4",
-      name: "Shypry B2C E-Commerce",
+      name: "ShypV B2C E-Commerce",
       description: "E-commerce platform",
       icon: "/icons/ecommerce.svg",
       users: 654,
@@ -62,7 +62,7 @@ export default function ProductsPage() {
     },
     {
       id: "6",
-      name: "Transport Management Software",
+      name: "Transport Management Software(TMS)",
       description: "Transport management system",
       icon: "/icons/tms.svg",
       users: 987,
