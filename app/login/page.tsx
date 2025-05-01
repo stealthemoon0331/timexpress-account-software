@@ -12,10 +12,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Checkbox } from "@/components/ui/checkbox"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { toast } from "@/components/ui/use-toast"
+// import { toast } from "@/components/ui/use-toast"
 import { Icons } from "@/components/icons"
 import { SocialButton } from "@/components/ui/social-buttons"
 import { signIn } from "next-auth/react";
+import { toast } from 'react-toastify';
 
 const formSchema = z.object({
   email: z.string().email({
@@ -43,35 +44,28 @@ export default function LoginPage() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
-
+    setIsLoading(true);
+  
     try {
-      // In a real app, you would call your API here
-      console.log(values)
-
-      // Simulate API call
-      await signIn("credentials", {
+      const res = await signIn("credentials", {
+        redirect: false,
         email: values.email,
         password: values.password,
-        callbackUrl: "/dashboard"
       });
-
-      toast({
-        title: "Login successful",
-        description: "Welcome back to Shiper.io!",
-      })
-
-      router.push("/dashboard")
+      console.log("res =======> ", res)
+      if (res?.error) {
+        toast.error("Invalid email or password. Please try again.");
+      } else {
+        toast.success("Welcome back to Shiper.io!");
+        router.push("/dashboard");
+      }
     } catch (error) {
-      toast({
-        title: "Login failed",
-        description: "Invalid email or password. Please try again.",
-        variant: "destructive",
-      })
+      toast.error("Something went wrong. Please try again later.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
+  
 
   const handleSocialLogin = async (provider: string) => {
     setIsLoading(true)
