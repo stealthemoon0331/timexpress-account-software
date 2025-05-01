@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/sidebar";
 import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
+import { LoggedUser } from "@/types/user";
 
 export default function DashboardLayout({
   children,
@@ -37,15 +38,31 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const [notifications] = useState(3); // Mock notification count
-  const [isAuthorizedRedirection, setIsAuthorizedRedirection] = useState(true);
+  const [loggedUser, setLoggedUser] = useState<LoggedUser | null>(null);
   const { data: session, status } = useSession();
+
   const router = useRouter();
   
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/login")
+      router.push("/login");
     }
-  }, [status, router])
+  
+    if (status === "authenticated" && session?.user) {
+      setLoggedUser({
+        id: session.user.id,
+        name: session.user.name,
+        email: session.user.email,
+        image: session.user.image,
+      });
+    }
+  }, [status, session, router]);
+
+  // useEffect(() => {
+  //   if(loggedUser) {
+
+  //   }
+  // }, [loggedUser])
 
   
   if (status === "loading") return <p>Loading...</p>
@@ -97,7 +114,6 @@ export default function DashboardLayout({
   ];
 
   return (
-    isAuthorizedRedirection && (
       <SidebarProvider>
         <div className="flex min-h-screen">
           <Sidebar>
@@ -132,7 +148,7 @@ export default function DashboardLayout({
                 <div className="flex items-center gap-2">
                   <div className="relative">
                     <Image
-                      src="/placeholder.svg?height=32&width=32"
+                      src={loggedUser?.image || "https://ui-avatars.com/api/?name=User&background=ccc&color=555&rounded=true"}
                       alt="Profile"
                       width={32}
                       height={32}
@@ -141,8 +157,8 @@ export default function DashboardLayout({
                     <span className="absolute right-0 top-0 flex h-2 w-2 rounded-full bg-upwork-green"></span>
                   </div>
                   <div className="text-sm">
-                    <p className="font-medium">John Doe</p>
-                    <p className="text-xs text-muted-foreground">Admin</p>
+                    <p className="font-medium">{loggedUser?.name}</p>
+                    {/* <p className="text-xs text-muted-foreground">Admin</p> */}
                   </div>
                 </div>
                 <DropdownMenu>
@@ -200,7 +216,7 @@ export default function DashboardLayout({
                       className="rounded-full"
                     >
                       <Image
-                        src="/placeholder.svg?height=32&width=32"
+                        src={loggedUser?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(loggedUser?.name || "User")}&background=ccc&color=555&rounded=true`}
                         alt="Profile"
                         width={32}
                         height={32}
@@ -221,7 +237,6 @@ export default function DashboardLayout({
                     <DropdownMenuItem
                       onClick={() => {
                         signOut({ callbackUrl: "/login" });
-                        localStorage.removeItem("token");
                       }}
                     >
                       <Icons.logout className="mr-2 h-4 w-4" />
@@ -235,6 +250,5 @@ export default function DashboardLayout({
           </div>
         </div>
       </SidebarProvider>
-    )
   );
 }
