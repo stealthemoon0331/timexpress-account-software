@@ -17,6 +17,7 @@ import { Icons } from "@/components/icons"
 import { SocialButton } from "@/components/ui/social-buttons"
 import { signIn } from "next-auth/react";
 import { toast } from 'react-toastify';
+import { useSession } from "next-auth/react"
 
 const formSchema = z.object({
   email: z.string().email({
@@ -29,10 +30,15 @@ const formSchema = z.object({
 })
 
 export default function LoginPage() {
+  const { data: session, status } = useSession()
   const router = useRouter()
-
-
   const [isLoading, setIsLoading] = useState(false)
+  
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/dashboard")
+    }
+  }, [status, router])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,8 +57,8 @@ export default function LoginPage() {
         redirect: false,
         email: values.email,
         password: values.password,
+        rememberMe: values.rememberMe,
       });
-      console.log("res =======> ", res)
       if (res?.error) {
         toast.error("Invalid email or password. Please try again.");
       } else {

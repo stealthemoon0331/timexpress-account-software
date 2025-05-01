@@ -48,7 +48,8 @@ const handler = NextAuth({
         if (!isValid) {
           throw new Error("Invalid credentials");
         }
-
+        user.rememberMe = credentials.rememberMe === "true"
+        
         return user;
       },
     }),
@@ -57,26 +58,32 @@ const handler = NextAuth({
     strategy: "jwt",
   },
   pages: {
-    signIn: '/login', // Use your custom login page
+    signIn: "/login", // Use your custom login page
   },
   callbacks: {
     async jwt({ token, user, account }) {
-      console.log("🧐 user from jwt callback function => ", user)
-      console.log("🧐 token from jwt callback function => ", token)
+      console.log("🧐 user from jwt callback function => ", user);
+      console.log("🧐 token from jwt callback function => ", token);
       if (user) {
         token.id = user.id;
       }
 
-      if(account) {
+      if (account) {
         token.accessToken = account.access_token;
         token.provider = account.provider;
+
+        const rememberMe = account.rememberMe ?? false;
+        const now = Math.floor(Date.now() / 1000);
+        token.exp = rememberMe
+          ? now + 60 * 60 * 24 * 30 // 30 days
+          : now + 60 * 60 * 2; // 2 hours
       }
 
       return token;
     },
     async session({ session, token }) {
-      console.log("🧐 session from session callback function => ", session)
-      console.log("🧐 token from token callback function => ", token)
+      console.log("🧐 session from session callback function => ", session);
+      console.log("🧐 token from token callback function => ", token);
       if (session?.user && token?.id) {
         session.user.id = token.id;
         session.accessToken = token.accessToken;
@@ -92,14 +99,14 @@ const handler = NextAuth({
       const existingUser = await prisma.user.findUnique({
         where: { email: user.email },
       });
-    
+
       console.log("🧐 existingUser => ", existingUser);
-    
+
       // If it's not an OAuth login, don't try to upsert the account
       if (!account || account.type !== "oauth") {
         return true;
       }
-    
+
       if (existingUser) {
         await prisma.account.upsert({
           where: {
@@ -111,16 +118,15 @@ const handler = NextAuth({
           update: {},
           create: {
             userId: existingUser.id,
-            type: 'oauth',
+            type: "oauth",
             provider: account.provider,
             providerAccountId: account.providerAccountId,
           },
         });
       }
-    
+
       return true;
-    }
-    
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
 });
