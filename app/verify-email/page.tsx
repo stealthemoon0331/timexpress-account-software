@@ -54,8 +54,6 @@ export default function VerifyEmailPage() {
         body: JSON.stringify({ email }),
       });
 
-      console.log("email confirm res => ", res);
-
       if (res.ok) {
         toast({
           title: "Verification email sent",

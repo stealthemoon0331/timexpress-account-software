@@ -34,11 +34,9 @@ export async function POST(req: Request) {
       accessToken: process.env.EMAILJS_ACCESS_TOKEN,
       template_params: {
         email: email,
-        link: process.env.NEXT_PUBLIC_APP_URL + "/verify?token=" + verificationToken.token
+        link: process.env.NEXT_PUBLIC_APP_URL + "/verify?email=" + email +"&token=" + verificationToken.token
       },
     };
-
-    console.log("payload =>>> ", payload);
 
     const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
       method: "POST",
@@ -52,7 +50,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Verification email sent" });
     } else {
       const errorText = await response.text();
-      console.log("errorText ===>>> ", errorText)
+
       return NextResponse.json(
         { error: "Failed to send email", details: errorText },
         { status: 500 }

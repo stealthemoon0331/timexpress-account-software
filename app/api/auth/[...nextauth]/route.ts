@@ -36,6 +36,10 @@ const handler = NextAuth({
           throw new Error("User not found");
         }
 
+        if (!user.emailVerified) {
+          throw new Error("Email is not verified");
+        }
+
         const isValid = await bcrypt.compare(
           credentials.password,
           user.password
@@ -56,28 +60,47 @@ const handler = NextAuth({
     signIn: '/login', // Use your custom login page
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
+      console.log("🧐 user from jwt callback function => ", user)
+      console.log("🧐 token from jwt callback function => ", token)
       if (user) {
         token.id = user.id;
       }
+
+      if(account) {
+        token.accessToken = account.access_token;
+        token.provider = account.provider;
+      }
+
       return token;
     },
     async session({ session, token }) {
-      if (token) {
-        if (session?.user) {
-          const userId = session.user.id;
-          // safe to use session.user here
-        }
+      console.log("🧐 session from session callback function => ", session)
+      console.log("🧐 token from token callback function => ", token)
+      if (session?.user && token?.id) {
+        session.user.id = token.id;
+        session.accessToken = token.accessToken;
       }
       return session;
     },
     async signIn({ user, account, profile }) {
+      if (!user?.email) {
+        console.error("User email is missing during sign-in.");
+        return false;
+      }
+
       const existingUser = await prisma.user.findUnique({
         where: { email: user.email },
       });
-      console.log("🧐 existingUser => ", existingUser)
+    
+      console.log("🧐 existingUser => ", existingUser);
+    
+      // If it's not an OAuth login, don't try to upsert the account
+      if (!account || account.type !== "oauth") {
+        return true;
+      }
+    
       if (existingUser) {
-        // Manually link account
         await prisma.account.upsert({
           where: {
             provider_providerAccountId: {
@@ -85,7 +108,7 @@ const handler = NextAuth({
               providerAccountId: account.providerAccountId,
             },
           },
-          update: {}, // No updates needed
+          update: {},
           create: {
             userId: existingUser.id,
             type: 'oauth',
@@ -93,12 +116,11 @@ const handler = NextAuth({
             providerAccountId: account.providerAccountId,
           },
         });
-  
-        return true;
       }
-  
+    
       return true;
-    },
+    }
+    
   },
   secret: process.env.NEXTAUTH_SECRET,
 });
