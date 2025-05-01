@@ -148,7 +148,7 @@ export default function DashboardLayout({
                 <div className="flex items-center gap-2">
                   <div className="relative">
                     <Image
-                      src={loggedUser?.image || "https://ui-avatars.com/api/?name=User&background=ccc&color=555&rounded=true"}
+                      src={loggedUser?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(loggedUser?.name || "User")}&background=ccc&color=555&rounded=true`}
                       alt="Profile"
                       width={32}
                       height={32}

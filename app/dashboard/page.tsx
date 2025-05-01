@@ -5,7 +5,7 @@ import { SubscriptionOverview } from "@/components/dashboard/subscription-overvi
 import RecentActivity from "@/components/dashboard/recent-activity"
 
 export default function DashboardPage() {
-  
+
   return (
     <div className="space-y-6">
       <div>
