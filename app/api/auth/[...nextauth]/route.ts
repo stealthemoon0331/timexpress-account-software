@@ -22,6 +22,7 @@ const handler = NextAuth({
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
+        rememberMe: { label: "Remember Me", type: "checkbox" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -48,9 +49,10 @@ const handler = NextAuth({
         if (!isValid) {
           throw new Error("Invalid credentials");
         }
-        user.rememberMe = credentials.rememberMe === "true"
-        
-        return user;
+        return {
+          ...user,
+          rememberMe: credentials?.rememberMe === "true",
+        };
       },
     }),
   ],
@@ -66,6 +68,7 @@ const handler = NextAuth({
       console.log("🧐 token from jwt callback function => ", token);
       if (user) {
         token.id = user.id;
+        token.rememberMe = user.rememberMe;
       }
 
       if (account) {
@@ -86,6 +89,7 @@ const handler = NextAuth({
       console.log("🧐 token from token callback function => ", token);
       if (session?.user && token?.id) {
         session.user.id = token.id;
+        session.rememberMe = token.rememberMe ?? false;
         session.accessToken = token.accessToken;
       }
       return session;

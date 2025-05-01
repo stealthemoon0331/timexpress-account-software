@@ -57,7 +57,7 @@ export default function LoginPage() {
         redirect: false,
         email: values.email,
         password: values.password,
-        rememberMe: values.rememberMe,
+        rememberMe: values.rememberMe ? "true" : "false", 
       });
       if (res?.error) {
         toast.error("Invalid email or password. Please try again.");

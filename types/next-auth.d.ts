@@ -2,6 +2,12 @@
 import NextAuth from "next-auth";
 
 declare module "next-auth" {
+  interface Credentials {
+    email: string;
+    password: string;
+    rememberMe: string; 
+  }
+
   interface Session {
     accessToken?: string;
     user: {
@@ -9,6 +15,7 @@ declare module "next-auth" {
       name?: string | null;
       email?: string | null;
     };
+    rememberMe: boolean
   }
 
   interface User {
