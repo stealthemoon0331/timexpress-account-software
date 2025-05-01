@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { toast } from "@/components/ui/use-toast"
 import { Icons } from "@/components/icons"
+import { toast } from "react-toastify"
 
 const formSchema = z.object({
   email: z.string().email({
@@ -36,24 +36,25 @@ export default function ForgotPasswordPage() {
     setIsLoading(true)
 
     try {
-      // In a real app, you would call your API here
-      console.log(values)
+      console.log("verify email : ", values.email)
+      const email = values.email;
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({email})
+      })
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      if (!response.ok) {
+        throw new Error("Failed to send reset email")
+      }
 
       setIsSubmitted(true)
 
-      toast({
-        title: "Reset link sent",
-        description: "Check your email for the password reset link.",
-      })
+      toast.success("The reset link was sent successfully! Plz check your mail.")
     } catch (error) {
-      toast({
-        title: "Something went wrong.",
-        description: "We couldn't send a reset link. Please try again.",
-        variant: "destructive",
-      })
+      toast.error("Sorry, can't send the reset link.")
     } finally {
       setIsLoading(false)
     }

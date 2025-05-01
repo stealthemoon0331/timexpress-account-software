@@ -79,16 +79,9 @@ export default function LoginPage() {
         callbackUrl: "/dashboard"
       })
       
-      toast({
-        title: "Social login initiated",
-        description: `Redirecting to ${provider} for authentication...`,
-      })
+      toast.success("Welcome back to Shiper.io!");
     } catch (error) {
-      toast({
-        title: "Something went wrong.",
-        description: `Could not log in with ${provider}. Please try again.`,
-        variant: "destructive",
-      })
+      toast.error("Something went wrong. Please try again later.");
     } finally {
       setIsLoading(false)
     }
