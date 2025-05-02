@@ -23,16 +23,21 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Icons } from "@/components/icons";
 import Image from "next/image";
+import prisma from "@/lib/prisma";
+import { addDays } from "date-fns";
+import { useSession } from "next-auth/react";
 
 interface PaymentFormProps {
   amount: string;
+  planId: string;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-export function PaymentForm({ amount, onSuccess, onCancel }: PaymentFormProps) {
+export function PaymentForm({ amount, planId, onSuccess, onCancel }: PaymentFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("paypal");
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,6 +141,7 @@ export function PaymentForm({ amount, onSuccess, onCancel }: PaymentFormProps) {
               <PayPalWrapper
                 createOrder={createOrder}
                 captureOrder={captureOrder}
+                planId={planId}
               />
             )}
 
@@ -198,11 +204,15 @@ export function PaymentForm({ amount, onSuccess, onCancel }: PaymentFormProps) {
 function PayPalWrapper({
   createOrder,
   captureOrder,
+  planId
 }: {
   createOrder: () => Promise<string>;
   captureOrder: (orderID: string) => Promise<any>;
+  planId: string;
 }) {
   const [{ isPending }] = usePayPalScriptReducer();
+  const { data: session, status } = useSession();
+
 
   if (isPending) {
     return (
@@ -230,6 +240,15 @@ function PayPalWrapper({
         }
 
         if (captureResponse.status === "COMPLETED") {
+          await fetch("/api/payment/complete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId: session?.user.id,
+              planId: planId,
+            }),
+          });
+          
           toast.success("Payment successful!");
         }
       }}

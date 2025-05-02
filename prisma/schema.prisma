@@ -17,8 +17,16 @@ model User {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  // New fields for plan management
+  planId         String?   // Foreign key to Plan
+  planActivatedAt DateTime?
+  planExpiresAt  DateTime?
+
   accounts       Account[]
   sessions       Session[]
+  plan           Plan?     @relation(fields: [planId], references: [id])
+
+  payments       Payment[] 
 }
 
 model Account {
@@ -54,4 +62,30 @@ model VerificationToken {
   token     String   @unique
   expires   DateTime
 }
+
+model Plan {
+  id          String   @id
+  name        String
+  description String
+  price       Float    // store as number
+  features    String   @db.Text // Prisma currently doesn't support arrays in MySQL natively, so store as JSON if needed
+  createdAt   DateTime @default(now())
+
+  users       User[]
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  userId      String
+  amount      Float
+  currency    String   // e.g., "USD"
+  status      String   // e.g., "COMPLETED", "FAILED"
+  method      String   // e.g., "paypal"
+  orderId     String   // PayPal order ID
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+
 

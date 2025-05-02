@@ -85,13 +85,14 @@ const handler = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      console.log("🧐 session from session callback function => ", session);
       console.log("🧐 token from token callback function => ", token);
       if (session?.user && token?.id) {
         session.user.id = token.id;
         session.rememberMe = token.rememberMe ?? false;
         session.accessToken = token.accessToken;
       }
+      console.log("🧐 session from session callback function => ", session);
+
       return session;
     },
     async signIn({ user, account, profile }) {
@@ -105,6 +106,33 @@ const handler = NextAuth({
       });
 
       console.log("🧐 existingUser => ", existingUser);
+
+      const trialPlan = await prisma.plan.findUnique({
+        where: { id: "free-trial" },
+      });
+
+      const now = new Date();
+      const expires = new Date();
+      expires.setDate(now.getDate() + Number(process.env.TRIAL_DURATION));
+
+      if (!existingUser) {
+        await prisma.user.upsert({
+          where: { email: user.email },
+          update: {
+            plan: { connect: { id: trialPlan?.id } },
+            planActivatedAt: now,
+            planExpiresAt: expires,
+          },
+          create: {
+            email: user.email,
+            name: user.name,
+            image: user.image,
+            plan: { connect: { id: trialPlan?.id } },
+            planActivatedAt: now,
+            planExpiresAt: expires,
+          },
+        });
+      }
 
       // If it's not an OAuth login, don't try to upsert the account
       if (!account || account.type !== "oauth") {

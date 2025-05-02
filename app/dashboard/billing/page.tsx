@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -98,6 +98,20 @@ export default function BillingPage() {
       current: false,
     },
   ];
+
+  useEffect(() => {
+    const syncPlans = async () => {
+      try {
+        const res = await fetch('/api/payment/plans', { method: 'POST' });
+        if (!res.ok) throw new Error('Failed to sync plans');
+      } catch (err) {
+        console.error(err);
+      }
+    };
+  
+    syncPlans();
+  }, []);
+  
 
   const planImages: { [key: string]: string } = {
     starter: "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
@@ -367,6 +381,7 @@ export default function BillingPage() {
                   ""
                 ) || "0.00"
               }
+              planId={selectedPlan}
               onSuccess={handlePaymentSuccess}
               onCancel={() => setShowPaymentDialog(false)}
             />
