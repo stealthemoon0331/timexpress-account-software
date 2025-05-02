@@ -34,10 +34,14 @@ interface PaymentFormProps {
   onCancel?: () => void;
 }
 
-export function PaymentForm({ amount, planId, onSuccess, onCancel }: PaymentFormProps) {
+export function PaymentForm({
+  amount,
+  planId,
+  onSuccess,
+  onCancel,
+}: PaymentFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("paypal");
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -204,7 +208,7 @@ export function PaymentForm({ amount, planId, onSuccess, onCancel }: PaymentForm
 function PayPalWrapper({
   createOrder,
   captureOrder,
-  planId
+  planId,
 }: {
   createOrder: () => Promise<string>;
   captureOrder: (orderID: string) => Promise<any>;
@@ -212,7 +216,6 @@ function PayPalWrapper({
 }) {
   const [{ isPending }] = usePayPalScriptReducer();
   const { data: session, status } = useSession();
-
 
   if (isPending) {
     return (
@@ -240,15 +243,26 @@ function PayPalWrapper({
         }
 
         if (captureResponse.status === "COMPLETED") {
+          const transaction =
+            captureResponse.purchase_units?.[0]?.payments?.captures?.[0];
+          const amount = parseFloat(transaction?.amount?.value || "0");
+          const currency = transaction?.amount?.currency_code || "USD";
+          const method = "paypal";
+          const orderId = transaction?.id || data.orderID;
+
           await fetch("/api/payment/complete", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               userId: session?.user.id,
               planId: planId,
+              amount,
+              currency,
+              method,
+              orderId,
             }),
           });
-          
+
           toast.success("Payment successful!");
         }
       }}

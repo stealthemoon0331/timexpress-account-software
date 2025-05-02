@@ -3,6 +3,7 @@ import './globals.css'
 import { SessionProviderWrapper } from './session-provider'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { UserProvider } from './contexts/UserContext';
 
 export const metadata: Metadata = {
   title: 'v0 App',
@@ -19,7 +20,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
       <SessionProviderWrapper>
-        {children}
+        <UserProvider>
+          {children}
+        </UserProvider>
         <ToastContainer position="top-right" autoClose={3000} />
       </SessionProviderWrapper>
       </body>

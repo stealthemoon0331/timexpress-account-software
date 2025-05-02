@@ -25,79 +25,14 @@ import { toast } from "react-toastify";
 import { Icons } from "@/components/icons";
 import { PaymentForm } from "@/components/payment/payment-form";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { plans } from "@/lib/data";
+import { getPlanTitle } from "@/lib/utils";
 
 export default function BillingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("free-trial");
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-
-  const plans = [
-    {
-      id: "free-trial",
-      name: "Free Trial",
-      description: "30-day free trial with all features",
-      price: "$0",
-      features: [
-        "All Shiper.io products",
-        "Unlimited usage during trial",
-        "Email support",
-        "Automatic conversion to monthly plan after trial",
-      ],
-      current: true,
-    },
-    {
-      id: "starter",
-      name: "Starter",
-      description: "30-day free trial, then $15/month",
-      price: "$15/month",
-      features: [
-        "CRM",
-        "Accounting",
-        "To Do",
-        "Planner",
-        "Quote",
-        "Analytics",
-        "HR",
-      ],
-      current: false,
-    },
-    {
-      id: "pro-suite",
-      name: "Pro Suite",
-      description: "30-day free trial, then $29/month",
-      price: "$29/month",
-      features: [
-        "CRM",
-        "WMS",
-        "Accounting",
-        "To Do",
-        "Planner",
-        "Quote",
-        "Analytics",
-        "HR",
-      ],
-      current: false,
-    },
-    {
-      id: "elite",
-      name: "Elite",
-      description: "30-day free trial, then $49/month",
-      price: "$49/month",
-      features: [
-        "CRM",
-        "WMS",
-        "FMS",
-        "Accounting",
-        "To Do",
-        "Planner",
-        "Quote",
-        "Analytics",
-        "HR",
-      ],
-      current: false,
-    },
-  ];
 
   useEffect(() => {
     const syncPlans = async () => {
@@ -132,7 +67,7 @@ export default function BillingPage() {
 
     toast.success(
       `Your subscription has been updated to the ${
-        selectedPlan === "monthly" ? "Monthly" : "Annual"
+        getPlanTitle(selectedPlan)
       } plan.`
     );
   };

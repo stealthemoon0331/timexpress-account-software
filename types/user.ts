@@ -3,4 +3,7 @@ export interface LoggedUser {
     name?: string | null;
     email?: string | null;
     image?: string | null;
+    planId?: string | null;
+    planActivatedAt?: string | null;
+    planExpiresAt?: string | null;
   }

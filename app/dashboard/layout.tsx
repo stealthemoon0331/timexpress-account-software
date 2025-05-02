@@ -30,6 +30,8 @@ import {
 import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
 import { LoggedUser } from "@/types/user";
+import { useUser } from "../contexts/UserContext";
+import { isPlanExpired } from "@/lib/utils";
 
 export default function DashboardLayout({
   children,
@@ -38,32 +40,11 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const [notifications] = useState(3); // Mock notification count
-  const [loggedUser, setLoggedUser] = useState<LoggedUser | null>(null);
   const { data: session, status } = useSession();
 
   const router = useRouter();
   
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    }
-  
-    if (status === "authenticated" && session?.user) {
-      setLoggedUser({
-        id: session.user.id,
-        name: session.user.name,
-        email: session.user.email,
-        image: session.user.image,
-      });
-    }
-  }, [status, session, router]);
-
-  // useEffect(() => {
-  //   if(loggedUser) {
-
-  //   }
-  // }, [loggedUser])
-
+  const { user: loggedUser, loading } = useUser();
   
   if (status === "loading") return <p>Loading...</p>
   if (status === "unauthenticated") return null
@@ -86,6 +67,7 @@ export default function DashboardLayout({
       label: "Users",
       icon: Icons.user,
       active: pathname.startsWith("/dashboard/users"),
+      disabled: isPlanExpired(loggedUser?.planExpiresAt),
     },
     {
       href: "/dashboard/products",
@@ -133,7 +115,7 @@ export default function DashboardLayout({
               <SidebarMenu>
                 {routes.map((route) => (
                   <SidebarMenuItem key={route.href}>
-                    <SidebarMenuButton asChild isActive={route.active}>
+                    <SidebarMenuButton asChild isActive={route.active} disabled={route.disabled}>
                       <Link href={route.href}>
                         <route.icon className="h-5 w-5" />
                         <span>{route.label}</span>

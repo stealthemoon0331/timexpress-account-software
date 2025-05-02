@@ -1,57 +1,56 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Icons } from "@/components/icons"
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Icons } from "@/components/icons";
+import { useUser } from "@/app/contexts/UserContext";
+import { getPlanTitle, isPlanExpired } from "@/lib/utils";
+import { format } from "date-fns";
+import { plans } from "@/lib/data";
 
 export function DashboardStats() {
   // Mock data - in a real app, this would come from an API
+
+  const { user: loggedUser, loading } = useUser();
+
+  if (loading || !loggedUser) return null;
+
+  const { planId, planExpiresAt } = loggedUser;
+
+  const plan = plans.find((p) => p.id === planId);
+  const planTitle = plan?.name ?? getPlanTitle(planId);
+  const isExpired = isPlanExpired(planExpiresAt);
+  const daysLeft = planExpiresAt
+    ? Math.max(0, Math.ceil((new Date(planExpiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : 0;
+
   const stats = [
     {
       title: "Subscription Status",
-      value: "Active",
+      value: !isExpired ? "Active" : "Expired",
       icon: Icons.creditCard,
-      bottom: "Free Trial (25 days remaining)"
+      bottom: `${planTitle}${daysLeft > 0 ? ` (${daysLeft} days remaining)` : ""}`,
     },
     {
       title: "Current Plan",
-      value: "Free Trial",
+      value: planTitle,
       icon: Icons.package,
-      bottom: "All Features Included"
+      bottom: planId === "free-trial" ? "All Features Included" : "Custom plan features",
     },
     {
       title: "Next Billing Date",
-      value: "May 20, 2025",
+      value: !isExpired && planExpiresAt
+        ? format(new Date(planExpiresAt), "MMMM d, yyyy")
+        : "-",
       icon: Icons.calendar,
-      bottom: "$ 15/month after trial"
+      bottom: planId === "free-trial" ? "$15/month after trial" : "See billing section",
     },
     {
-      title: "Active Products",
-      value: "6",
+      title: "Features",
+      value: plan?.features?.length ?? "0",
       icon: Icons.grid,
-      bottom: "All products included in trial"
+      bottom: plan?.features?.join(", ") ?? "No features listed",
     },
-    // {
-    //   title: "Active Organizations",
-    //   value: "56",
-    //   change: "+3%",
-    //   trend: "up",
-    //   icon: Icons.layers,
-    // },
-    // {
-    //   title: "Revenue (MTD)",
-    //   value: "$12,543",
-    //   change: "+8%",
-    //   trend: "up",
-    //   icon: Icons.creditCard,
-    // },
-    // {
-    //   title: "Active Subscriptions",
-    //   value: "987",
-    //   change: "-2%",
-    //   trend: "down",
-    //   icon: Icons.barChart,
-    // },
-  ]
+  ];
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -60,7 +59,9 @@ export function DashboardStats() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  {stat.title}
+                </p>
                 <div className="flex items-baseline gap-2">
                   <p className="text-3xl font-bold">{stat.value}</p>
                 </div>
@@ -70,11 +71,9 @@ export function DashboardStats() {
               </div>
             </div>
           </CardContent>
-          <CardFooter>
-            {stat.bottom}
-          </CardFooter>
+          <CardFooter>{stat.bottom}</CardFooter>
         </Card>
       ))}
     </div>
-  )
+  );
 }
