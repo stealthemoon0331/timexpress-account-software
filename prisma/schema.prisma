@@ -21,6 +21,7 @@ model User {
   planId         String?   // Foreign key to Plan
   planActivatedAt DateTime?
   planExpiresAt  DateTime?
+  paypalSubscriptionId String?
 
   accounts       Account[]
   sessions       Session[]
@@ -83,9 +84,16 @@ model Payment {
   method      String   // e.g., "paypal"
   orderId     String   // PayPal order ID
   createdAt   DateTime @default(now())
+  paypalSubscriptionId String?
 
   user        User     @relation(fields: [userId], references: [id])
 }
 
-
+model PayPalWebhook {
+  id        String   @id @default(cuid())
+  eventId   String   @unique
+  eventType String
+  payload   String   @db.Text
+  createdAt DateTime @default(now())
+}
 
