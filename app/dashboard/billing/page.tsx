@@ -1,8 +1,15 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -11,18 +18,19 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Separator } from "@/components/ui/separator"
-import { toast } from "@/components/ui/use-toast"
-import { Icons } from "@/components/icons"
-import { PaymentForm } from "@/components/payment/payment-form"
+} from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "react-toastify";
+import { Icons } from "@/components/icons";
+import { PaymentForm } from "@/components/payment/payment-form";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 
 export default function BillingPage() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [selectedPlan, setSelectedPlan] = useState("free-trial")
-  const [showCancelDialog, setShowCancelDialog] = useState(false)
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState("free-trial");
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
   const plans = [
     {
@@ -89,92 +97,98 @@ export default function BillingPage() {
       ],
       current: false,
     },
-  ]
+  ];
 
   const planImages: { [key: string]: string } = {
     starter: "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
     "pro-suite": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d",
     elite: "https://images.unsplash.com/photo-1518770660439-4636190af475",
-  }
+  };
 
   const handleChangePlan = async () => {
     if (selectedPlan === "free-trial") {
-      return
+      return;
     }
 
-    setShowPaymentDialog(true)
-  }
+    setShowPaymentDialog(true);
+  };
 
   const handlePaymentSuccess = () => {
-    setShowPaymentDialog(false)
+    setShowPaymentDialog(false);
 
-    toast({
-      title: "Plan updated",
-      description: `Your subscription has been updated to the ${selectedPlan === "monthly" ? "Monthly" : "Annual"} plan.`,
-    })
-  }
+    toast.success(
+      `Your subscription has been updated to the ${
+        selectedPlan === "monthly" ? "Monthly" : "Annual"
+      } plan.`
+    );
+  };
 
   const handleCancelSubscription = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       // In a real app, you would call your API here
-      console.log("Cancelling subscription")
+      console.log("Cancelling subscription");
 
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      setShowCancelDialog(false)
+      setShowCancelDialog(false);
 
-      toast({
-        title: "Subscription cancelled",
-        description:
-          "Your subscription has been cancelled. You can still use the service until the end of your billing period.",
-      })
+      toast.success("Your subscription has been cancelled. You can still use the service until the end of your billing period.");
     } catch (error) {
-      toast({
-        title: "Something went wrong.",
-        description: "Your subscription was not cancelled. Please try again.",
-        variant: "destructive",
-      })
+      toast.success("Your subscription was not cancelled. Please try again.")
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
-
+  };
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Billing</h1>
-        <p className="text-muted-foreground">Manage your subscription and billing information.</p>
+        <p className="text-muted-foreground">
+          Manage your subscription and billing information.
+        </p>
       </div>
       <Separator />
       <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>Current Plan</CardTitle>
-            <CardDescription>You are currently on the Free Trial plan.</CardDescription>
+            <CardDescription>
+              You are currently on the Free Trial plan.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-lg border p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium">Free Trial</h3>
-                  <p className="text-sm text-muted-foreground">25 days remaining</p>
+                  <p className="text-sm text-muted-foreground">
+                    25 days remaining
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className="font-medium">$0</p>
-                  <p className="text-sm text-muted-foreground">$27.50/month after trial</p>
+                  <p className="text-sm text-muted-foreground">
+                    $27.50/month after trial
+                  </p>
                 </div>
               </div>
               <Separator className="my-4" />
               <div className="space-y-2 text-sm">
                 <p>Your trial will end on May 20, 2025</p>
-                <p>You will be automatically subscribed to the Monthly plan after your trial ends.</p>
+                <p>
+                  You will be automatically subscribed to the Monthly plan after
+                  your trial ends.
+                </p>
               </div>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-              <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+              <Dialog
+                open={showCancelDialog}
+                onOpenChange={setShowCancelDialog}
+              >
                 <DialogTrigger asChild>
                   <Button variant="outline">Cancel Subscription</Button>
                 </DialogTrigger>
@@ -182,15 +196,23 @@ export default function BillingPage() {
                   <DialogHeader>
                     <DialogTitle>Cancel Subscription</DialogTitle>
                     <DialogDescription>
-                      Are you sure you want to cancel your subscription? You will lose access to all premium features at
-                      the end of your current billing period.
+                      Are you sure you want to cancel your subscription? You
+                      will lose access to all premium features at the end of
+                      your current billing period.
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
-                    <Button variant="outline" onClick={() => setShowCancelDialog(false)}>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowCancelDialog(false)}
+                    >
                       Keep Subscription
                     </Button>
-                    <Button variant="destructive" onClick={handleCancelSubscription} disabled={isLoading}>
+                    <Button
+                      variant="destructive"
+                      onClick={handleCancelSubscription}
+                      disabled={isLoading}
+                    >
                       {isLoading ? (
                         <>
                           <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
@@ -215,7 +237,9 @@ export default function BillingPage() {
         <Card>
           <CardHeader>
             <CardTitle>Change Plan</CardTitle>
-            <CardDescription>Choose the plan that best fits your needs.</CardDescription>
+            <CardDescription>
+              Choose the plan that best fits your needs.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <RadioGroup
@@ -225,11 +249,17 @@ export default function BillingPage() {
             >
               {plans.map((plan) => (
                 <div key={plan.id} className="relative">
-                  <RadioGroupItem value={plan.id} id={plan.id} className="sr-only" />
+                  <RadioGroupItem
+                    value={plan.id}
+                    id={plan.id}
+                    className="sr-only"
+                  />
                   <label
                     htmlFor={plan.id}
                     className={`flex h-full cursor-pointer flex-col rounded-md border p-4 hover:border-upwork-green ${
-                      selectedPlan === plan.id ? "border-2 border-upwork-green" : ""
+                      selectedPlan === plan.id
+                        ? "border-2 border-upwork-green"
+                        : ""
                     }`}
                     // style={{
                     //   backgroundImage: `url(${planImages[plan.id]})`,
@@ -246,7 +276,9 @@ export default function BillingPage() {
                     )}
                     <div className="mb-4">
                       <h3 className="font-medium">{plan.name}</h3>
-                      <p className="text-sm text-muted-foreground">{plan.description}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {plan.description}
+                      </p>
                     </div>
                     <div className="mb-4">
                       <span className="text-2xl font-bold">{plan.price}</span>
@@ -284,7 +316,9 @@ export default function BillingPage() {
         <Card>
           <CardHeader>
             <CardTitle>Billing History</CardTitle>
-            <CardDescription>View your billing history and download invoices.</CardDescription>
+            <CardDescription>
+              View your billing history and download invoices.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="rounded-md border">
@@ -298,7 +332,9 @@ export default function BillingPage() {
                 </div>
               </div>
               <Separator />
-              <div className="p-4 text-center text-sm text-muted-foreground">No previous invoices</div>
+              <div className="p-4 text-center text-sm text-muted-foreground">
+                No previous invoices
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -310,16 +346,33 @@ export default function BillingPage() {
             <DialogTitle>Payment Details</DialogTitle>
             <DialogDescription>
               Enter your payment information to{" "}
-              {selectedPlan === "monthly" ? "subscribe to the Monthly plan" : "subscribe to the Annual plan"}
+              {selectedPlan === "monthly"
+                ? "subscribe to the Monthly plan"
+                : "subscribe to the Annual plan"}
             </DialogDescription>
           </DialogHeader>
-          <PaymentForm
-            amount={selectedPlan === "monthly" ? "$27.50" : "$264.00"}
-            onSuccess={handlePaymentSuccess}
-            onCancel={() => setShowPaymentDialog(false)}
-          />
+          <PayPalScriptProvider
+            options={{
+              clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
+              dataNamespace: "paypal_sdk",
+              currency: "USD",
+              intent: "capture",
+              components: "buttons",
+            }}
+          >
+            <PaymentForm
+              amount={
+                plans.find((plan) => plan.id === selectedPlan)?.price.replace(
+                  /[^0-9.]/g,
+                  ""
+                ) || "0.00"
+              }
+              onSuccess={handlePaymentSuccess}
+              onCancel={() => setShowPaymentDialog(false)}
+            />
+          </PayPalScriptProvider>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

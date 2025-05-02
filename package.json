@@ -12,6 +12,8 @@
     "@auth/prisma-adapter": "^2.9.0",
     "@emailjs/browser": "^4.4.1",
     "@hookform/resolvers": "latest",
+    "@paypal/checkout-server-sdk": "^1.0.3",
+    "@paypal/react-paypal-js": "^8.8.3",
     "@prisma/client": "^6.7.0",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",

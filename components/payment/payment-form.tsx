@@ -11,10 +11,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  PayPalScriptProvider,
+  PayPalButtons,
+  usePayPalScriptReducer,
+} from "@paypal/react-paypal-js";
+import { toast } from "react-toastify";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { toast } from "@/components/ui/use-toast";
 import { Icons } from "@/components/icons";
 import Image from "next/image";
 
@@ -39,23 +45,40 @@ export function PaymentForm({ amount, onSuccess, onCancel }: PaymentFormProps) {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      toast({
-        title: "Payment successful",
-        description: "Your payment has been processed successfully.",
-      });
+      toast.success("Your payment has been processed successfully.");
 
       if (onSuccess) onSuccess();
     } catch (error) {
-      toast({
-        title: "Payment failed",
-        description:
-          "There was an error processing your payment. Please try again.",
-        variant: "destructive",
-      });
+      toast.error(
+        "There was an error processing your payment. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
   };
+
+  async function createOrder() {
+    const response = await fetch("/api/payment/paypal/create-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount }),
+    });
+    const data = await response.json();
+    return data.id; // order ID returned from backend
+  }
+
+  // Function to call your backend API to capture the order
+  async function captureOrder(orderID: string) {
+    const response = await fetch("/api/payment/paypal/capture-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderID }),
+    });
+
+    const result = await response.json();
+
+    return result;
+  }
 
   return (
     <Card className="w-full">
@@ -69,34 +92,13 @@ export function PaymentForm({ amount, onSuccess, onCancel }: PaymentFormProps) {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <Label>Payment Method</Label>
-                <div className="flex items-center gap-1">
-                  {/* <Image src="/icons/visa.svg" alt="Visa" width={32} height={20} /> */}
-                  {/* <Image
-                    src="/icons/mastercard.svg"
-                    alt="Mastercard"
-                    width={32}
-                    height={20}
-                  />
-                  <Image
-                    src="/icons/amex.svg"
-                    alt="American Express"
-                    width={32}
-                    height={20}
-                  /> */}
-                </div>
+                <div className="flex items-center gap-1"></div>
               </div>
               <RadioGroup
                 value={paymentMethod}
                 onValueChange={setPaymentMethod}
                 className="grid gap-4"
               >
-                {/* <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="credit-card" id="credit-card" />
-                  <Label htmlFor="credit-card" className="flex items-center gap-2 cursor-pointer">
-                    <Icons.creditCard className="h-4 w-4" />
-                    Credit / Debit Card
-                  </Label>
-                </div> */}
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="paypal" id="paypal" />
                   <Label
@@ -130,42 +132,11 @@ export function PaymentForm({ amount, onSuccess, onCancel }: PaymentFormProps) {
               </RadioGroup>
             </div>
 
-            {/* {paymentMethod === "credit-card" && (
-              <div className="space-y-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="card-number">Card Number</Label>
-                  <Input id="card-number" placeholder="1234 5678 9012 3456" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="expiry">Expiry Date</Label>
-                    <Input id="expiry" placeholder="MM/YY" />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="cvc">CVC</Label>
-                    <Input id="cvc" placeholder="123" />
-                  </div>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Name on Card</Label>
-                  <Input id="name" placeholder="John Doe" />
-                </div>
-              </div>
-            )} */}
-
             {paymentMethod === "paypal" && (
-              <div className="flex flex-col items-center justify-center py-6 space-y-4">
-                <Image
-                  src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg"
-                  alt="PayPal"
-                  width={120}
-                  height={30}
-                />
-                <p className="text-sm text-muted-foreground text-center">
-                  You will be redirected to PayPal to complete your payment
-                  securely.
-                </p>
-              </div>
+              <PayPalWrapper
+                createOrder={createOrder}
+                captureOrder={captureOrder}
+              />
             )}
 
             {paymentMethod === "payfort" && (
@@ -192,7 +163,7 @@ export function PaymentForm({ amount, onSuccess, onCancel }: PaymentFormProps) {
           </div>
 
           <div className="mt-6 flex flex-col gap-2">
-            <Button
+            {/* <Button
               type="submit"
               className="w-full bg-upwork-green hover:bg-upwork-darkgreen text-white"
               disabled={isLoading}
@@ -203,9 +174,9 @@ export function PaymentForm({ amount, onSuccess, onCancel }: PaymentFormProps) {
                   Processing...
                 </>
               ) : (
-                `Pay ${amount}`
+                `Pay $ ${amount}`
               )}
-            </Button>
+            </Button> */}
             {onCancel && (
               <Button
                 type="button"
@@ -221,5 +192,51 @@ export function PaymentForm({ amount, onSuccess, onCancel }: PaymentFormProps) {
         </form>
       </CardContent>
     </Card>
+  );
+}
+
+function PayPalWrapper({
+  createOrder,
+  captureOrder,
+}: {
+  createOrder: () => Promise<string>;
+  captureOrder: (orderID: string) => Promise<any>;
+}) {
+  const [{ isPending }] = usePayPalScriptReducer();
+
+  if (isPending) {
+    return (
+      <div className="text-sm text-muted-foreground">Loading PayPal...</div>
+    );
+  }
+
+  return (
+    <PayPalButtons
+      style={{
+        color: "gold",
+        shape: "rect",
+        label: "pay",
+        height: 50,
+      }}
+      createOrder={async () => {
+        const orderID = await createOrder();
+        return orderID;
+      }}
+      onApprove={async (data, actions) => {
+        const captureResponse = await captureOrder(data.orderID);
+
+        if (captureResponse.status === "INSTRUMENT_DECLINED") {
+          return actions.restart();
+        }
+
+        if (captureResponse.status === "COMPLETED") {
+          toast.success("Payment successful!");
+        }
+      }}
+      onError={(err) => {
+        console.error("PayPal Checkout Error:", err);
+        alert("Payment failed. Please try again.");
+      }}
+    />
   );
 }
