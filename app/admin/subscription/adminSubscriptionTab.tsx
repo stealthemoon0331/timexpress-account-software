@@ -9,6 +9,12 @@ import {
 } from "@/components/ui/card";
 import { toast } from "sonner";
 import { plans as initialPlans } from "@/lib/data";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+} from "@hello-pangea/dnd";
 
 export function AdminSubscriptionsTab() {
   const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
@@ -79,7 +85,7 @@ export function AdminSubscriptionsTab() {
           plan.id === payload.id ? { ...plan, ...payload } : plan
         )
       );
-      
+
       toast.success("Plan updated successfully!");
       setEditingPlanId(null);
     } catch (err: any) {
@@ -107,6 +113,17 @@ export function AdminSubscriptionsTab() {
   const handleRemoveFeature = (index: number) => {
     const updated = [...newPlanData.features];
     updated.splice(index, 1);
+    setNewPlanData({ ...newPlanData, features: updated });
+  };
+
+  const handleFeatureDragEnd = (result: DropResult) => {
+    const { source, destination } = result;
+    if (!destination || !newPlanData) return;
+
+    const updated = Array.from(newPlanData.features);
+    const [moved] = updated.splice(source.index, 1);
+    updated.splice(destination.index, 0, moved);
+
     setNewPlanData({ ...newPlanData, features: updated });
   };
 
@@ -157,31 +174,62 @@ export function AdminSubscriptionsTab() {
                     className="w-full p-2 border rounded"
                     placeholder="Price"
                   />
-                  <ul className="space-y-2">
-                    {newPlanData.features.map((f: string, i: number) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={f}
-                          onChange={(e) => {
-                            const updated = [...newPlanData.features];
-                            updated[i] = e.target.value;
-                            setNewPlanData({
-                              ...newPlanData,
-                              features: updated,
-                            });
-                          }}
-                          className="w-full p-2 border rounded"
-                        />
-                        <Button
-                          variant="destructive"
-                          onClick={() => handleRemoveFeature(i)}
+                  <DragDropContext onDragEnd={handleFeatureDragEnd}>
+                    <Droppable droppableId="features" isDropDisabled={false}>
+                      {(provided: any) => (
+                        <ul
+                          className="space-y-2"
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
                         >
-                          ✕
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
+                          {newPlanData.features.map((f: string, i: number) => (
+                            <Draggable
+                              key={i}
+                              draggableId={`feature-${i}`}
+                              index={i}
+                            >
+                              {(provided: any) => (
+                                <li
+                                  key={i}
+                                  className="flex items-center gap-2"
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                >
+                                  <span
+                                    {...provided.dragHandleProps}
+                                    className="cursor-grab text-gray-400 select-none"
+                                    title="Drag to reorder"
+                                  >
+                                    ☰
+                                  </span>
+                                  <input
+                                    type="text"
+                                    value={f}
+                                    onChange={(e) => {
+                                      const updated = [...newPlanData.features];
+                                      updated[i] = e.target.value;
+                                      setNewPlanData({
+                                        ...newPlanData,
+                                        features: updated,
+                                      });
+                                    }}
+                                    className="w-full p-2 border rounded"
+                                  />
+                                  <Button
+                                    variant="destructive"
+                                    onClick={() => handleRemoveFeature(i)}
+                                  >
+                                    ✕
+                                  </Button>
+                                </li>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </ul>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
                   <div className="flex gap-2">
                     <input
                       type="text"
