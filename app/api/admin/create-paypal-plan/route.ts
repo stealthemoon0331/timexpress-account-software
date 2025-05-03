@@ -10,7 +10,8 @@ export async function POST(req: NextRequest) {
     // if (!isAdmin) return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
 
     const plan = await req.json()
-    if (!plan?.id || !plan?.name || !plan?.price) {
+    console.log("plan ==> ", plan)
+    if (!plan?.id || !plan?.name || plan.price == null) {
       return NextResponse.json({ message: "Invalid plan data" }, { status: 400 })
     }
 
@@ -30,14 +31,14 @@ export async function POST(req: NextRequest) {
             description: plan.description,
             price: 0,
             features: plan.features,
-            paypalPlanId: null,
+            paypalPlanId: "P-TRIAL",
           },
           update: {
             name: plan.name,
             description: plan.description,
             price: 0,
             features: plan.features,
-            paypalPlanId: null,
+            paypalPlanId: "P-TRIAL",
           },
         })
       

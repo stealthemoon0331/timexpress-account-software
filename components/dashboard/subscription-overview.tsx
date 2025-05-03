@@ -108,7 +108,7 @@ export function SubscriptionOverview() {
         </div>
       </div>
 
-      <div className="flex gap-2">
+      {/* <div className="flex gap-2">
         <Button
           onClick={() => setShowPaymentDialog(true)}
           className="flex-1 bg-upwork-green hover:bg-upwork-darkgreen text-white"
@@ -118,7 +118,7 @@ export function SubscriptionOverview() {
         <Button variant="outline" className="flex-1">
           Billing History
         </Button>
-      </div>
+      </div> */}
 
       <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
         <DialogContent className="sm:max-w-[500px]">
@@ -143,9 +143,9 @@ export function SubscriptionOverview() {
             {planId && (
               <PaymentForm
                 amount={
-                  plans
+                  String(plans
                     .find((plan) => plan.id === planId)
-                    ?.price.replace(/[^0-9.]/g, "") || "0.00"
+                    ?.price).replace(/[^0-9.]/g, "") || "0.00"
                 }
                 planId={planId}
                 onSuccess={handlePaymentSuccess}

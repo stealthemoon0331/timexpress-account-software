@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,7 +8,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { plans as initialPlans } from "@/lib/data";
+import { plans as initialPlans, Plan } from "@/lib/data";
 import {
   DragDropContext,
   Droppable,
@@ -23,12 +23,32 @@ export function AdminSubscriptionsTab() {
   const [loadingPlans, setLoadingPlans] = useState<{ [id: string]: boolean }>(
     {}
   );
-  const [plans, setPlans] = useState(() =>
-    initialPlans.map((plan) => ({
-      ...plan,
-      price: parseFloat(plan.price.replace(/[^\d.]/g, "")), // convert "$29/month" → 29
-    }))
-  );
+  const [plans, setPlans] = useState<Plan[] | null>(null);
+
+  useEffect(() => {
+    const syncPlans = async () => {
+      try {
+        const res = await fetch("/api/payment/plans", { method: "GET" });
+        if (!res.ok) throw new Error("Failed to sync plans");
+
+        const responseData = await res.json();
+
+        const parsedPlans = responseData.map((plan: any) => ({
+          ...plan,
+          features:
+            typeof plan.features === "string"
+              ? JSON.parse(plan.features)
+              : plan.features,
+        }));
+
+        setPlans(parsedPlans);
+      } catch (err) {
+        console.error("Error loading plans:", err);
+      }
+    };
+
+    syncPlans();
+  }, []);
 
   const handleCreatePayPalPlan = async (plan: any) => {
     setLoadingPlans((prev) => ({ ...prev, [plan.id]: true }));
@@ -81,7 +101,7 @@ export function AdminSubscriptionsTab() {
       if (!res.ok) throw new Error(data.message);
 
       setPlans((prevPlans) =>
-        prevPlans.map((plan) =>
+        (prevPlans || []).map((plan) =>
           plan.id === payload.id ? { ...plan, ...payload } : plan
         )
       );
@@ -129,7 +149,7 @@ export function AdminSubscriptionsTab() {
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {plans.map((plan) => {
+      {plans?.map((plan) => {
         const isEditing = editingPlanId === plan.id;
         const isLoading = loadingPlans[plan.id] || false;
 

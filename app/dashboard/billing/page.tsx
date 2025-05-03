@@ -25,7 +25,7 @@ import { toast } from "react-toastify";
 import { Icons } from "@/components/icons";
 import { PaymentForm } from "@/components/payment/payment-form";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
-import { plans } from "@/lib/data";
+import { Plan, plans as initialPlans } from "@/lib/data";
 import { getPlanTitle } from "@/lib/utils";
 
 export default function BillingPage() {
@@ -33,14 +33,26 @@ export default function BillingPage() {
   const [selectedPlan, setSelectedPlan] = useState("free-trial");
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [plans, setPlans] = useState<Plan[] | null>(null);
 
   useEffect(() => {
     const syncPlans = async () => {
       try {
-        const res = await fetch('/api/payment/plans', { method: 'POST' });
-        if (!res.ok) throw new Error('Failed to sync plans');
+        const res = await fetch("/api/payment/plans", { method: "GET" });
+        if (!res.ok) throw new Error("Failed to sync plans");
+  
+        const responseData = await res.json();
+  
+        const parsedPlans = responseData.map((plan: any) => ({
+          ...plan,
+          features: typeof plan.features === "string"
+            ? JSON.parse(plan.features)
+            : plan.features,
+        }));
+  
+        setPlans(parsedPlans);
       } catch (err) {
-        console.error(err);
+        console.error("Error loading plans:", err);
       }
     };
   
@@ -66,9 +78,9 @@ export default function BillingPage() {
     setShowPaymentDialog(false);
 
     toast.success(
-      `Your subscription has been updated to the ${
-        getPlanTitle(selectedPlan)
-      } plan.`
+      `Your subscription has been updated to the ${getPlanTitle(
+        selectedPlan
+      )} plan.`
     );
   };
 
@@ -84,9 +96,11 @@ export default function BillingPage() {
 
       setShowCancelDialog(false);
 
-      toast.success("Your subscription has been cancelled. You can still use the service until the end of your billing period.");
+      toast.success(
+        "Your subscription has been cancelled. You can still use the service until the end of your billing period."
+      );
     } catch (error) {
-      toast.success("Your subscription was not cancelled. Please try again.")
+      toast.success("Your subscription was not cancelled. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -196,7 +210,7 @@ export default function BillingPage() {
               onValueChange={setSelectedPlan}
               className="grid gap-4 md:grid-cols-3"
             >
-              {plans.map((plan) => (
+              {plans?.map((plan) => (
                 <div key={plan.id} className="relative">
                   <RadioGroupItem
                     value={plan.id}
@@ -230,7 +244,7 @@ export default function BillingPage() {
                       </p>
                     </div>
                     <div className="mb-4">
-                      <span className="text-2xl font-bold">{plan.price}</span>
+                      <span className="text-2xl font-bold">$ {plan.price}</span>
                     </div>
                     <ul className="space-y-2 text-sm">
                       {plan.features.map((feature, index) => (
@@ -311,10 +325,9 @@ export default function BillingPage() {
           >
             <PaymentForm
               amount={
-                plans.find((plan) => plan.id === selectedPlan)?.price.replace(
-                  /[^0-9.]/g,
-                  ""
-                ) || "0.00"
+                String(
+                  plans?.find((plan) => plan.id === selectedPlan)?.price
+                ).replace(/[^0-9.]/g, "") || "0.00"
               }
               planId={selectedPlan}
               onSuccess={handlePaymentSuccess}
