@@ -69,8 +69,9 @@ model Plan {
   name        String
   description String
   price       Float    // store as number
-  features    String   @db.Text // Prisma currently doesn't support arrays in MySQL natively, so store as JSON if needed
+  features    Json 
   createdAt   DateTime @default(now())
+  paypalPlanId String?
 
   users       User[]
 }

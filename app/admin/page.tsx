@@ -17,6 +17,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination"
+import { AdminSubscriptionsTab } from "./subscription/adminSubscriptionTab"
 
 export default function AdminPage() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -144,9 +145,9 @@ export default function AdminPage() {
       <Tabs defaultValue="users" className="mb-6">
         <TabsList>
           <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="organizations">Organizations</TabsTrigger>
+          {/* <TabsTrigger value="organizations">Organizations</TabsTrigger> */}
           <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+          {/* <TabsTrigger value="settings">Settings</TabsTrigger> */}
         </TabsList>
         <TabsContent value="users" className="mt-4">
           <Card>
@@ -257,7 +258,7 @@ export default function AdminPage() {
             </Pagination>
           </div>
         </TabsContent>
-        <TabsContent value="organizations" className="mt-4">
+        {/* <TabsContent value="organizations" className="mt-4">
           <Card>
             <CardHeader>
               <CardTitle>Organizations</CardTitle>
@@ -269,7 +270,7 @@ export default function AdminPage() {
               </p>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
         <TabsContent value="subscriptions" className="mt-4">
           <Card>
             <CardHeader>
@@ -280,10 +281,11 @@ export default function AdminPage() {
               <p className="text-center py-8 text-muted-foreground">
                 Select the Subscriptions tab to view and manage subscription plans.
               </p>
+              <AdminSubscriptionsTab/>
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="settings" className="mt-4">
+        {/* <TabsContent value="settings" className="mt-4">
           <Card>
             <CardHeader>
               <CardTitle>System Settings</CardTitle>
@@ -295,7 +297,7 @@ export default function AdminPage() {
               </p>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </div>
   )
