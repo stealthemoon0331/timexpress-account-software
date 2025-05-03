@@ -5,7 +5,6 @@ import { Progress } from "@/components/ui/progress";
 import { Icons } from "@/components/icons";
 import { format } from "date-fns";
 import { useUser } from "@/app/contexts/UserContext";
-import { plans } from "@/lib/data";
 import {
   Dialog,
   DialogContent,
@@ -15,27 +14,58 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { PaymentForm } from "../payment/payment-form";
 import { toast } from "react-toastify";
 import { getPlanTitle } from "@/lib/utils";
+import { Plan } from "@/lib/data";
 
 export function SubscriptionOverview() {
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-
   const { user: loggedUser, loading } = useUser();
 
-  if (loading || !loggedUser) return null;
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [plans, setPlans] = useState<Plan[] | null>(null);
+  const [plan, setPlan] = useState<Plan>();
 
-  const { planId, planActivatedAt, planExpiresAt } = loggedUser;
+  
+  // const { planId, planActivatedAt, planExpiresAt } = loggedUser;
 
-  const plan = plans.find((p) => p.id === planId);
+  useEffect(() => {
+    const syncPlans = async () => {
+      try {
+        const res = await fetch("/api/payment/plans", { method: "GET" });
+        if (!res.ok) throw new Error("Failed to sync plans");
+
+        const responseData = await res.json();
+
+        const parsedPlans = responseData.map((plan: any) => ({
+          ...plan,
+          features:
+            typeof plan.features === "string"
+              ? JSON.parse(plan.features)
+              : plan.features,
+        }));
+
+        setPlans(parsedPlans);
+      } catch (err) {
+        console.error("Error loading plans:", err);
+      }
+    };
+
+    syncPlans();
+  }, []);
+
+  useEffect(() => {
+    if(plans) setPlan(plans.find((p) => p.id === loggedUser?.planId));
+  }, [plans, loggedUser?.planId])
+
+  // const plan = plans.find((p) => p.id === planId);
   const planName = plan?.name ?? "Unknown";
   const price = plan?.price ?? "-";
 
-  const startDate = planActivatedAt ? new Date(planActivatedAt) : null;
-  const endDate = planExpiresAt ? new Date(planExpiresAt) : null;
+  const startDate = loggedUser?.planActivatedAt ? new Date(loggedUser?.planActivatedAt) : null;
+  const endDate = loggedUser?.planExpiresAt ? new Date(loggedUser?.planExpiresAt) : null;
 
   const totalDays =
     startDate && endDate
@@ -58,9 +88,12 @@ export function SubscriptionOverview() {
     setShowPaymentDialog(false);
 
     toast.success(
-      `Your subscription has been updated to the ${getPlanTitle(planId)} plan.`
+      `Your subscription has been updated to the ${getPlanTitle(plans || [], loggedUser?.planId)} plan.`
     );
   };
+
+  if (loading || !loggedUser) return null;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -98,7 +131,7 @@ export function SubscriptionOverview() {
             </p>
           </div>
           <p className="font-bold">
-            {planId === "free-trial" ? "$15.00" : price}
+            {loggedUser?.planId === "free-trial" ? "$15.00" : price}
           </p>
         </div>
         <div className="mt-2 flex items-center text-xs text-muted-foreground">
@@ -126,7 +159,7 @@ export function SubscriptionOverview() {
             <DialogTitle>Payment Details</DialogTitle>
             <DialogDescription>
               Enter your payment information to{" "}
-              {planId === "monthly"
+              {loggedUser?.planId === "monthly"
                 ? "subscribe to the Monthly plan"
                 : "subscribe to the Annual plan"}
             </DialogDescription>
@@ -140,14 +173,13 @@ export function SubscriptionOverview() {
               components: "buttons",
             }}
           >
-            {planId && (
+            {loggedUser?.planId && (
               <PaymentForm
                 amount={
-                  String(plans
-                    .find((plan) => plan.id === planId)
-                    ?.price).replace(/[^0-9.]/g, "") || "0.00"
+                  plan?.price || 0.00
                 }
-                planId={planId}
+                planId={loggedUser?.planId}
+                paypalPlanId={plan?.paypalPlanId || ""}
                 onSuccess={handlePaymentSuccess}
                 onCancel={() => setShowPaymentDialog(false)}
               />

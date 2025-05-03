@@ -8,7 +8,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { plans as initialPlans, Plan } from "@/lib/data";
+import { Plan } from "@/lib/data";
 import {
   DragDropContext,
   Droppable,

@@ -5,19 +5,51 @@ import { Icons } from "@/components/icons";
 import { useUser } from "@/app/contexts/UserContext";
 import { getPlanTitle, isPlanExpired } from "@/lib/utils";
 import { format } from "date-fns";
-import { plans } from "@/lib/data";
+import { useEffect, useState } from "react";
+import { Plan } from "@/lib/data";
 
 export function DashboardStats() {
-  // Mock data - in a real app, this would come from an API
-
   const { user: loggedUser, loading } = useUser();
+
+  const [plans, setPlans] = useState<Plan[] | null>(null);
+  const [plan, setPlan] = useState<Plan>();
+
+  useEffect(() => {
+    const syncPlans = async () => {
+      try {
+        const res = await fetch("/api/payment/plans", { method: "GET" });
+        if (!res.ok) throw new Error("Failed to sync plans");
+
+        const responseData = await res.json();
+
+        const parsedPlans = responseData.map((plan: any) => ({
+          ...plan,
+          features:
+            typeof plan.features === "string"
+              ? JSON.parse(plan.features)
+              : plan.features,
+        }));
+
+        setPlans(parsedPlans);
+      } catch (err) {
+        console.error("Error loading plans:", err);
+      }
+    };
+
+    syncPlans();
+  }, []);
+
+  useEffect(() => {
+    if (plans && loggedUser?.planId) {
+      setPlan(plans.find((p) => p.id === loggedUser.planId));
+    }
+  }, [plans, loggedUser?.planId]);
 
   if (loading || !loggedUser) return null;
 
   const { planId, planExpiresAt } = loggedUser;
 
-  const plan = plans.find((p) => p.id === planId);
-  const planTitle = plan?.name ?? getPlanTitle(planId);
+  const planTitle = plan?.name ?? getPlanTitle(plans || [], planId);
   const isExpired = isPlanExpired(planExpiresAt);
   const daysLeft = planExpiresAt
     ? Math.max(0, Math.ceil((new Date(planExpiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
@@ -77,3 +109,4 @@ export function DashboardStats() {
     </div>
   );
 }
+

@@ -28,8 +28,9 @@ import { addDays } from "date-fns";
 import { useSession } from "next-auth/react";
 
 interface PaymentFormProps {
-  amount: string;
+  amount: number;
   planId: string;
+  paypalPlanId: string;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -37,6 +38,7 @@ interface PaymentFormProps {
 export function PaymentForm({
   amount,
   planId,
+  paypalPlanId,
   onSuccess,
   onCancel,
 }: PaymentFormProps) {
@@ -142,11 +144,7 @@ export function PaymentForm({
             </div>
 
             {paymentMethod === "paypal" && (
-              <PayPalWrapper
-                createOrder={createOrder}
-                captureOrder={captureOrder}
-                planId={planId}
-              />
+              <PayPalWrapper planId={planId} paypalPlanId={paypalPlanId} />
             )}
 
             {paymentMethod === "payfort" && (
@@ -206,70 +204,62 @@ export function PaymentForm({
 }
 
 function PayPalWrapper({
-  createOrder,
-  captureOrder,
   planId,
+  paypalPlanId,
 }: {
-  createOrder: () => Promise<string>;
-  captureOrder: (orderID: string) => Promise<any>;
   planId: string;
+  paypalPlanId: string;
 }) {
-  const [{ isPending }] = usePayPalScriptReducer();
-  const { data: session, status } = useSession();
+  const [{ isPending, isResolved }] = usePayPalScriptReducer();
+  const { data: session } = useSession();
 
-  if (isPending) {
-    return (
-      <div className="text-sm text-muted-foreground">Loading PayPal...</div>
-    );
+  if (!isResolved) {
+    return <div className="text-sm text-muted-foreground">Loading PayPal script...</div>;
   }
 
+  console.log("paypalPlanId ===> ", paypalPlanId)
+
   return (
-    <PayPalButtons
-      style={{
-        color: "gold",
-        shape: "rect",
-        label: "pay",
-        height: 50,
-      }}
-      createOrder={async () => {
-        const orderID = await createOrder();
-        return orderID;
-      }}
-      onApprove={async (data, actions) => {
-        const captureResponse = await captureOrder(data.orderID);
-
-        if (captureResponse.status === "INSTRUMENT_DECLINED") {
-          return actions.restart();
-        }
-
-        if (captureResponse.status === "COMPLETED") {
-          const transaction =
-            captureResponse.purchase_units?.[0]?.payments?.captures?.[0];
-          const amount = parseFloat(transaction?.amount?.value || "0");
-          const currency = transaction?.amount?.currency_code || "USD";
-          const method = "paypal";
-          const orderId = transaction?.id || data.orderID;
-
-          await fetch("/api/payment/complete", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              userId: session?.user.id,
-              planId: planId,
-              amount,
-              currency,
-              method,
-              orderId,
-            }),
-          });
-
-          toast.success("Payment successful!");
-        }
-      }}
-      onError={(err) => {
-        console.error("PayPal Checkout Error:", err);
-        alert("Payment failed. Please try again.");
-      }}
-    />
+    <div>
+      {isPending ? (
+        <div className="text-sm text-muted-foreground">Loading PayPal buttons...</div>
+      ) : (
+        <PayPalButtons
+          style={{ layout: "vertical" }}
+          fundingSource="paypal"
+          createSubscription={async () => {
+            const res = await fetch("/api/payment/create-subscription", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ paypalPlanId }),
+            });
+            const data = await res.json();
+            return data.id;
+          }}
+          onApprove={async (data) => {
+            try {
+              await fetch("/api/payment/complete", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  userId: session?.user.id,
+                  planId,
+                  paypalSubscriptionId: data.subscriptionID,
+                }),
+              });
+              toast.success("Subscription successful!");
+            } catch (err) {
+              console.error("Subscription completion error", err);
+              toast.error("Failed to activate subscription.");
+            }
+          }}
+          onError={(err) => {
+            console.error("PayPal Subscription Error:", err);
+            toast.error("Payment failed. Please try again.");
+          }}
+        />
+      )}
+    </div>
   );
 }
+

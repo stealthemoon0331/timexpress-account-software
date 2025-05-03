@@ -25,12 +25,12 @@ import { toast } from "react-toastify";
 import { Icons } from "@/components/icons";
 import { PaymentForm } from "@/components/payment/payment-form";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
-import { Plan, plans as initialPlans } from "@/lib/data";
 import { getPlanTitle } from "@/lib/utils";
+import { Plan } from "@/lib/data";
 
 export default function BillingPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState("free-trial");
+  const [selectedPlanId, setSelectedPlanId] = useState<string>("free-trial");
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [plans, setPlans] = useState<Plan[] | null>(null);
@@ -40,25 +40,25 @@ export default function BillingPage() {
       try {
         const res = await fetch("/api/payment/plans", { method: "GET" });
         if (!res.ok) throw new Error("Failed to sync plans");
-  
+
         const responseData = await res.json();
-  
+
         const parsedPlans = responseData.map((plan: any) => ({
           ...plan,
-          features: typeof plan.features === "string"
-            ? JSON.parse(plan.features)
-            : plan.features,
+          features:
+            typeof plan.features === "string"
+              ? JSON.parse(plan.features)
+              : plan.features,
         }));
-  
+
         setPlans(parsedPlans);
       } catch (err) {
         console.error("Error loading plans:", err);
       }
     };
-  
+
     syncPlans();
   }, []);
-  
 
   const planImages: { [key: string]: string } = {
     starter: "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
@@ -67,7 +67,7 @@ export default function BillingPage() {
   };
 
   const handleChangePlan = async () => {
-    if (selectedPlan === "free-trial") {
+    if (selectedPlanId === "free-trial") {
       return;
     }
 
@@ -78,8 +78,8 @@ export default function BillingPage() {
     setShowPaymentDialog(false);
 
     toast.success(
-      `Your subscription has been updated to the ${getPlanTitle(
-        selectedPlan
+      `Your subscription has been updated to the ${getPlanTitle(plans || [],
+        selectedPlanId
       )} plan.`
     );
   };
@@ -206,8 +206,8 @@ export default function BillingPage() {
           </CardHeader>
           <CardContent>
             <RadioGroup
-              defaultValue={selectedPlan}
-              onValueChange={setSelectedPlan}
+              defaultValue={selectedPlanId}
+              onValueChange={setSelectedPlanId}
               className="grid gap-4 md:grid-cols-3"
             >
               {plans?.map((plan) => (
@@ -220,17 +220,10 @@ export default function BillingPage() {
                   <label
                     htmlFor={plan.id}
                     className={`flex h-full cursor-pointer flex-col rounded-md border p-4 hover:border-upwork-green ${
-                      selectedPlan === plan.id
+                      selectedPlanId === plan.id
                         ? "border-2 border-upwork-green"
                         : ""
                     }`}
-                    // style={{
-                    //   backgroundImage: `url(${planImages[plan.id]})`,
-                    //   backgroundSize: "cover",
-                    //   backgroundPosition: "center",
-                    //   backgroundBlendMode: "overlay",
-                    //   backgroundColor: "rgba(255, 255, 255, 0.85)",
-                    // }}
                   >
                     {plan.current && (
                       <div className="absolute -right-2 -top-2 rounded-full bg-upwork-green px-2 py-1 text-xs text-white">
@@ -263,7 +256,7 @@ export default function BillingPage() {
             <Button
               onClick={handleChangePlan}
               className="bg-upwork-green hover:bg-upwork-darkgreen text-white"
-              disabled={isLoading || selectedPlan === "free-trial"}
+              disabled={isLoading || selectedPlanId === "free-trial"}
             >
               {isLoading ? (
                 <>
@@ -309,7 +302,7 @@ export default function BillingPage() {
             <DialogTitle>Payment Details</DialogTitle>
             <DialogDescription>
               Enter your payment information to{" "}
-              {selectedPlan === "monthly"
+              {selectedPlanId === "monthly"
                 ? "subscribe to the Monthly plan"
                 : "subscribe to the Annual plan"}
             </DialogDescription>
@@ -317,19 +310,20 @@ export default function BillingPage() {
           <PayPalScriptProvider
             options={{
               clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
-              dataNamespace: "paypal_sdk",
               currency: "USD",
-              intent: "capture",
-              components: "buttons",
+              intent: "subscription",
+              dataNamespace: "paypal_sdk",
+              vault: true,
+              components: "buttons"
+
             }}
           >
             <PaymentForm
-              amount={
-                String(
-                  plans?.find((plan) => plan.id === selectedPlan)?.price
-                ).replace(/[^0-9.]/g, "") || "0.00"
+              amount={plans?.find((p) => p.id === selectedPlanId)?.price || 0.0}
+              planId={selectedPlanId}
+              paypalPlanId={
+                plans?.find((p) => p.id === selectedPlanId)?.paypalPlanId || ""
               }
-              planId={selectedPlan}
               onSuccess={handlePaymentSuccess}
               onCancel={() => setShowPaymentDialog(false)}
             />
