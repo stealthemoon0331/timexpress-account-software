@@ -27,8 +27,12 @@ import { PaymentForm } from "@/components/payment/payment-form";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { getPlanTitle } from "@/lib/utils";
 import { Plan } from "@/lib/data";
+import { useUser } from "@/app/contexts/UserContext";
+import { differenceInDays, format } from "date-fns";
 
 export default function BillingPage() {
+  const { user: loggedUser, loading } = useUser();
+
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string>("free-trial");
   const [showCancelDialog, setShowCancelDialog] = useState(false);
@@ -51,12 +55,14 @@ export default function BillingPage() {
               : plan.features,
         }));
 
+        console.log("parsedPlans ==>> ", parsedPlans);
+
         setPlans(parsedPlans);
       } catch (err) {
         console.error("Error loading plans:", err);
       }
     };
-
+    console.log("selectedPlanId ==> ", selectedPlanId);
     syncPlans();
   }, []);
 
@@ -75,10 +81,12 @@ export default function BillingPage() {
   };
 
   const handlePaymentSuccess = () => {
+    console.log("selectedPlanId ==> ", selectedPlanId);
     setShowPaymentDialog(false);
 
     toast.success(
-      `Your subscription has been updated to the ${getPlanTitle(plans || [],
+      `Your subscription has been updated to the ${getPlanTitle(
+        plans || [],
         selectedPlanId
       )} plan.`
     );
@@ -92,7 +100,9 @@ export default function BillingPage() {
       console.log("Cancelling subscription");
 
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await fetch("/api/payment/paypal/cancel-subscription", {
+        method: "POST",
+      });
 
       setShowCancelDialog(false);
 
@@ -119,32 +129,61 @@ export default function BillingPage() {
           <CardHeader>
             <CardTitle>Current Plan</CardTitle>
             <CardDescription>
-              You are currently on the Free Trial plan.
+              You are currently on the{" "}
+              {plans?.find((p) => p.id === loggedUser?.planId)?.name} plan.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-lg border p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium">Free Trial</h3>
+                  <h3 className="font-medium">
+                    {plans?.find((p) => p.id === loggedUser?.planId)?.name}
+                  </h3>
                   <p className="text-sm text-muted-foreground">
-                    25 days remaining
+                    {differenceInDays(
+                      new Date(loggedUser?.planExpiresAt || new Date()),
+                      new Date()
+                    ) > 0
+                      ? `${differenceInDays(
+                          new Date(loggedUser?.planExpiresAt || new Date()),
+                          new Date()
+                        )} days remaining`
+                      : "Plan expired"}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium">$0</p>
-                  <p className="text-sm text-muted-foreground">
-                    $27.50/month after trial
+                  <p className="font-medium">
+                    $ {plans?.find((p) => p.id === loggedUser?.planId)?.price}
                   </p>
+                  {/* <p className="text-sm text-muted-foreground">
+                    {
+                      plans?.find((p) => p.id === loggedUser?.planId)
+                        ?.description
+                    }
+                  </p> */}
                 </div>
               </div>
               <Separator className="my-4" />
               <div className="space-y-2 text-sm">
-                <p>Your trial will end on May 20, 2025</p>
                 <p>
-                  You will be automatically subscribed to the Monthly plan after
-                  your trial ends.
+                  Your trial will end{" "}
+                  {differenceInDays(
+                    new Date(loggedUser?.planExpiresAt || new Date()),
+                    new Date()
+                  ) > 0
+                    ? `${format(
+                        new Date(loggedUser?.planExpiresAt || new Date()),
+                        "MMMM d, yyyy"
+                      )}.`
+                    : "Plan expired"}
                 </p>
+                {/* {loggedUser?.planId === "free-trial" && (
+                  <p>
+                    You will be automatically subscribed to the Monthly plan
+                    after your trial ends.
+                  </p>
+                )} */}
               </div>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
@@ -188,12 +227,12 @@ export default function BillingPage() {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-              <Button
+              {/* <Button
                 onClick={() => setShowPaymentDialog(true)}
                 className="bg-upwork-green hover:bg-upwork-darkgreen text-white"
               >
                 Update Payment Method
-              </Button>
+              </Button> */}
             </div>
           </CardContent>
         </Card>
@@ -225,7 +264,7 @@ export default function BillingPage() {
                         : ""
                     }`}
                   >
-                    {plan.current && (
+                    {loggedUser?.planId === plan.id && (
                       <div className="absolute -right-2 -top-2 rounded-full bg-upwork-green px-2 py-1 text-xs text-white">
                         Current
                       </div>
@@ -256,7 +295,11 @@ export default function BillingPage() {
             <Button
               onClick={handleChangePlan}
               className="bg-upwork-green hover:bg-upwork-darkgreen text-white"
-              disabled={isLoading || selectedPlanId === "free-trial"}
+              disabled={
+                isLoading ||
+                selectedPlanId === "free-trial" ||
+                loggedUser?.planId === "free-trial"
+              }
             >
               {isLoading ? (
                 <>
@@ -314,16 +357,17 @@ export default function BillingPage() {
               intent: "subscription",
               dataNamespace: "paypal_sdk",
               vault: true,
-              components: "buttons"
-
+              components: "buttons",
             }}
           >
+            {/* {loggedUser?.paypalSubscriptionId ? } */}
             <PaymentForm
               amount={plans?.find((p) => p.id === selectedPlanId)?.price || 0.0}
               planId={selectedPlanId}
               paypalPlanId={
                 plans?.find((p) => p.id === selectedPlanId)?.paypalPlanId || ""
               }
+              subscriptionType={!loggedUser?.paypalSubscriptionId ? "create-subscription" : "update-subscription"}
               onSuccess={handlePaymentSuccess}
               onCancel={() => setShowPaymentDialog(false)}
             />

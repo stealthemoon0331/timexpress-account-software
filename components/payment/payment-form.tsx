@@ -31,6 +31,7 @@ interface PaymentFormProps {
   amount: number;
   planId: string;
   paypalPlanId: string;
+  subscriptionType: string;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -39,6 +40,7 @@ export function PaymentForm({
   amount,
   planId,
   paypalPlanId,
+  subscriptionType,
   onSuccess,
   onCancel,
 }: PaymentFormProps) {
@@ -144,7 +146,7 @@ export function PaymentForm({
             </div>
 
             {paymentMethod === "paypal" && (
-              <PayPalWrapper planId={planId} paypalPlanId={paypalPlanId} />
+              <PayPalWrapper planId={planId} paypalPlanId={paypalPlanId} subscriptionType={subscriptionType} />
             )}
 
             {paymentMethod === "payfort" && (
@@ -206,39 +208,65 @@ export function PaymentForm({
 function PayPalWrapper({
   planId,
   paypalPlanId,
+  subscriptionType,
 }: {
   planId: string;
   paypalPlanId: string;
+  subscriptionType: string;
 }) {
   const [{ isPending, isResolved }] = usePayPalScriptReducer();
   const { data: session } = useSession();
 
   if (!isResolved) {
-    return <div className="text-sm text-muted-foreground">Loading PayPal script...</div>;
+    return (
+      <div className="text-sm text-muted-foreground">
+        Loading PayPal script...
+      </div>
+    );
   }
 
-  console.log("paypalPlanId ===> ", paypalPlanId)
+  console.log("paypalPlanId ===> ", paypalPlanId);
 
   return (
     <div>
       {isPending ? (
-        <div className="text-sm text-muted-foreground">Loading PayPal buttons...</div>
+        <div className="text-sm text-muted-foreground">
+          Loading PayPal buttons...
+        </div>
       ) : (
         <PayPalButtons
           style={{ layout: "vertical" }}
           fundingSource="paypal"
           createSubscription={async () => {
-            const res = await fetch("/api/payment/create-subscription", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ paypalPlanId }),
-            });
-            const data = await res.json();
-            return data.id;
+            if(subscriptionType === "create-subscription") {
+              const res = await fetch("/api/payment/paypal/create-subscription", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ paypalPlanId }),
+              });
+  
+              const data = await res.json();
+              console.log("change subscription response data", data)
+              toast.error(data.error);
+              return data.id;
+            }
+
+            if(subscriptionType === "update-subscription") {
+              const res = await fetch("/api/payment/paypal/change-subscription", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ paypalPlanId }),
+              });
+  
+              const data = await res.json();
+              console.log("change subscription response data", data)
+              toast.error(data.error);
+              return data.id;
+            }
           }}
           onApprove={async (data) => {
             try {
-              await fetch("/api/payment/complete", {
+              await fetch("/api/payment/paypal/complete", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -262,4 +290,3 @@ function PayPalWrapper({
     </div>
   );
 }
-

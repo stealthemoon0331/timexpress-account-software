@@ -53,7 +53,7 @@ export function AdminSubscriptionsTab() {
   const handleCreatePayPalPlan = async (plan: any) => {
     setLoadingPlans((prev) => ({ ...prev, [plan.id]: true }));
     try {
-      const res = await fetch("/api/admin/create-paypal-plan", {
+      const res = await fetch("/api/admin/payment/paypal/create-paypal-plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(plan),
@@ -92,7 +92,7 @@ export function AdminSubscriptionsTab() {
     setLoadingPlans((prev) => ({ ...prev, [newPlanData.id]: true }));
     try {
       console.log("payload => ", payload);
-      const res = await fetch("/api/admin/update-plan", {
+      const res = await fetch("/api/admin/payment/paypal/update-plan", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

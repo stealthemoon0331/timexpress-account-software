@@ -1,8 +1,15 @@
+// app/api/payment/paypal/create-subscription/route.ts
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
     const { paypalPlanId } = await req.json();
+
+    await console.log("paypalPlanId ===>> ", paypalPlanId)
+
+    if (!paypalPlanId || typeof paypalPlanId !== "string") {
+      return NextResponse.json({ error: "Missing or invalid PayPal Plan ID" }, { status: 400 });
+    }
 
     const auth = Buffer.from(
       `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`

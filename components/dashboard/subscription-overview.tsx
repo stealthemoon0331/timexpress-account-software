@@ -112,7 +112,7 @@ export function SubscriptionOverview() {
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Subscription Period</span>
           <span className="font-medium">
-            {daysRemaining} days remaining ({percentRemaining}%)
+            {daysRemaining + 1} days remaining ({percentRemaining}%)
           </span>
         </div>
         <Progress value={percentRemaining} className="h-2" />
@@ -180,6 +180,7 @@ export function SubscriptionOverview() {
                 }
                 planId={loggedUser?.planId}
                 paypalPlanId={plan?.paypalPlanId || ""}
+                subscriptionType={!loggedUser?.paypalSubscriptionId ? "create-subscription" : "update-subscription"}
                 onSuccess={handlePaymentSuccess}
                 onCancel={() => setShowPaymentDialog(false)}
               />
