@@ -1,5 +1,5 @@
 import { db } from "./db"
-import { hash } from "bcrypt"
+import { hash } from "bcryptjs"
 import { v4 as uuidv4 } from "uuid"
 
 // Get all users (with pagination)
