@@ -22,8 +22,16 @@ const VerificationSuccess = () => {
   );
 
   // Get the email from the URL query parameters
-  const token = searchParams.get("token");
-  const email = searchParams.get("email");
+  const [token, setToken] = useState<string | null>(null)
+  const [email, setEmail] = useState<string | null>(null)
+
+  useEffect(() => {
+    const paramToken = searchParams.get("token");
+    const paramEmail = searchParams.get("email");
+
+    setToken(paramToken)
+    setEmail(paramEmail)
+  }, [searchParams])
 
   useEffect(() => {
     const verifyToken = async () => {

@@ -22,7 +22,13 @@ export default function VerifyEmailPage() {
 
   const searchParams = useSearchParams();
 
-  const email = searchParams.get("email");
+  const [email, setEmail] = useState<string | null>(null)
+
+  useEffect(() => {
+    const paramEmail = searchParams.get("email");
+
+    setEmail(paramEmail)
+  }, [searchParams])
 
   console.log("email => ", email);
 
