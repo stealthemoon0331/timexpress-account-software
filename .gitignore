@@ -3,6 +3,8 @@
 # dependencies
 /node_modules
 
+/prisma/migrations/
+
 # next.js
 /.next/
 /out/
