@@ -14,7 +14,6 @@ import {
 import { Icons } from "@/components/icons";
 
 const VerificationSuccess = () => {
-  const searchParams = useSearchParams();
   const router = useRouter();
   const [countdown, setCountdown] = useState(5);
   const [status, setStatus] = useState<"pending" | "valid" | "invalid">(
@@ -26,12 +25,12 @@ const VerificationSuccess = () => {
   const [email, setEmail] = useState<string | null>(null)
 
   useEffect(() => {
-    const paramToken = searchParams.get("token");
-    const paramEmail = searchParams.get("email");
-
-    setToken(paramToken)
-    setEmail(paramEmail)
-  }, [searchParams])
+    const params = new URLSearchParams(window.location.search)
+    const tokenFromUrl = params.get("token")
+    const emailFromUrl = params.get("email")
+    setToken(tokenFromUrl)
+    setEmail(emailFromUrl)
+  }, [])
 
   useEffect(() => {
     const verifyToken = async () => {

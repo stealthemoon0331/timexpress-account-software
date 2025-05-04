@@ -27,16 +27,16 @@ const formSchema = z
 
 export default function ResetPasswordPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [token, setToken] = useState<string | null>(null)
 
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
-    const paramToken = searchParams.get("token")
-    setToken(paramToken)
-  }, [searchParams])
+    const params = new URLSearchParams(window.location.search)
+    const tokenFromUrl = params.get("token")
+    setToken(tokenFromUrl)
+  }, [])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
