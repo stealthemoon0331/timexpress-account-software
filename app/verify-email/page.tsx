@@ -14,21 +14,18 @@ import {
 } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { Icons } from "@/components/icons";
-import { useSearchParams } from "next/navigation";
 
 export default function VerifyEmailPage() {
   const [isResending, setIsResending] = useState(false);
   const hasAutoSentRef = useRef(false);
 
-  const searchParams = useSearchParams();
-
   const [email, setEmail] = useState<string | null>(null)
 
   useEffect(() => {
-    const paramEmail = searchParams.get("email");
-
-    setEmail(paramEmail)
-  }, [searchParams])
+    const params = new URLSearchParams(window.location.search)
+    const emailFromUrl = params.get("email")
+    setEmail(emailFromUrl)
+  }, [])
 
   console.log("email => ", email);
 
