@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -12,9 +12,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Checkbox } from "@/components/ui/checkbox"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { toast } from "@/components/ui/use-toast"
+// import { toast } from "@/components/ui/use-toast"
 import { Icons } from "@/components/icons"
 import { SocialButton } from "@/components/ui/social-buttons"
+import { signIn } from "next-auth/react";
+import { toast } from 'react-toastify';
+import { useSession } from "next-auth/react"
 
 const formSchema = z.object({
   email: z.string().email({
@@ -27,8 +30,15 @@ const formSchema = z.object({
 })
 
 export default function LoginPage() {
+  const { data: session, status } = useSession()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/dashboard")
+    }
+  }, [status, router])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -40,31 +50,28 @@ export default function LoginPage() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
-
+    setIsLoading(true);
+  
     try {
-      // In a real app, you would call your API here
-      console.log(values)
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      toast({
-        title: "Login successful",
-        description: "Welcome back to Shiper.io!",
-      })
-
-      router.push("/dashboard")
+      const res = await signIn("credentials", {
+        redirect: false,
+        email: values.email,
+        password: values.password,
+        rememberMe: values.rememberMe ? "true" : "false", 
+      });
+      if (res?.error) {
+        toast.error("Invalid email or password. Please try again.");
+      } else {
+        toast.success("Welcome back to Shiper.io!");
+        router.push("/dashboard");
+      }
     } catch (error) {
-      toast({
-        title: "Login failed",
-        description: "Invalid email or password. Please try again.",
-        variant: "destructive",
-      })
+      toast.error("Something went wrong. Please try again later.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
+  
 
   const handleSocialLogin = async (provider: string) => {
     setIsLoading(true)
@@ -74,18 +81,13 @@ export default function LoginPage() {
       console.log(`Logging in with ${provider}`)
 
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      toast({
-        title: "Social login initiated",
-        description: `Redirecting to ${provider} for authentication...`,
+      await signIn(provider, {
+        callbackUrl: "/dashboard"
       })
+      
+      toast.success("Welcome back to Shiper.io!");
     } catch (error) {
-      toast({
-        title: "Something went wrong.",
-        description: `Could not log in with ${provider}. Please try again.`,
-        variant: "destructive",
-      })
+      toast.error("Something went wrong. Please try again later.");
     } finally {
       setIsLoading(false)
     }
@@ -105,10 +107,10 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="grid grid-cols-1 gap-4">
-              <SocialButton provider="google" onClick={() => handleSocialLogin("Google")} disabled={isLoading}>
+              <SocialButton provider="google" onClick={() => handleSocialLogin("google")} disabled={isLoading}>
                 Continue with Google
               </SocialButton>
-              <SocialButton provider="facebook" onClick={() => handleSocialLogin("Facebook")} disabled={isLoading}>
+              <SocialButton provider="facebook" onClick={() => handleSocialLogin("facebook")} disabled={isLoading}>
                 Continue with Facebook
               </SocialButton>
             </div>

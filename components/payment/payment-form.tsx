@@ -1,53 +1,96 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { toast } from "@/components/ui/use-toast"
-import { Icons } from "@/components/icons"
-import Image from "next/image"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  PayPalScriptProvider,
+  PayPalButtons,
+  usePayPalScriptReducer,
+} from "@paypal/react-paypal-js";
+import { toast } from "react-toastify";
+
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Icons } from "@/components/icons";
+import Image from "next/image";
+import prisma from "@/lib/prisma";
+import { addDays } from "date-fns";
+import { useSession } from "next-auth/react";
 
 interface PaymentFormProps {
-  amount: string
-  onSuccess?: () => void
-  onCancel?: () => void
+  amount: number;
+  planId: string;
+  paypalPlanId: string;
+  subscriptionType: string;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-export function PaymentForm({ amount, onSuccess, onCancel }: PaymentFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState("credit-card")
+export function PaymentForm({
+  amount,
+  planId,
+  paypalPlanId,
+  subscriptionType,
+  onSuccess,
+  onCancel,
+}: PaymentFormProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("paypal");
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
       // In a real app, you would call your payment API here
-      console.log(`Processing payment of ${amount} with ${paymentMethod}`)
+      console.log(`Processing payment of ${amount} with ${paymentMethod}`);
 
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      toast({
-        title: "Payment successful",
-        description: "Your payment has been processed successfully.",
-      })
+      toast.success("Your payment has been processed successfully.");
 
-      if (onSuccess) onSuccess()
+      if (onSuccess) onSuccess();
     } catch (error) {
-      toast({
-        title: "Payment failed",
-        description: "There was an error processing your payment. Please try again.",
-        variant: "destructive",
-      })
+      toast.error(
+        "There was an error processing your payment. Please try again."
+      );
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
+  };
+
+  async function createOrder() {
+    const response = await fetch("/api/payment/paypal/create-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount }),
+    });
+    const data = await response.json();
+    return data.id; // order ID returned from backend
+  }
+
+  // Function to call your backend API to capture the order
+  async function captureOrder(orderID: string) {
+    const response = await fetch("/api/payment/paypal/capture-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderID }),
+    });
+
+    const result = await response.json();
+
+    return result;
   }
 
   return (
@@ -62,74 +105,61 @@ export function PaymentForm({ amount, onSuccess, onCancel }: PaymentFormProps) {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <Label>Payment Method</Label>
-                <div className="flex items-center gap-1">
-                  <Image src="/icons/visa.svg" alt="Visa" width={32} height={20} />
-                  <Image src="/icons/mastercard.svg" alt="Mastercard" width={32} height={20} />
-                  <Image src="/icons/amex.svg" alt="American Express" width={32} height={20} />
-                </div>
+                <div className="flex items-center gap-1"></div>
               </div>
-              <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="grid gap-4">
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="credit-card" id="credit-card" />
-                  <Label htmlFor="credit-card" className="flex items-center gap-2 cursor-pointer">
-                    <Icons.creditCard className="h-4 w-4" />
-                    Credit / Debit Card
-                  </Label>
-                </div>
+              <RadioGroup
+                value={paymentMethod}
+                onValueChange={setPaymentMethod}
+                className="grid gap-4"
+              >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="paypal" id="paypal" />
-                  <Label htmlFor="paypal" className="flex items-center gap-2 cursor-pointer">
-                    <Image src="/icons/paypal.svg" alt="PayPal" width={16} height={16} />
+                  <Label
+                    htmlFor="paypal"
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <Image
+                      src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_37x23.jpg"
+                      alt="PayPal"
+                      width={16}
+                      height={16}
+                    />
                     PayPal
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="payfort" id="payfort" />
-                  <Label htmlFor="payfort" className="flex items-center gap-2 cursor-pointer">
-                    <Image src="/icons/payfort.svg" alt="Payfort" width={16} height={16} />
+                  <Label
+                    htmlFor="payfort"
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <Image
+                      src="https://static.openfintech.io/payment_providers/payfort/logo.png?w=400&c=v0.59.26#w100"
+                      alt="Payfort"
+                      width={16}
+                      height={16}
+                    />
                     Payfort
                   </Label>
                 </div>
               </RadioGroup>
             </div>
 
-            {paymentMethod === "credit-card" && (
-              <div className="space-y-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="card-number">Card Number</Label>
-                  <Input id="card-number" placeholder="1234 5678 9012 3456" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="expiry">Expiry Date</Label>
-                    <Input id="expiry" placeholder="MM/YY" />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="cvc">CVC</Label>
-                    <Input id="cvc" placeholder="123" />
-                  </div>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Name on Card</Label>
-                  <Input id="name" placeholder="John Doe" />
-                </div>
-              </div>
-            )}
-
             {paymentMethod === "paypal" && (
-              <div className="flex flex-col items-center justify-center py-6 space-y-4">
-                <Image src="/icons/paypal-large.svg" alt="PayPal" width={120} height={30} />
-                <p className="text-sm text-muted-foreground text-center">
-                  You will be redirected to PayPal to complete your payment securely.
-                </p>
-              </div>
+              <PayPalWrapper planId={planId} paypalPlanId={paypalPlanId} subscriptionType={subscriptionType} />
             )}
 
             {paymentMethod === "payfort" && (
               <div className="flex flex-col items-center justify-center py-6 space-y-4">
-                <Image src="/icons/payfort-large.svg" alt="Payfort" width={120} height={30} />
+                <Image
+                  src="https://static.openfintech.io/payment_providers/payfort/logo.png?w=400&c=v0.59.26#w100"
+                  alt="Payfort"
+                  width={120}
+                  height={30}
+                />
                 <p className="text-sm text-muted-foreground text-center">
-                  You will be redirected to Payfort to complete your payment securely.
+                  You will be redirected to Payfort to complete your payment
+                  securely.
                 </p>
               </div>
             )}
@@ -143,7 +173,7 @@ export function PaymentForm({ amount, onSuccess, onCancel }: PaymentFormProps) {
           </div>
 
           <div className="mt-6 flex flex-col gap-2">
-            <Button
+            {/* <Button
               type="submit"
               className="w-full bg-upwork-green hover:bg-upwork-darkgreen text-white"
               disabled={isLoading}
@@ -154,11 +184,17 @@ export function PaymentForm({ amount, onSuccess, onCancel }: PaymentFormProps) {
                   Processing...
                 </>
               ) : (
-                `Pay ${amount}`
+                `Pay $ ${amount}`
               )}
-            </Button>
+            </Button> */}
             {onCancel && (
-              <Button type="button" variant="outline" className="w-full" onClick={onCancel} disabled={isLoading}>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={onCancel}
+                disabled={isLoading}
+              >
                 Cancel
               </Button>
             )}
@@ -166,5 +202,91 @@ export function PaymentForm({ amount, onSuccess, onCancel }: PaymentFormProps) {
         </form>
       </CardContent>
     </Card>
-  )
+  );
+}
+
+function PayPalWrapper({
+  planId,
+  paypalPlanId,
+  subscriptionType,
+}: {
+  planId: string;
+  paypalPlanId: string;
+  subscriptionType: string;
+}) {
+  const [{ isPending, isResolved }] = usePayPalScriptReducer();
+  const { data: session } = useSession();
+
+  if (!isResolved) {
+    return (
+      <div className="text-sm text-muted-foreground">
+        Loading PayPal script...
+      </div>
+    );
+  }
+
+  console.log("paypalPlanId ===> ", paypalPlanId);
+
+  return (
+    <div>
+      {isPending ? (
+        <div className="text-sm text-muted-foreground">
+          Loading PayPal buttons...
+        </div>
+      ) : (
+        <PayPalButtons
+          style={{ layout: "vertical" }}
+          fundingSource="paypal"
+          createSubscription={async () => {
+            if(subscriptionType === "create-subscription") {
+              const res = await fetch("/api/payment/paypal/create-subscription", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ paypalPlanId }),
+              });
+  
+              const data = await res.json();
+              console.log("change subscription response data", data)
+              toast.error(data.error);
+              return data.id;
+            }
+
+            if(subscriptionType === "update-subscription") {
+              const res = await fetch("/api/payment/paypal/change-subscription", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ paypalPlanId }),
+              });
+  
+              const data = await res.json();
+              console.log("change subscription response data", data)
+              toast.error(data.error);
+              return data.id;
+            }
+          }}
+          onApprove={async (data) => {
+            try {
+              await fetch("/api/payment/paypal/complete", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  userId: session?.user.id,
+                  planId,
+                  paypalSubscriptionId: data.subscriptionID,
+                }),
+              });
+              toast.success("Subscription successful!");
+            } catch (err) {
+              console.error("Subscription completion error", err);
+              toast.error("Failed to activate subscription.");
+            }
+          }}
+          onError={(err) => {
+            console.error("PayPal Subscription Error:", err);
+            toast.error("Payment failed. Please try again.");
+          }}
+        />
+      )}
+    </div>
+  );
 }

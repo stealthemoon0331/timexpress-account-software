@@ -5,7 +5,7 @@ import { SubscriptionOverview } from "@/components/dashboard/subscription-overvi
 import RecentActivity from "@/components/dashboard/recent-activity"
 
 export default function DashboardPage() {
-  
+
   return (
     <div className="space-y-6">
       <div>
@@ -15,8 +15,8 @@ export default function DashboardPage() {
 
       <DashboardStats />
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+      <div className="flex flex-col justify-center">
+        {/* <Card className="col-span-4">
           <CardHeader>
             <CardTitle>Usage Overview</CardTitle>
             <CardDescription>Product usage across your organization</CardDescription>
@@ -24,7 +24,7 @@ export default function DashboardPage() {
           <CardContent>
             <UsageOverview />
           </CardContent>
-        </Card>
+        </Card> */}
         <Card className="col-span-3">
           <CardHeader>
             <CardTitle>Subscription Overview</CardTitle>

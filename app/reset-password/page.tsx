@@ -1,37 +1,37 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { z } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "react-toastify"
 import { Icons } from "@/components/icons"
 
 const formSchema = z
   .object({
-    password: z.string().min(8, {
-      message: "Password must be at least 8 characters.",
-    }),
-    confirmPassword: z.string().min(8, {
-      message: "Password must be at least 8 characters.",
-    }),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
   })
 
-export default function ResetPasswordPage({ params }: { params: { token: string } }) {
+export default function ResetPasswordPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const token = searchParams.get("token")
+
   const [isLoading, setIsLoading] = useState(false)
-  const [isTokenValid, setIsTokenValid] = useState(true) // In a real app, validate the token on page load
+  const [isSuccess, setIsSuccess] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,27 +42,26 @@ export default function ResetPasswordPage({ params }: { params: { token: string 
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!token) {
+      toast.error("Invalid or missing token.")
+      return
+    }
+
     setIsLoading(true)
 
     try {
-      // In a real app, you would call your API here with the token and new password
-      console.log({ token: params.token, password: values.password })
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      toast({
-        title: "Password reset successful",
-        description: "Your password has been reset. You can now log in with your new password.",
+      const response = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, password: values.password }),
       })
 
-      router.push("/login")
+      if (!response.ok) throw new Error("Failed to reset password")
+
+      setIsSuccess(true)
+      toast.success("Password reset successful. You can now log in.")
     } catch (error) {
-      toast({
-        title: "Something went wrong.",
-        description: "We couldn't reset your password. Please try again.",
-        variant: "destructive",
-      })
+      toast.error("Error resetting password. Try again or request a new link.")
     } finally {
       setIsLoading(false)
     }
@@ -77,24 +76,21 @@ export default function ResetPasswordPage({ params }: { params: { token: string 
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[450px]">
         <Card>
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl">Reset password</CardTitle>
-            <CardDescription>Create a new password for your account</CardDescription>
+            <CardTitle className="text-2xl">Reset Password</CardTitle>
+            <CardDescription>Enter your new password below</CardDescription>
           </CardHeader>
           <CardContent>
-            {!isTokenValid ? (
+            {isSuccess ? (
               <div className="flex flex-col items-center justify-center space-y-4 pt-4">
-                <div className="rounded-full bg-destructive/10 p-6">
-                  <Icons.alertTriangle className="h-12 w-12 text-destructive" />
+                <div className="rounded-full bg-upwork-lightgreen p-6">
+                  <Icons.check className="h-12 w-12 text-upwork-green" />
                 </div>
-                <div className="text-center space-y-2">
-                  <p className="font-medium">Invalid or expired token</p>
-                  <p className="text-sm text-muted-foreground">
-                    This password reset link is invalid or has expired. Please request a new one.
-                  </p>
-                </div>
-                <Button variant="outline" className="w-full mt-4" onClick={() => router.push("/forgot-password")}>
-                  Request new reset link
-                </Button>
+                <p className="text-center text-sm text-muted-foreground">
+                  Password reset successful.{" "}
+                  <Link href="/login" className="text-upwork-green underline-offset-4 hover:underline">
+                    Back to login
+                  </Link>
+                </p>
               </div>
             ) : (
               <Form {...form}>
@@ -106,26 +102,27 @@ export default function ResetPasswordPage({ params }: { params: { token: string 
                       <FormItem>
                         <FormLabel>New Password</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="••••••••" {...field} />
+                          <Input type="password" {...field} />
                         </FormControl>
-                        <FormDescription>Password must be at least 8 characters long</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="confirmPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Confirm New Password</FormLabel>
+                        <FormLabel>Confirm Password</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="••••••••" {...field} />
+                          <Input type="password" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
                   <Button
                     type="submit"
                     className="w-full bg-upwork-green hover:bg-upwork-darkgreen text-white"
@@ -134,24 +131,16 @@ export default function ResetPasswordPage({ params }: { params: { token: string 
                     {isLoading ? (
                       <>
                         <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                        Resetting password...
+                        Resetting...
                       </>
                     ) : (
-                      "Reset password"
+                      "Reset Password"
                     )}
                   </Button>
                 </form>
               </Form>
             )}
           </CardContent>
-          <CardFooter className="flex flex-col items-center">
-            <p className="text-sm text-muted-foreground">
-              Remember your password?{" "}
-              <Link href="/login" className="text-upwork-green underline-offset-4 hover:underline">
-                Back to login
-              </Link>
-            </p>
-          </CardFooter>
         </Card>
       </div>
     </div>
