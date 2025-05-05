@@ -293,7 +293,7 @@ export function AddMoreUserDialog({
 
         registered_system.push(system);
 
-        fetch(`/api/ums/users/${user.id}`, {
+        fetch(`/api/ums/customers/${user.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",

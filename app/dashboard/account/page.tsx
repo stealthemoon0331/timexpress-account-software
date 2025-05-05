@@ -198,37 +198,6 @@ export default function AccountPage() {
                   name="fullName"
                   render={({ field }) => (
                     <FormItem>
-                      <div className="mb-6 flex flex-col items-center">
-                        {/* <div className="relative mb-4">
-                          <div className="h-24 w-24 overflow-hidden rounded-full bg-muted">
-                            <Image
-                              src={loggedUser?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(loggedUser?.name || "User")}&background=ccc&color=555&rounded=true`}
-                              alt="Profile"
-                              width={96}
-                              height={96}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-background"
-                          >
-                            <Icons.edit className="h-4 w-4" />
-                            <span className="sr-only">
-                              Change profile photo
-                            </span>
-                          </Button>
-                        </div> */}
-                        {/* <Button
-                          type="button"
-                          variant="link"
-                          className="text-upwork-green"
-                        >
-                          Upload new photo
-                        </Button> */}
-                      </div>
                       <FormLabel>Full Name</FormLabel>
                       <FormControl>
                         <Input {...field} />
@@ -253,27 +222,6 @@ export default function AccountPage() {
                     </FormItem>
                   )}
                 />
-                {/* <FormField
-                  control={profileForm.control}
-                  name="bio"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Bio</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Tell us a little about yourself"
-                          className="resize-none"
-                          {...field}
-                          value={field.value || ""}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        This will be displayed on your profile.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
                 <Button
                   type="submit"
                   className="bg-upwork-green hover:bg-upwork-darkgreen text-white"
