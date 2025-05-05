@@ -23,7 +23,8 @@ export const createUserTableQuery = `
         access VARCHAR(255),
         teams VARCHAR(255),
         systems_with_permission VARCHAR(255),
-        status INT
+        status INT,
+        adminId VARCHAR(255)
       );
     `;
 
