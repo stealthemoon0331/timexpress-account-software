@@ -31,8 +31,6 @@ model User {
 
   payments       Payment[] 
 
-  reports        Report[]
-
 }
 
 model Account {
@@ -107,8 +105,5 @@ model Report {
   title     String
   message   String   @db.Text
   createdAt DateTime @default(now())
-
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
 }
 

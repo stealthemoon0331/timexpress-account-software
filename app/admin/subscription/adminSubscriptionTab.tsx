@@ -8,7 +8,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Plan } from "@/lib/data";
+import { Plan, plans as initialPlans } from "@/lib/data";
 import {
   DragDropContext,
   Droppable,
@@ -23,7 +23,7 @@ export function AdminSubscriptionsTab() {
   const [loadingPlans, setLoadingPlans] = useState<{ [id: string]: boolean }>(
     {}
   );
-  const [plans, setPlans] = useState<Plan[] | null>(null);
+  const [plans, setPlans] = useState<Plan[] | null>(initialPlans);
 
   useEffect(() => {
     const syncPlans = async () => {

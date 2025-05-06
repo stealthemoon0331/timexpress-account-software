@@ -10,8 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+export interface NewReportCardProps {
+  title?: string;
+  message?: string;
+}
+
 export interface ReportCardProps {
-  id: number;
+  id: string;
   title: string;
   message: string;
   createdAt: string;
@@ -23,8 +28,8 @@ export default function ReportCard({
   onEdit,
 }: {
   report: ReportCardProps;
-  onDelete: (id: number) => void;
-  onEdit: (id: number, data: { title: string; message: string }) => void;
+  onDelete: (id: string) => void;
+  onEdit: (data: {id: string, title: string; message: string }) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -32,7 +37,7 @@ export default function ReportCard({
   const [editMessage, setEditMessage] = useState(report.message);
 
   const handleSave = () => {
-    onEdit(report.id, { title: editTitle, message: editMessage });
+    onEdit({id: report.id, title: editTitle, message: editMessage });
     setEditing(false);
   };
 

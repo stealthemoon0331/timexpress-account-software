@@ -16,13 +16,13 @@ export async function GET() {
 // POST: Create a new report
 export async function POST(req: NextRequest) {
   try {
-    const { title, message, userId } = await req.json();
+    const { title, message } = await req.json();
 
     const newReport = await prisma.report.create({
       data: {
         title,
         message,
-        userId,
+        
       },
     });
 

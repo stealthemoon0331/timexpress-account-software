@@ -52,6 +52,10 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "react-toastify";
 import ReportsList from "@/components/ui/reportsList";
+import {
+  NewReportCardProps,
+  ReportCardProps,
+} from "@/components/ui/reportCard";
 
 interface UserType {
   id: string;
@@ -88,9 +92,25 @@ export default function AdminPage() {
   // const [stats, setStats] = useState
   const [plans, setPlans] = useState<Plan[] | null>(null);
 
-  const [newReport, setNewReport] = useState<Report>();
+  const [reports, setReports] = useState<ReportCardProps[]>([]);
+
+  const [newReport, setNewReport] = useState<NewReportCardProps | null>(null);
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const response = await fetch("/api/admin/reports");
+        const data = await response.json();
+        setReports(data);
+      } catch (error) {
+        console.error("Error fetching reports:", error);
+      }
+    };
+
+    fetchReports();
+  }, []);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -228,10 +248,8 @@ export default function AdminPage() {
     if (!title || !message) return;
 
     const newReport = {
-      id: Date.now(),
       title,
       message,
-      createdAt: new Date().toLocaleString(),
     };
 
     setNewReport(newReport);
@@ -490,8 +508,7 @@ export default function AdminPage() {
 
               {/* List of previous reports */}
               <div className="mt-6 space-y-4">
-                
-              {newReport && <ReportsList newReport={newReport}/>}
+                <ReportsList _newReport={newReport} />
               </div>
             </CardContent>
           </Card>

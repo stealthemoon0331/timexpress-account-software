@@ -1,10 +1,18 @@
 import { useEffect, useState } from "react";
-import ReportCard, { ReportCardProps } from "./reportCard";
+import ReportCard, { NewReportCardProps, ReportCardProps } from "./reportCard";
+import { toast } from "react-toastify";
 
- // Replace with your API endpoint
+// Replace with your API endpoint
 
-export default function ReportsList({ newReport }: { newReport: ReportCardProps }) {
+export default function ReportsList({
+  _newReport,
+}: {
+  _newReport: NewReportCardProps | null;
+}) {
   const [reports, setReports] = useState<ReportCardProps[]>([]);
+  const [newReport, setNewReport] = useState<NewReportCardProps | null>(
+    _newReport
+  );
 
   // Fetch reports from the API on component mount
   useEffect(() => {
@@ -24,21 +32,26 @@ export default function ReportsList({ newReport }: { newReport: ReportCardProps 
   // Handle adding a new report to the database and state
   useEffect(() => {
     const addNewReport = async () => {
-      if (newReport) {
-
-          try {
-            console.log("new report => ", newReport);
+      if (_newReport) {
+        try {
+          console.log("new report => ", newReport);
           const response = await fetch("/api/admin/reports", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(newReport),
+            body: JSON.stringify({
+              title: _newReport.title,
+              message: _newReport.message,
+              userId: "1",
+            }),
           });
 
           if (response.ok) {
             const addedReport = await response.json();
-            setReports((prevReports) => [...prevReports, addedReport].reverse());
+            setReports((prevReports) =>
+              [...prevReports, addedReport].reverse()
+            );
           } else {
             console.error("Failed to add new report:", response.statusText);
           }
@@ -49,17 +62,26 @@ export default function ReportsList({ newReport }: { newReport: ReportCardProps 
     };
 
     addNewReport();
-  }, [newReport]);
+  }, [_newReport]);
 
   // Handle delete report from the database and state
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/reports/${id}`, {
+      const response = await fetch(`/api/admin/reports`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: id,
+        }),
       });
 
       if (response.ok) {
-        setReports((prevReports) => prevReports.filter((report) => report.id !== id));
+        setReports((prevReports) =>
+          prevReports.filter((report) => report.id !== id)
+        );
+        toast.info("Report deleted!");
       } else {
         console.error("Failed to delete report:", response.statusText);
       }
@@ -69,12 +91,13 @@ export default function ReportsList({ newReport }: { newReport: ReportCardProps 
   };
 
   // Handle edit report in the database and state
-  const handleEdit = async (
-    id: number,
-    newData: { title: string; message: string }
-  ) => {
+  const handleEdit = async (newData: {
+    id: string;
+    title: string;
+    message: string;
+  }) => {
     try {
-      const response = await fetch(`/api/admin/reports/${id}`, {
+      const response = await fetch(`/api/admin/reports`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -86,9 +109,10 @@ export default function ReportsList({ newReport }: { newReport: ReportCardProps 
         const updatedReport = await response.json();
         setReports((prevReports) =>
           prevReports.map((report) =>
-            report.id === id ? { ...report, ...newData } : report
+            report.id === newData.id ? { ...report, ...newData } : report
           )
         );
+        toast.info("Report updated!")
       } else {
         console.error("Failed to update report:", response.statusText);
       }
