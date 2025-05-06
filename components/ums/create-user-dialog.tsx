@@ -327,7 +327,7 @@ export function CreateUserDialog({
             : [""],
         };
 
-        fetch(`/api/ums/users`, {
+        fetch(`/api/ums/customers`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

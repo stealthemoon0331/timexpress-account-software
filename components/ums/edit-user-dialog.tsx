@@ -390,7 +390,7 @@ export function EditUserDialog({
         access: selectedAccess, //
         teams: formData.teams, //
       };
-      await fetch(`/api/ums/users/${user.id}`, {
+      await fetch(`/api/ums/customers/${user.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

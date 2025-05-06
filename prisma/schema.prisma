@@ -17,17 +17,20 @@ model User {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  // New fields for plan management
+  // fields for plan management
   planId         String?   // Foreign key to Plan
   planActivatedAt DateTime?
   planExpiresAt  DateTime?
   paypalSubscriptionId String? @unique
+
+  lastLoginAt           DateTime?
 
   accounts       Account[]
   sessions       Session[]
   plan           Plan?     @relation(fields: [planId], references: [id])
 
   payments       Payment[] 
+
 }
 
 model Account {
@@ -94,6 +97,13 @@ model PayPalWebhook {
   eventId   String   @unique
   eventType String
   payload   String   @db.Text
+  createdAt DateTime @default(now())
+}
+
+model Report {
+  id        String   @id @default(cuid())
+  title     String
+  message   String   @db.Text
   createdAt DateTime @default(now())
 }
 

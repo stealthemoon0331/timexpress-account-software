@@ -190,7 +190,7 @@ export default function UserManagement() {
     // Fetch users from the API
     const fetchUsers = async () => {
       try {
-        const response = await fetch("/api/ums/users", {
+        const response = await fetch("/api/ums/customers", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -408,7 +408,7 @@ export default function UserManagement() {
       });
     }
 
-    await fetch(`/api/ums/users`, {
+    await fetch(`/api/ums/customers`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

@@ -55,14 +55,12 @@ export default function BillingPage() {
               : plan.features,
         }));
 
-        console.log("parsedPlans ==>> ", parsedPlans);
-
         setPlans(parsedPlans);
       } catch (err) {
         console.error("Error loading plans:", err);
       }
     };
-    console.log("selectedPlanId ==> ", selectedPlanId);
+
     syncPlans();
   }, []);
 
@@ -81,7 +79,7 @@ export default function BillingPage() {
   };
 
   const handlePaymentSuccess = () => {
-    console.log("selectedPlanId ==> ", selectedPlanId);
+
     setShowPaymentDialog(false);
 
     toast.success(
@@ -96,8 +94,6 @@ export default function BillingPage() {
     setIsLoading(true);
 
     try {
-      // In a real app, you would call your API here
-      console.log("Cancelling subscription");
 
       // Simulate API call
       await fetch("/api/payment/paypal/cancel-subscription", {
