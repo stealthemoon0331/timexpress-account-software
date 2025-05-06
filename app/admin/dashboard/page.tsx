@@ -40,7 +40,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { AdminSubscriptionsTab } from "./subscription/adminSubscriptionTab";
+import { AdminSubscriptionsTab } from "../subscription/adminSubscriptionTab";
 import { Plan } from "@/lib/data";
 import {
   Dialog,
@@ -56,6 +56,7 @@ import {
   NewReportCardProps,
   ReportCardProps,
 } from "@/components/ui/reportCard";
+import LogoutButton from "@/components/admin/logout";
 
 interface UserType {
   id: string;
@@ -275,7 +276,7 @@ export default function AdminPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/dashboard">
+          <Link href="/dashboard/overview">
             <Button variant="outline">Dashboard</Button>
           </Link>
           <Button
@@ -285,6 +286,7 @@ export default function AdminPage() {
             <Icons.download className="mr-2 h-4 w-4" />
             Export Data
           </Button>
+          <LogoutButton/>
         </div>
       </div>
 

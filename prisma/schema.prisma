@@ -107,3 +107,17 @@ model Report {
   createdAt DateTime @default(now())
 }
 
+model Admin {
+  id           String   @id @default(cuid())
+  name         String?
+  email        String   @unique
+  password     String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  role         Role     @default(STANDARD)
+}
+
+enum Role {
+  SUPER_ADMIN
+  STANDARD
+}

@@ -25,6 +25,7 @@ export function AdminSubscriptionsTab() {
   );
   const [plans, setPlans] = useState<Plan[] | null>(initialPlans);
 
+
   useEffect(() => {
     const syncPlans = async () => {
       try {

@@ -4,7 +4,7 @@ import { UsageOverview } from "@/components/dashboard/usage-overview"
 import { SubscriptionOverview } from "@/components/dashboard/subscription-overview"
 import RecentActivity from "@/components/dashboard/recent-activity"
 
-export default function DashboardPage() {
+export default function OverviewPage() {
 
   return (
     <div className="space-y-6">

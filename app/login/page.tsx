@@ -36,7 +36,7 @@ export default function LoginPage() {
   
   useEffect(() => {
     if (status === "authenticated") {
-      router.push("/dashboard")
+      router.push("/dashboard/overview")
     }
   }, [status, router])
 
@@ -63,7 +63,7 @@ export default function LoginPage() {
         toast.error("Invalid email or password. Please try again.");
       } else {
         toast.success("Welcome back to Shiper.io!");
-        router.push("/dashboard");
+        router.push("/dashboard/overview");
       }
     } catch (error) {
       toast.error("Something went wrong. Please try again later.");
@@ -82,7 +82,7 @@ export default function LoginPage() {
 
       // Simulate API call
       await signIn(provider, {
-        callbackUrl: "/dashboard"
+        callbackUrl: "/dashboard/overview"
       })
       
       toast.success("Welcome back to Shiper.io!");

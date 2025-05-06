@@ -116,7 +116,7 @@ export default function RegisterPage() {
 
       // Simulate API call
       await signIn(provider, {
-        callbackUrl: "/dashboard",
+        callbackUrl: "/dashboard/overview",
       });
 
       toast({

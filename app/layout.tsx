@@ -5,11 +5,12 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { UserProvider } from "./contexts/UserContext";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import AdminPage from "./admin/dashboard/page";
 
 export const metadata: Metadata = {
-  title: "v0 App",
-  description: "Created with v0",
-  generator: "v0.dev",
+  title: "Shiper",
+  description: "Shiper",
+  generator: "takuma",
 };
 
 export default function RootLayout({
@@ -20,22 +21,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <SessionProviderWrapper>
-          <UserProvider>
-            {/* <PayPalScriptProvider
-              options={{
-                clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
-                currency: "USD",
-                intent: "subscription", // Important for subscriptions
-                vault: true, // Required for recurring payments
-                components: "buttons", // ✅ Fixes the error
-              }}
-            > */}
+          <SessionProviderWrapper>
               {children}
-            {/* </PayPalScriptProvider> */}
-          </UserProvider>
-          <ToastContainer position="top-right" autoClose={3000} />
-        </SessionProviderWrapper>
+            <ToastContainer position="top-right" autoClose={3000} />
+          </SessionProviderWrapper>
       </body>
     </html>
   );
