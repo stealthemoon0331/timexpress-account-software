@@ -30,6 +30,9 @@ model User {
   plan           Plan?     @relation(fields: [planId], references: [id])
 
   payments       Payment[] 
+
+  reports        Report[]
+
 }
 
 model Account {
@@ -97,5 +100,15 @@ model PayPalWebhook {
   eventType String
   payload   String   @db.Text
   createdAt DateTime @default(now())
+}
+
+model Report {
+  id        String   @id @default(cuid())
+  title     String
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
 }
 

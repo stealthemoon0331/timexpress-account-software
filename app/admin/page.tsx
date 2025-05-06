@@ -30,6 +30,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { Icons } from "@/components/icons";
 import {
   Pagination,
@@ -50,6 +51,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "react-toastify";
+import ReportsList from "@/components/ui/reportsList";
 
 interface UserType {
   id: string;
@@ -62,6 +64,13 @@ interface UserType {
   planExpiresAt: Date | null;
   lastLoginAt: Date | null;
 }
+
+type Report = {
+  id: number;
+  title: string;
+  message: string;
+  createdAt: string;
+};
 
 export default function AdminPage() {
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
@@ -78,6 +87,10 @@ export default function AdminPage() {
   const [users, setUsers] = useState<UserType[]>([]);
   // const [stats, setStats] = useState
   const [plans, setPlans] = useState<Plan[] | null>(null);
+
+  const [newReport, setNewReport] = useState<Report>();
+  const [title, setTitle] = useState("");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -126,6 +139,8 @@ export default function AdminPage() {
     return map;
   }, [plans]);
 
+  const USERS_PER_PAGE = 10;
+
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -138,9 +153,17 @@ export default function AdminPage() {
     return matchesSearch && matchesStatus;
   });
 
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * USERS_PER_PAGE,
+    currentPage * USERS_PER_PAGE
+  );
+
+  const totalPages = Math.ceil(filteredUsers.length / USERS_PER_PAGE);
+
   // Stats for the dashboard
 
   const totalUsersNumber = users.length;
+
   const activeSubscriptionsNumber = users.filter(
     (f) => f.planExpiresAt && new Date(f.planExpiresAt) > new Date()
   ).length;
@@ -181,7 +204,7 @@ export default function AdminPage() {
     },
     {
       title: "Active Users",
-      value: activeUsers.toString(),
+      value: activeUsers.length.toString(),
       change: "+3%",
       trend: "up",
     },
@@ -191,14 +214,37 @@ export default function AdminPage() {
     const worksheet = XLSX.utils.json_to_sheet(users);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
-  
+
     const excelBuffer = XLSX.write(workbook, {
       bookType: "xlsx",
       type: "array",
     });
-  
+
     const data = new Blob([excelBuffer], { type: "application/octet-stream" });
     saveAs(data, "users.xlsx");
+  };
+
+  const handleAddReport = () => {
+    if (!title || !message) return;
+
+    const newReport = {
+      id: Date.now(),
+      title,
+      message,
+      createdAt: new Date().toLocaleString(),
+    };
+
+    setNewReport(newReport);
+    setTitle("");
+    setMessage("");
+  };
+
+  const handlePrevious = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
   return (
@@ -214,8 +260,10 @@ export default function AdminPage() {
           <Link href="/dashboard">
             <Button variant="outline">Dashboard</Button>
           </Link>
-          <Button className="bg-upwork-green hover:bg-upwork-darkgreen text-white"
-           onClick={exportToExcel}>
+          <Button
+            className="bg-upwork-green hover:bg-upwork-darkgreen text-white"
+            onClick={exportToExcel}
+          >
             <Icons.download className="mr-2 h-4 w-4" />
             Export Data
           </Button>
@@ -249,8 +297,8 @@ export default function AdminPage() {
       <Tabs defaultValue="users" className="mb-6">
         <TabsList>
           <TabsTrigger value="users">Users</TabsTrigger>
-          {/* <TabsTrigger value="organizations">Organizations</TabsTrigger> */}
           <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
+          <TabsTrigger value="reports">Reports</TabsTrigger>
           {/* <TabsTrigger value="settings">Settings</TabsTrigger> */}
         </TabsList>
         <TabsContent value="users" className="mt-4">
@@ -299,14 +347,14 @@ export default function AdminPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredUsers.length === 0 ? (
+                    {paginatedUsers.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={7} className="h-24 text-center">
                           No users found.
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredUsers.map((user, index) => (
+                      paginatedUsers.map((user, index) => (
                         <TableRow key={user.id}>
                           <TableCell>
                             {(currentPage - 1) * 10 + index + 1}
@@ -390,39 +438,64 @@ export default function AdminPage() {
           </Card>
           <div className="flex items-center justify-between mt-4">
             <div className="text-sm text-muted-foreground">
-              Showing {filteredUsers.length > 0 ? 1 : 0} to{" "}
-              {filteredUsers.length} of {filteredUsers.length} users
+              Showing {(currentPage - 1) * USERS_PER_PAGE + 1} to{" "}
+              {Math.min(currentPage * USERS_PER_PAGE, filteredUsers.length)} of{" "}
+              {filteredUsers.length} users
             </div>
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
-                  <PaginationPrevious href="#" />
+                  <PaginationPrevious href="#" onClick={handlePrevious} />
                 </PaginationItem>
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <PaginationItem key={i}>
+                    <PaginationLink
+                      href="#"
+                      isActive={i + 1 === currentPage}
+                      onClick={() => setCurrentPage(i + 1)}
+                    >
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
                 <PaginationItem>
-                  <PaginationLink href="#" isActive>
-                    1
-                  </PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationNext href="#" />
+                  <PaginationNext href="#" onClick={handleNext} />
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
           </div>
         </TabsContent>
-        {/* <TabsContent value="organizations" className="mt-4">
+        <TabsContent value="reports" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Organizations</CardTitle>
-              <CardDescription>Manage organizations and their subscriptions.</CardDescription>
+              <CardTitle>Reports</CardTitle>
+              <CardDescription>Report any event to the users.</CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-center py-8 text-muted-foreground">
-                Select the Organizations tab to view and manage organizations.
-              </p>
+            <CardContent className="space-y-6">
+              {/* Form to create a new report */}
+              <div className="space-y-2">
+                <Input
+                  placeholder="Report title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+                <Textarea
+                  placeholder="Write your report..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  rows={4}
+                />
+                <Button onClick={handleAddReport}>Submit Report</Button>
+              </div>
+
+              {/* List of previous reports */}
+              <div className="mt-6 space-y-4">
+                
+              {newReport && <ReportsList newReport={newReport}/>}
+              </div>
             </CardContent>
           </Card>
-        </TabsContent> */}
+        </TabsContent>
         <TabsContent value="subscriptions" className="mt-4">
           <Card>
             <CardHeader>
@@ -546,7 +619,7 @@ export default function AdminPage() {
                         user.id === updatedUser.id ? updatedUser : user
                       )
                     );
-                    
+
                     toast.success("Successfully plan updated!");
 
                     setShowPlanModal(false);
