@@ -33,22 +33,11 @@ export const authOptions: NextAuthOptions = {
           where: { email: credentials.email },
         });
 
-        if (!user || !user.password) {
-          throw new Error("User not found");
-        }
+        if (!user || !user.password) throw new Error("User not found");
+        if (!user.emailVerified) throw new Error("Email is not verified");
 
-        if (!user.emailVerified) {
-          throw new Error("Email is not verified");
-        }
-
-        const isValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
-
-        if (!isValid) {
-          throw new Error("Invalid credentials");
-        }
+        const isValid = await bcrypt.compare(credentials.password, user.password);
+        if (!isValid) throw new Error("Invalid credentials");
 
         return {
           ...user,
@@ -64,16 +53,25 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
   },
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger, session }) {
+      // On login
       if (user) {
         token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        token.picture = user.image;
         token.rememberMe = user.rememberMe;
       }
 
-      if (account) {
-        token.accessToken = account.access_token;
-        token.provider = account.provider;
+      // On update call (from update() client function)
+      if (trigger === "update" && session) {
+        token.name = session.name;
+        token.email = session.email;
+        token.picture = session.image;
+      }
 
+      // Handle "remember me" token expiration
+      if (account) {
         const rememberMe = account.rememberMe ?? false;
         const now = Math.floor(Date.now() / 1000);
         token.exp = rememberMe
@@ -83,15 +81,20 @@ export const authOptions: NextAuthOptions = {
 
       return token;
     },
+
     async session({ session, token }) {
       if (session?.user && token?.id) {
         session.user.id = token.id;
+        session.user.name = token.name;
+        session.user.email = token.email;
+        session.user.image = token.picture;
         session.rememberMe = token.rememberMe ?? false;
         session.accessToken = token.accessToken;
       }
 
       return session;
     },
+
     async signIn({ user, account }) {
       if (!user?.email) return false;
 
@@ -114,15 +117,24 @@ export const authOptions: NextAuthOptions = {
             plan: { connect: { id: trialPlan?.id } },
             planActivatedAt: now,
             planExpiresAt: expires,
+            lastLoginAt: now,
           },
           create: {
             email: user.email,
             name: user.name,
             image: user.image,
+            emailVerified: new Date(),
             plan: { connect: { id: trialPlan?.id } },
             planActivatedAt: now,
             planExpiresAt: expires,
+            lastLoginAt: now,
           },
+        });
+      } else {
+        // ✅ Update lastLoginAt for returning users
+        await prisma.user.update({
+          where: { email: user.email },
+          data: { lastLoginAt: now },
         });
       }
 

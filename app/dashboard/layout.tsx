@@ -69,12 +69,12 @@ export default function DashboardLayout({
       active: pathname.startsWith("/dashboard/users"),
       disabled: isPlanExpired(loggedUser?.planExpiresAt),
     },
-    {
-      href: "/dashboard/products",
-      label: "Products",
-      icon: Icons.package,
-      active: pathname.startsWith("/dashboard/products"),
-    },
+    // {
+    //   href: "/dashboard/products",
+    //   label: "Products",
+    //   icon: Icons.package,
+    //   active: pathname.startsWith("/dashboard/products"),
+    // },
     {
       href: "/dashboard/billing",
       label: "Billing",

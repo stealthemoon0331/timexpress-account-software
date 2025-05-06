@@ -17,11 +17,13 @@ model User {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  // New fields for plan management
+  // fields for plan management
   planId         String?   // Foreign key to Plan
   planActivatedAt DateTime?
   planExpiresAt  DateTime?
   paypalSubscriptionId String? @unique
+
+  lastLoginAt           DateTime?
 
   accounts       Account[]
   sessions       Session[]

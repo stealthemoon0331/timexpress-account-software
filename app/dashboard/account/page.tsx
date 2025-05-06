@@ -24,12 +24,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/components/ui/use-toast";
+// import { toast } from "@/components/ui/use-toast";
 import { Icons } from "@/components/icons";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { LoggedUser } from "@/types/user";
+import { useUser } from "@/app/contexts/UserContext";
+import { toast } from "react-toastify";
 
 const profileFormSchema = z.object({
   fullName: z.string().min(2, {
@@ -66,35 +68,27 @@ const passwordFormSchema = z
 export default function AccountPage() {
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
-  const [loggedUser, setLoggedUser] = useState<LoggedUser | null>(null);
-  const { data: session, status } = useSession();
+  // const [loggedUser, setLoggedUser] = useState<LoggedUser | null>(null);
+  const { data: session, status, update } = useSession();
 
   const router = useRouter();
+
+  const { user: loggedUser, loading } = useUser();
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
     }
-  
+
     if (status === "authenticated" && session?.user) {
-      const user = {
-        id: session.user.id,
-        name: session.user.name || "",
-        email: session.user.email || "",
-        image: session.user.image || "",
-      };
-  
-      setLoggedUser(user);
-  
       // Set values to form fields
       profileForm.reset({
-        fullName: user.name,
-        email: user.email,
+        fullName: loggedUser?.name || "",
+        email: loggedUser?.email || "",
         // bio: "", // you can load this from your API if available
       });
     }
-  }, [status, session, router]);
-  
+  }, [status, session, router, loggedUser]);
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
@@ -119,21 +113,37 @@ export default function AccountPage() {
 
     try {
       // In a real app, you would call your API here
-      console.log(values);
+      const res = await fetch("/api/user/me", {
+        method: "PUT",
+        body: JSON.stringify({
+          id: loggedUser?.id,
+          name: values.fullName,
+          email: values.email,
+        }),
+
+        headers: { "Content-Type": "application/json" },
+      });
 
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      if (res.ok) {
+        const updatedUserData = await res.json();
 
-      toast({
-        title: "Profile updated",
-        description: "Your profile information has been updated.",
-      });
+        await update({
+          name: updatedUserData.name,
+          email: updatedUserData.email,
+        });
+
+        // Set values to form fields
+        profileForm.reset({
+          fullName: updatedUserData.name,
+          email: updatedUserData.email,
+          // bio: "", // you can load this from your API if available
+        });
+
+        toast.success("Your profile information has been updated.");
+      }
     } catch (error) {
-      toast({
-        title: "Something went wrong.",
-        description: "Your profile was not updated. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Your profile was not updated. Please try again.");
     } finally {
       setIsProfileLoading(false);
     }
@@ -145,26 +155,27 @@ export default function AccountPage() {
     try {
       // In a real app, you would call your API here
       console.log(values);
+      const res = await fetch("/api/user/me/password", {
+        method: "PUT",
+        body: JSON.stringify({
+          id: loggedUser?.id,
+          password: values.newPassword,
+        }),
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      toast({
-        title: "Password updated",
-        description: "Your password has been updated successfully.",
+        headers: { "Content-Type": "application/json" },
       });
 
-      passwordForm.reset({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
+      if (res.ok) {
+        toast.success("Your password has been updated successfully.");
+
+        passwordForm.reset({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      }
     } catch (error) {
-      toast({
-        title: "Something went wrong.",
-        description: "Your password was not updated. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Your password was not updated. Please try again.");
     } finally {
       setIsPasswordLoading(false);
     }
