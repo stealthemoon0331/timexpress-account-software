@@ -27,10 +27,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { toast } from "@/components/ui/use-toast";
 import { Icons } from "@/components/icons";
 import { SocialButton } from "@/components/ui/social-buttons";
 import { signIn } from "next-auth/react";
+import { toast } from "react-toastify";
 
 const formSchema = z.object({
   fullName: z.string().min(2, {
@@ -80,10 +80,7 @@ export default function RegisterPage() {
       });
 
       if (res.ok) {
-        toast({
-          title: "Account created!",
-          description: "Please check your email to verify your account.",
-        });
+        toast.info("Please check your email to verify your account.");
 
         router.push(`/verify-email?email=${encodeURIComponent(values.email)}`);
       } else {
@@ -97,11 +94,7 @@ export default function RegisterPage() {
         alert(errorMessage);
       }
     } catch (error) {
-      toast({
-        title: "Something went wrong.",
-        description: "Your account was not created. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Your account was not created. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -119,16 +112,9 @@ export default function RegisterPage() {
         callbackUrl: "/dashboard/overview",
       });
 
-      toast({
-        title: "Social login initiated",
-        description: `Redirecting to ${provider} for authentication...`,
-      });
+      toast.info(`Redirecting to ${provider} for authentication...`);
     } catch (error) {
-      toast({
-        title: "Something went wrong.",
-        description: `Could not log in with ${provider}. Please try again.`,
-        variant: "destructive",
-      });
+      toast.error(`Could not log in with ${provider}. Please try again.`);
     } finally {
       setIsLoading(false);
     }

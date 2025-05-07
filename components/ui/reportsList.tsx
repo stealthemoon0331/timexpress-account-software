@@ -10,10 +10,6 @@ export default function ReportsList({
   _newReport: NewReportCardProps | null;
 }) {
   const [reports, setReports] = useState<ReportCardProps[]>([]);
-  const [newReport, setNewReport] = useState<NewReportCardProps | null>(
-    _newReport
-  );
-
   // Fetch reports from the API on component mount
   useEffect(() => {
     const fetchReports = async () => {
@@ -34,7 +30,6 @@ export default function ReportsList({
     const addNewReport = async () => {
       if (_newReport) {
         try {
-          console.log("new report => ", newReport);
           const response = await fetch("/api/admin/reports", {
             method: "POST",
             headers: {
@@ -43,7 +38,8 @@ export default function ReportsList({
             body: JSON.stringify({
               title: _newReport.title,
               message: _newReport.message,
-              userId: "1",
+              userId: _newReport.userId,
+              userName: _newReport.userId === "all" ? "Everyone" : _newReport.userName
             }),
           });
 

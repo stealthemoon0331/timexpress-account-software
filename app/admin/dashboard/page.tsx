@@ -94,6 +94,7 @@ export default function AdminPage() {
   const [plans, setPlans] = useState<Plan[] | null>(null);
 
   const [reports, setReports] = useState<ReportCardProps[]>([]);
+  const[senderId, setSenderId] = useState<string>("all");
 
   const [newReport, setNewReport] = useState<NewReportCardProps | null>(null);
   const [title, setTitle] = useState("");
@@ -251,6 +252,8 @@ export default function AdminPage() {
     const newReport = {
       title,
       message,
+      userId: senderId,
+      userName: users.find((user) => user.id === senderId)?.name
     };
 
     setNewReport(newReport);
@@ -286,7 +289,7 @@ export default function AdminPage() {
             <Icons.download className="mr-2 h-4 w-4" />
             Export Data
           </Button>
-          <LogoutButton/>
+          <LogoutButton />
         </div>
       </div>
 
@@ -491,9 +494,27 @@ export default function AdminPage() {
               <CardTitle>Reports</CardTitle>
               <CardDescription>Report any event to the users.</CardDescription>
             </CardHeader>
+
             <CardContent className="space-y-6">
               {/* Form to create a new report */}
               <div className="space-y-2">
+                {/* Sender select */}
+                <Select onValueChange={(value) => setSenderId(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select sender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      <SelectItem key="0" value="all">
+                        {"All"}
+                      </SelectItem>
+                    {users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name ?? user.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
                 <Input
                   placeholder="Report title"
                   value={title}

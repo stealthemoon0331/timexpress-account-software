@@ -32,11 +32,10 @@ import { useSession } from "next-auth/react";
 import { LoggedUser } from "@/types/user";
 import { isPlanExpired } from "@/lib/utils";
 import { useUser } from "@/app/contexts/UserContext";
+import NotificationBell from "@/lib/notification-bell";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [notifications] = useState(3); // Mock notification count
-  
   
   const { user: loggedUser, loading } = useUser();
   
@@ -47,37 +46,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       icon: Icons.dashboard,
       active: pathname === "/dashboard/overview",
     },
-    // {
-    //   href: "/dashboard/organizations",
-    //   label: "Organizations",
-    //   icon: Icons.users,
-    //   active: pathname.startsWith("/dashboard/organizations"),
-    // },
     {
       href: "/dashboard/customers",
       label: "customers",
-      icon: Icons.user,
+      icon: Icons.users,
       active: pathname.startsWith("/dashboard/users"),
       disabled: isPlanExpired(loggedUser?.planExpiresAt),
     },
-    // {
-    //   href: "/dashboard/products",
-    //   label: "Products",
-    //   icon: Icons.package,
-    //   active: pathname.startsWith("/dashboard/products"),
-    // },
     {
       href: "/dashboard/billing",
       label: "Billing",
       icon: Icons.creditCard,
       active: pathname.startsWith("/dashboard/billing"),
     },
-    // {
-    //   href: "/dashboard/usage",
-    //   label: "Usage",
-    //   icon: Icons.barChart,
-    //   active: pathname.startsWith("/dashboard/usage"),
-    // },
     {
       href: "/dashboard/account",
       label: "Account",
@@ -177,7 +158,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6">
             <SidebarTrigger />
             <div className="ml-auto flex items-center gap-4">
-              <Button variant="outline" size="icon" className="relative">
+            <NotificationBell/>
+              {/* <Button variant="outline" size="icon" className="relative">
                 <Icons.bell className="h-5 w-5" />
                 {notifications > 0 && (
                   <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-upwork-green text-xs text-white">
@@ -185,7 +167,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </span>
                 )}
                 <span className="sr-only">Notifications</span>
-              </Button>
+              </Button> */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button

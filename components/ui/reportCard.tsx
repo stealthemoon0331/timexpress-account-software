@@ -13,12 +13,16 @@ import { Textarea } from "@/components/ui/textarea";
 export interface NewReportCardProps {
   title?: string;
   message?: string;
+  userId: string;
+  userName?: string;
 }
 
 export interface ReportCardProps {
   id: string;
   title: string;
   message: string;
+  userId: string;
+  userName: string;
   createdAt: string;
 }
 
@@ -50,7 +54,7 @@ export default function ReportCard({
             onChange={(e) => setEditTitle(e.target.value)}
           />
         ) : (
-          <CardTitle>{report.title}</CardTitle>
+          <CardTitle>{report.title} to {report.userName}</CardTitle>
         )}
         {new Date(report.createdAt).toLocaleString(undefined, {
           year: "numeric",
