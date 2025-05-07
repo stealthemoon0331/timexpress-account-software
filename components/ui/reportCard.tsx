@@ -54,7 +54,7 @@ export default function ReportCard({
             onChange={(e) => setEditTitle(e.target.value)}
           />
         ) : (
-          <CardTitle>{report.title} to {report.userName}</CardTitle>
+          <CardTitle>{report.title}</CardTitle>
         )}
         {new Date(report.createdAt).toLocaleString(undefined, {
           year: "numeric",
@@ -64,6 +64,7 @@ export default function ReportCard({
           minute: "2-digit",
           hour12: false,
         })}
+        <span className="text-sm">to {report.userName}</span>
       </CardHeader>
 
       <CardContent

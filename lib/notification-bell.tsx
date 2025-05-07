@@ -54,7 +54,7 @@ export default function NotificationBell() {
           console.error("Error fetching notifications:", error);
         }
       };
-  
+
       fetchNotifications();
     }
   }, [loggedUser]);
@@ -66,7 +66,9 @@ export default function NotificationBell() {
 
   const markAsRead = async (id: number) => {
     try {
-      await fetch(`/api/dashboard/notifications/${id}/read`, { method: "POST" });
+      await fetch(`/api/dashboard/notifications/${id}/read`, {
+        method: "POST",
+      });
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
@@ -97,25 +99,27 @@ export default function NotificationBell() {
               No notifications
             </p>
           ) : (
-            notifications.map((notification) => (
-              <DropdownMenuItem
-                key={notification.id}
-                className={notification.read ? "opacity-50" : ""}
-                onClick={() => setSelectedNotification(notification)}
-              >
-                <div>
-                  <p className="text-sm font-medium">
-                    {truncateText(notification.title, 40)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {truncateText(notification.message, 60)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {notification.timestamp}
-                  </p>
-                </div>
-              </DropdownMenuItem>
-            ))
+            <div className="max-h-[200px] overflow-y-auto">
+              {notifications.map((notification) => (
+                <DropdownMenuItem
+                  key={notification.id}
+                  className={notification.read ? "opacity-50" : ""}
+                  onClick={() => setSelectedNotification(notification)}
+                >
+                  <div>
+                    <p className="text-sm font-medium">
+                      {truncateText(notification.title, 40)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {truncateText(notification.message, 60)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {notification.timestamp}
+                    </p>
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </div>
           )}
           <DropdownMenuItem asChild>
             <a href="/notifications" className="text-center w-full block">
@@ -134,7 +138,9 @@ export default function NotificationBell() {
             <DialogHeader>
               <DialogTitle>{selectedNotification.title}</DialogTitle>
             </DialogHeader>
-            <div className="text-sm">{selectedNotification.message}</div>
+            <div className="text-sm max-h-60 overflow-y-auto whitespace-pre-wrap">
+              {selectedNotification.message}
+            </div>
             <DialogFooter>
               <button
                 onClick={() => {

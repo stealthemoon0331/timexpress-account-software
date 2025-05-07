@@ -38,15 +38,23 @@ export async function POST(req: Request) {
       );
     }
 
-    // Create the notification in the database
-    const notification = await prisma.notification.create({
-      data: {
+    const existing = await prisma.notification.findFirst({
+      where: {
         userId,
-        title,
-        message,
-        read: false, // Default to unread
+        title: "Plan Expiration Reminder",
       },
     });
+    
+    if (!existing) {
+      await prisma.notification.create({
+        data: {
+          userId,
+          title: "Plan Expiration Reminder",
+          message: "Your current plan is expiring soon. Please renew to avoid interruption.",
+          read: false,
+        },
+      });
+    }
 
     return NextResponse.json(notification, { status: 201 });
   } catch (error) {
