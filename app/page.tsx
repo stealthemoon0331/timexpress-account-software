@@ -1,86 +1,47 @@
+"use client";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { plans } from "@/lib/data";
+import { Plan, plans as initialPlans, products } from "@/lib/data";
+import LogisticsTagline from "@/components/landing/logistics-tagline";
+import { CheckCircle } from "lucide-react";
+import { useUser } from "./contexts/UserContext";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  const products = [
-    {
-      name: "Shypri CRM",
-      icon: "https://shiper.io/assets/img/newimg/3.svg",
-      url: "https://shypri.com/",
-    },
-    {
-      name: "Fleetp Fleet Mgt",
-      icon: "https://shiper.io/assets/img/newimg/2.svg",
-      url: "https://fleetp.com/",
-    },
-    {
-      name: "WMS Ninja Inventory",
-      icon: "https://shiper.io/assets/img/newimg/8.svg",
-      url: "https://wmsninja.com/signin",
-    },
-    {
-      name: "Shypv B2C E-Commerce",
-      icon: "https://shiper.io/assets/img/newimg/1.svg",
-      url: "https://www.shypv.com/",
-    },
-    {
-      name: "ShypRTO Reverse Logistics",
-      icon: "https://shiper.io/assets/img/newimg/4.svg",
-      url: "http://shyprto.com/",
-    },
-    {
-      name: "Transport Management Software(TMS)",
-      icon: "https://shiper.io/assets/img/newimg/5.svg",
-      url: "https://shiper.io/app/accounting",
-    },
-    {
-      name: "Hurricane Customs",
-      icon: "https://shiper.io/assets/img/newimg/6.svg",
-      url: "http://hurricanecommerce.com/",
-    },
-    {
-      name: "Arashyp Cross Border USA & UK",
-      icon: "https://shiper.io/assets/img/newimg/7.svg",
-      url: "https://www.arashyp.com/",
-    },
-    {
-      name: "SeaRates Sea Quotes",
-      icon: "https://shiper.io/assets/img/newimg/9.svg",
-      url: "https://www.searates.com/",
-    },
-    {
-      name: "Freightos Air Quotes",
-      icon: "https://shiper.io/assets/img/newimg/10.svg",
-      url: "https://www.freightos.com/",
-    },
-    {
-      name: "Timex C2C Express",
-      icon: "https://shiper.io/assets/img/newimg/11.svg",
-      url: "https://www.timexpress.ae/",
-    },
-    {
-      name: "ShypV Bullet Express",
-      icon: "https://shiper.io/assets/img/newimg/12.svg",
-      url: "https://www.shypv.com/go/book?login=true",
-    },
-    {
-      name: "Couryier USA",
-      icon: "https://shiper.io/assets/img/newimg/13.svg",
-      url: "https://couryier.us/",
-    },
-    {
-      name: "PUDO",
-      icon: "https://shiper.io/assets/img/newimg/14.svg",
-      url: "https://www.pudo.ae/",
-    },
-    {
-      name: "Plug In's Shopify, Magento, Woo Commerce",
-      icon: "https://shiper.io/assets/img/newimg/15.svg",
-      url: "https://www.timexpress.ae/smart-send",
-    },
-  ];
+  const router = useRouter();
+  const { user: loggedUser, loading } = useUser();
+  const [plans, setPlans] = useState<Plan[] | null>();
+
+  useEffect(() => {
+    const syncPlans = async () => {
+      try {
+        const res = await fetch("/api/payment/plans", { method: "GET" });
+        if (!res.ok) throw new Error("Failed to sync plans");
+
+        const responseData = await res.json();
+
+        const parsedPlans = responseData.map((plan: any) => ({
+          ...plan,
+          features:
+            typeof plan.features === "string"
+              ? JSON.parse(plan.features)
+              : plan.features,
+        }));
+
+        setPlans(parsedPlans);
+      } catch (err) {
+        console.error("Error loading plans:", err);
+      }
+    };
+
+    syncPlans();
+  }, []);
+
+  const handleChoosePlan = () => {
+    router.push("/dashboard/billing");
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -133,30 +94,12 @@ export default function Home() {
           </div>
         </div>
       </header>
-      <main className="flex-1">
+      <main className="flex-1 w-full">
         <section className="w-full py-12 md:py-24 lg:py-32">
-          <div className="container px-4 md:px-6">
-            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
+          <div className="container px-12 md:px-24">
+            <div className="flex justify-between">
               <div className="flex flex-col justify-center space-y-4">
-                <div className="text-center">
-                  <h1 className="text-4xl sm:text-5xl font-caveat font-semibold leading-snug">
-                    <span className="italic">"All your logistics</span>
-                    <br />
-                    <span className="relative inline-block italic">
-                      <span className="bg-[#2e7d32] px-2 rounded-md text-white">
-                        on one platform
-                      </span>
-                      <span className="italic">."</span>
-                    </span>
-                  </h1>
-                  <p className="mt-4 text-2xl font-caveat italic">
-                    Easy, Fast and
-                    <span className="relative inline-block ml-2">
-                      Reliable!
-                      <span className="absolute left-0 bottom-0 w-full h-2 bg-gray-300 rounded-full -z-10" />
-                    </span>
-                  </p>
-                </div>
+                <LogisticsTagline />
 
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
                   <Link href="/register">
@@ -173,11 +116,11 @@ export default function Home() {
                     </Button>
                   </Link>
                 </div>
-                <div className="text-sm text-upwork-green font-medium">
+                {/* <div className="text-sm text-upwork-green font-medium">
                   US$ 27.50 / month for ALL apps
-                </div>
+                </div> */}
               </div>
-              <div className="flex justify-center">
+              <div className="flex flex-col justify-center">
                 <Image
                   src="https://shiper.io/assets/img/newimg/homeimg.svg"
                   alt="Logistics illustration"
@@ -189,39 +132,60 @@ export default function Home() {
             </div>
           </div>
         </section>
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-50 dark:bg-gray-900">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              {/* <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                  Our Products
-                </h2>
-                <p className="max-w-[900px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400">
-                  Comprehensive solutions for all your logistics needs
-                </p>
-              </div> */}
+        <section className="relative bg-gray-100 pt-4 md:pt-6 pb-14 overflow-hidden">
+  {/* Background doodle shape */}
+  <div
+    aria-hidden="true"
+    className="absolute inset-0 bg-[url('https://shiper.io/assets/img/03.svg?c4=%23ffffff')] bg-top bg-no-repeat bg-[length:100%_auto] pointer-events-none"
+  ></div>
+
+  {/* Optional notification box (conditionally render if needed) */}
+  {/* <div className="container px-4 md:px-6 relative z-10">
+    <div className="hidden md:flex items-center justify-center bg-white/90 rounded-full p-3 mb-6 shadow">
+      <Image
+        src="/assets/img/ae.png"
+        alt="United Arab Emirates"
+        width={16}
+        height={16}
+        className="rounded-full me-2"
+      />
+      <span className="font-semibold text-sm">Odoo Roadshow 2024 - Abu Dhabi, UAE</span>
+      <span className="ml-4 text-sm whitespace-nowrap">Jan 22, 2024</span>
+      <Link
+        href="https://odoo.com/event/odoo-roadshow-2024-abu-dhabi-uae-4654/register"
+        className="ml-6 text-sm text-blue-600 hover:underline whitespace-nowrap"
+        target="_blank"
+      >
+        Register ⟶
+      </Link>
+    </div>
+  </div> */}
+
+  {/* Product/app grid */}
+  <div className="container px-4 md:px-6 relative z-10">
+    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-6 mt-8">
+      {products.map((product) => (
+        <Link href={product.url} key={product.name} className="text-center">
+          <div className="flex flex-col items-center p-2 hover:-translate-y-1 transition-transform duration-200">
+            <div className="bg-white rounded-md shadow-sm p-3 mb-2">
+              <Image
+                src={product.icon || "/placeholder.svg"}
+                alt={product.name}
+                width={80}
+                height={80}
+                className="rounded"
+              />
             </div>
-            <div className="grid grid-cols-3 md:grid-cols-6 sm:grid-cols-4 gap-6 mt-8 ">
-              {products.map((product) => (
-                <Link href={product.url} key={product.name}>
-                  <div className="flex flex-col items-center p-4 cursor-pointer transform transition-transform duration-300 hover:-translate-y-2">
-                    <div className="p-8 bg-white rounded-lg dark:bg-gray-700 mb-3">
-                      <Image
-                        src={product.icon || "/placeholder.svg"}
-                        alt={product.name}
-                        width={48}
-                        height={48}
-                      />
-                    </div>
-                    <h3 className="text-sm font-medium text-center">
-                      {product.name}
-                    </h3>
-                  </div>
-                </Link>
-              ))}
-            </div>
+            <p className="text-xs sm:text-sm text-gray-700 truncate max-w-[8rem] leading-tight">
+              {product.name}
+            </p>
           </div>
-        </section>
+        </Link>
+      ))}
+    </div>
+  </div>
+</section>
+
 
         <section
           id="pricing"
@@ -237,13 +201,13 @@ export default function Home() {
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
-              {plans.map((plan) => (
+              {plans?.map((plan) => (
                 <div
                   key={plan.id}
-                  className={`rounded-2xl shadow-md border p-6 flex flex-col justify-between ${
+                  className={`rounded-2xl shadow-md border p-6 flex flex-col justify-between cursor-pointer transition-transform duration-300 hover:scale-[1.02] hover:shadow-lg ${
                     plan.current
-                      ? "border-upwork-green"
-                      : "border-gray-200 dark:border-gray-700"
+                      ? "border-upwork-green hover:border-upwork-darkgreen"
+                      : "border-gray-200 dark:border-gray-700 hover:border-upwork-green"
                   } bg-white dark:bg-gray-800`}
                 >
                   <div>
@@ -259,7 +223,10 @@ export default function Home() {
                     </div>
                     <ul className="text-sm space-y-2 mb-6">
                       {plan.features.map((feature, idx) => (
-                        <li key={idx}>✔ {feature}</li>
+                        <li key={idx} className="flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-upwork-green mt-1" />
+                          <span>{feature}</span>
+                        </li>
                       ))}
                     </ul>
                   </div>
@@ -270,6 +237,7 @@ export default function Home() {
                         : "border-upwork-green text-upwork-green hover:bg-upwork-lightgreen"
                     }`}
                     variant={plan.current ? "default" : "outline"}
+                    onClick={handleChoosePlan}
                   >
                     {plan.price === 0 ? "Start Free Trial" : "Choose Plan"}
                   </Button>

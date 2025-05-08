@@ -15,6 +15,7 @@ import {
   Draggable,
   DropResult,
 } from "@hello-pangea/dnd";
+import { CheckCircle } from "lucide-react";
 
 export function AdminSubscriptionsTab() {
   const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
@@ -283,7 +284,11 @@ export function AdminSubscriptionsTab() {
                   <p className="font-semibold">Price: $ {plan.price}</p>
                   <ul className="text-sm list-disc pl-5 space-y-1">
                     {plan.features.map((f: string, i: number) => (
-                      <li key={i}>{f}</li>
+                      <li key={i} className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-upwork-green mt-1" />
+                      <span>{f}</span>
+                    </li>
+                    
                     ))}
                   </ul>
                   <div className="pt-4 space-y-2">

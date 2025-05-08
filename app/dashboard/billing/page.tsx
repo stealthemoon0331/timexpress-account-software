@@ -29,6 +29,7 @@ import { getPlanTitle } from "@/lib/utils";
 import { Plan } from "@/lib/data";
 import { useUser } from "@/app/contexts/UserContext";
 import { differenceInDays, format } from "date-fns";
+import { CheckCircle } from "lucide-react";
 
 export default function BillingPage() {
   const { user: loggedUser, loading } = useUser();
@@ -276,10 +277,11 @@ export default function BillingPage() {
                     </div>
                     <ul className="space-y-2 text-sm">
                       {plan.features.map((feature, index) => (
-                        <li key={index} className="flex items-center">
-                          <Icons.check className="mr-2 h-4 w-4 text-upwork-green" />
-                          {feature}
-                        </li>
+                        <li key={index} className="flex items-start gap-2">
+                        <CheckCircle className="w-4 h-4 text-upwork-green mt-1" />
+                        <span>{feature}</span>
+                      </li>
+                      
                       ))}
                     </ul>
                   </label>
