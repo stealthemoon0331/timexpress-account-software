@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useUser } from "@/app/contexts/UserContext";
 
-export default function DashboardGuard({ children }: { children: React.ReactNode }) {
+export default function DashboardGuard({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { data: session, status } = useSession();
   const { user: loggedUser, loading } = useUser();
   const router = useRouter();
@@ -17,7 +21,11 @@ export default function DashboardGuard({ children }: { children: React.ReactNode
   }, [status, router]);
 
   if (status === "loading" || loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="flex items-center justify-center w-full absolute h-[60vh]">
+        <div className="loader" />
+      </div>
+    );
   }
 
   if (!session || !loggedUser) {
