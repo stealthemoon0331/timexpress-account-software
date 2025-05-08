@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&display=swap');
 
 body {
   font-family: Arial, Helvetica, sans-serif;
@@ -9,6 +10,9 @@ body {
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  .font-caveat {
+    font-family: 'Caveat', cursive;
   }
 }
 
@@ -84,11 +88,53 @@ body {
   }
 }
 
+.marker-highlight {
+  background: linear-gradient(transparent 60%, #28a745 60%);
+  font-weight: bold;
+  font-family: 'Pacifico', cursive; /* Or any similar script font */
+  font-size: 1.5em;
+}
+
+.x_wd [class*="display-"] {
+  font-family: "Caveat";
+  line-height: 0.9;
+  font-weight: 700;
+}
+
+.x_wd .display-1, .x_wd .display-2 {
+  line-height: 1;
+}
+
+.x_wd_yellow_highlight_bold_05 {
+  /*background-image: url(https://shiper.io/assets/img/yellow_highlight_bold_05.svg);*/
+  background-image: url(https://shiper.io/assets/img/green_highlight_01.png);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  white-space: nowrap;
+}
+
+.x_wd_blue_highlight_01 {
+  /*background-image: url(https://shiper.io/assets/img/blue_highlight_01.svg);*/
+  background-image: url(https://shiper.io/assets/img/darkgrey_highlight.png);
+  background-position: bottom center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  white-space: nowrap;
+}
+
+
 @layer base {
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .x_wd [class*="display-"] {
+    @apply font-bold leading-[0.9] font-caveat;
   }
 }

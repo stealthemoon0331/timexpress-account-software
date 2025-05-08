@@ -40,11 +40,50 @@ export function DashboardStats() {
   }, []);
 
   useEffect(() => {
-    if (plans && loggedUser?.planId) {
-      setPlan(plans.find((p) => p.id === loggedUser.planId));
-    }
-  }, [plans, loggedUser?.planId]);
-
+    const checkPlanExpirationAndNotify = async () => {
+      if (plans && loggedUser?.planId) {
+        const currentPlan = plans.find((p) => p.id === loggedUser.planId);
+        setPlan(currentPlan);
+      }
+  
+      if (loggedUser?.planId && loggedUser.planExpiresAt) {
+        const expirationDate = new Date(loggedUser.planExpiresAt);
+        const millisecondsInSevenDays = 7 * 24 * 60 * 60 * 1000;
+        const isExpirationComing =
+          expirationDate.getTime() - Date.now() <= millisecondsInSevenDays;
+  
+        const notifiedKey = `notified-plan-expiration-${loggedUser.id}`;
+        const alreadyNotified = localStorage.getItem(notifiedKey);
+  
+        if (isExpirationComing && !alreadyNotified) {
+          try {
+            await fetch(`/api/dashboard/notifications`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId: loggedUser.id,
+                title: "Plan Expiration Reminder",
+                message:
+                  "Your current plan is expiring soon. Please renew to avoid interruption.",
+              }),
+            });
+  
+            localStorage.setItem(notifiedKey, "true"); // Mark as notified
+          } catch (error) {
+            console.error("Failed to send expiration notification:", error);
+          }
+        }
+      }
+    };
+  
+    checkPlanExpirationAndNotify();
+  }, [plans, loggedUser?.planId, loggedUser?.planExpiresAt]);
+  
+  
+  
+  
   if (loading || !loggedUser) return null;
 
   const { planId, planExpiresAt } = loggedUser;

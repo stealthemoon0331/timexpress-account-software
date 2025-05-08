@@ -25,7 +25,6 @@ export async function POST(req: Request) {
     );
   }
 
-
   const auth = Buffer.from(
     `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`
   ).toString("base64");
