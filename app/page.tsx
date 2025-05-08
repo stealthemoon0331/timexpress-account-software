@@ -260,14 +260,14 @@ export default function Home() {
                   </div>
                   <Button
                     className={`w-full ${
-                      plan.current
+                      plan.id === "free-trial"
                         ? "bg-upwork-green text-white hover:bg-upwork-darkgreen"
                         : "border-upwork-green text-upwork-green hover:bg-upwork-lightgreen"
                     }`}
-                    variant={plan.current ? "default" : "outline"}
+                    variant={plan.id === "free-trial" ? "default" : "outline"}
                     onClick={handleChoosePlan}
                   >
-                    {plan.price === 0 ? "Start Free Trial" : "Choose Plan"}
+                    {plan.id === "free-trial" ? "Start Free Trial" : "Choose Plan"}
                   </Button>
                 </div>
               ))}

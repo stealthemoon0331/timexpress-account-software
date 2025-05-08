@@ -5,7 +5,7 @@ export async function PUT(req: NextRequest) {
   try {
     const planData = await req.json()
 
-    if (!planData?.id || !planData?.name || !planData?.price || !Array.isArray(planData.features)) {
+    if (!planData?.id || !planData?.name || planData?.price === undefined || !Array.isArray(planData.features)) {
       return NextResponse.json({ message: "Invalid plan data" }, { status: 400 })
     }
 
