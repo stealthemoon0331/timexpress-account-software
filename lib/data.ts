@@ -141,6 +141,10 @@ export const products = [
     icon: "https://shiper.io/assets/img/newimg/12.svg",
     url: "https://www.shypv.com/go/book?login=true",
   },
+  
+];
+
+export const products1 = [
   {
     name: "Couryier USA",
     icon: "https://shiper.io/assets/img/newimg/13.svg",
@@ -156,4 +160,4 @@ export const products = [
     icon: "https://shiper.io/assets/img/newimg/15.svg",
     url: "https://www.timexpress.ae/smart-send",
   },
-];
+]
