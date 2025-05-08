@@ -69,8 +69,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen">
-        <Sidebar>
+      <div className="flex min-h-screen w-full">
+        <Sidebar >
           <SidebarHeader>
             <Link href="/" className="flex items-center gap-2 px-2">
               <Image
@@ -83,7 +83,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <span className="text-xl font-bold">Shiper.io</span>
             </Link>
           </SidebarHeader>
-          <SidebarContent>
+          <SidebarContent className="px-4">
             <SidebarMenu>
               {routes.map((route) => (
                 <SidebarMenuItem key={route.href}>

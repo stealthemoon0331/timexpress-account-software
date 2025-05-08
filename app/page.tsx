@@ -29,7 +29,7 @@ export default function Home() {
               ? JSON.parse(plan.features)
               : plan.features,
         }));
-
+        if(parsedPlans.length === 0) setPlans(initialPlans)
         setPlans(parsedPlans);
       } catch (err) {
         console.error("Error loading plans:", err);
