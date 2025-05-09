@@ -15,6 +15,10 @@ export async function getPayPalAccessToken(): Promise<string> {
     body: "grant_type=client_credentials",
   })
   const data = await res.json()
+  if(process.env.TEST === "1") {
+    console.log("PAYPAL_BASE ==> ", PAYPAL_BASE);
+    console.log("data.access_token ==>", data.access_token)
+  }
   if (!res.ok) throw new Error("Failed to get PayPal access token")
   return data.access_token
 }
