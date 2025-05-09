@@ -27,30 +27,30 @@ export function AdminSubscriptionsTab() {
   const [plans, setPlans] = useState<Plan[] | null>(initialPlans);
 
 
-  // useEffect(() => {
-  //   const syncPlans = async () => {
-  //     try {
-  //       const res = await fetch("/api/payment/plans", { method: "GET" });
-  //       if (!res.ok) throw new Error("Failed to sync plans");
+  useEffect(() => {
+    const syncPlans = async () => {
+      try {
+        const res = await fetch("/api/payment/plans", { method: "GET" });
+        if (!res.ok) throw new Error("Failed to sync plans");
 
-  //       const responseData = await res.json();
+        const responseData = await res.json();
 
-  //       const parsedPlans = responseData.map((plan: any) => ({
-  //         ...plan,
-  //         features:
-  //           typeof plan.features === "string"
-  //             ? JSON.parse(plan.features)
-  //             : plan.features,
-  //       }));
+        const parsedPlans = responseData.map((plan: any) => ({
+          ...plan,
+          features:
+            typeof plan.features === "string"
+              ? JSON.parse(plan.features)
+              : plan.features,
+        }));
 
-  //       setPlans(parsedPlans);
-  //     } catch (err) {
-  //       console.error("Error loading plans:", err);
-  //     }
-  //   };
+        setPlans(parsedPlans);
+      } catch (err) {
+        console.error("Error loading plans:", err);
+      }
+    };
 
-  //   syncPlans();
-  // }, []);
+    syncPlans();
+  }, []);
 
   const handleCreatePayPalPlan = async (plan: any) => {
     setLoadingPlans((prev) => ({ ...prev, [plan.id]: true }));
