@@ -19,10 +19,10 @@ export function SocialButton({ provider, children, ...props }: SocialButtonProps
       logo: "/icons/google.svg",
     },
     facebook: {
-      bg: "bg-[#1877F2]",
-      hover: "hover:bg-[#166fe5]",
-      border: "border-0",
-      text: "text-white",
+      bg: "bg-white",
+      hover: "hover:bg-gray-50",
+      border: "border border-gray-300",
+      text: "text-gray-700",
       logo: "/icons/facebook.svg",
     },
     apple: {

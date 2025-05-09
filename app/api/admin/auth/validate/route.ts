@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.ADMIN_JWT_SECRET || "your-secret-key";
 export async function GET(req: Request) {
     const cookieStore = await cookies(); // Access cookies
     const token = cookieStore.get("adminToken")?.value;
-console.log("tokentoken => ", token)
+    console.log("tokentoken => ", token)
   if (!token) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }

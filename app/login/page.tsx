@@ -62,8 +62,8 @@ export default function LoginPage() {
       if (res?.error) {
         toast.error("Invalid email or password. Please try again.");
       } else {
-        toast.success("Welcome back to Shiper.io!");
         router.push("/dashboard/overview");
+        toast.success("Welcome back to Shiper.io!");
       }
     } catch (error) {
       toast.error("Something went wrong. Please try again later.");
