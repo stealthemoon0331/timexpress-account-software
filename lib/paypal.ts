@@ -16,11 +16,12 @@ export async function getPayPalAccessToken(): Promise<string> {
   })
   const data = await res.json()
   if(process.env.TEST === "1") {
+    console.log("🌿 Test: process.env.NODE_ENV => ", process.env.NODE_ENV);
     console.log("🌿 Test: PAYPAL_SECRET => ", PAYPAL_SECRET);
-    console.log("🌿 PAYPAL_CLIENT_ID => ", PAYPAL_CLIENT_ID);
-    console.log("🌿 auth => ", auth);
-    console.log("🌿 PAYPAL_BASE ==> ", PAYPAL_BASE);
-    console.log("🌿 data.access_token ==>", data.access_token);
+    console.log("🌿 Test: PAYPAL_CLIENT_ID => ", PAYPAL_CLIENT_ID);
+    console.log("🌿 Test: auth => ", auth);
+    console.log("🌿 Test: PAYPAL_BASE ==> ", PAYPAL_BASE);
+    console.log("🌿 Test: data.access_token ==>", data.access_token);
   }
   if (!res.ok) throw new Error("Failed to get PayPal access token")
   return data.access_token
