@@ -50,8 +50,11 @@ export function AdminSubscriptionsTab() {
               ? JSON.parse(plan.features)
               : plan.features,
         }));
-        if (parsedPlans.length === 0) setPlans(initialPlans);
-        setPlans(parsedPlans);
+        if (parsedPlans.length === 0) {
+          setPlans(initialPlans);
+        } else {
+          setPlans(parsedPlans);
+        }
       } catch (err) {
         console.error("Error loading plans:", err);
       }
