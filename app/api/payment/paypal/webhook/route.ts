@@ -1,6 +1,30 @@
 // /app/api/payment/paypal/webhook/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+// import { Readable } from "stream";
+// import { buffer } from "micro";
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+
+async function getRawBody(req: Request): Promise<Buffer> {
+  const reader = req.body?.getReader();
+  const chunks: Uint8Array[] = [];
+
+  if (reader) {
+    let result;
+    while (!(result = await reader.read()).done) {
+      chunks.push(result.value);
+    }
+  }
+
+  return Buffer.concat(chunks);
+}
+
 
 // const PAYPAL_WEBHOOK_ID = process.env.PAYPAL_WEBHOOK_ID!; // Optional, but recommended for verifying source
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID!;
@@ -31,7 +55,16 @@ async function getPlanIdFromPayPalPlanId(paypalPlanId: string): Promise<string |
 }
 
 export async function POST(req: Request) {
-  const body = await req.json();
+  const rawBody = await getRawBody(req);
+  const textBody = rawBody.toString("utf8");
+
+  let body;
+  try {
+    body = JSON.parse(textBody);
+  } catch (err) {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
   const eventType = body.event_type;
 
   const subscriptionId = body?.resource?.id;

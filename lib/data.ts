@@ -80,6 +80,25 @@ export const plans: Plan[] = [
   },
 ];
 
+export const systems = [
+  {
+    id: 1,
+    name: "CRM"
+  },
+  {
+    id: 1,
+    name: "WMS"
+  },
+  {
+    id: 1,
+    name: "TMS"
+  },
+  {
+    id: 1,
+    name: "FMS"
+  },
+]
+
 export const products = [
   {
     name: "Shypri CRM",

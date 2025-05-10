@@ -7,9 +7,7 @@
     "build": "npx prisma migrate deploy && npx prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "prisma": {
-      "seed": "ts-node prisma/seed.ts"
-    }
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@auth/core": "^0.38.0",
