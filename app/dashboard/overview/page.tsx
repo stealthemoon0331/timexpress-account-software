@@ -36,7 +36,7 @@ export default function OverviewPage() {
         </Card>
       </div>
 
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Recent Activity</CardTitle>
           <CardDescription>Latest actions and events in your account</CardDescription>
@@ -44,7 +44,7 @@ export default function OverviewPage() {
         <CardContent>
           <RecentActivity />
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   )
 }

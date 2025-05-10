@@ -303,7 +303,7 @@ export default function BillingPage() {
             </Button>
           </CardFooter>
         </Card>
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Billing History</CardTitle>
             <CardDescription>
@@ -327,7 +327,7 @@ export default function BillingPage() {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
