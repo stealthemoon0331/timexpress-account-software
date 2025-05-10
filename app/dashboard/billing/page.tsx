@@ -80,7 +80,6 @@ export default function BillingPage() {
   };
 
   const handlePaymentSuccess = () => {
-
     setShowPaymentDialog(false);
 
     toast.success(
@@ -95,7 +94,6 @@ export default function BillingPage() {
     setIsLoading(true);
 
     try {
-
       // Simulate API call
       await fetch("/api/payment/paypal/cancel-subscription", {
         method: "POST",
@@ -278,10 +276,9 @@ export default function BillingPage() {
                     <ul className="space-y-2 text-sm">
                       {plan.features.map((feature, index) => (
                         <li key={index} className="flex items-start gap-2">
-                        <CheckCircle className="w-4 h-4 text-upwork-green mt-1" />
-                        <span>{feature}</span>
-                      </li>
-                      
+                          <CheckCircle className="w-4 h-4 text-upwork-green mt-1" />
+                          <span>{feature}</span>
+                        </li>
                       ))}
                     </ul>
                   </label>
@@ -293,11 +290,7 @@ export default function BillingPage() {
             <Button
               onClick={handleChangePlan}
               className="bg-upwork-green hover:bg-upwork-darkgreen text-white"
-              disabled={
-                isLoading ||
-                selectedPlanId === "free-trial" ||
-                loggedUser?.planId === "free-trial"
-              }
+              disabled={isLoading}
             >
               {isLoading ? (
                 <>
@@ -365,7 +358,11 @@ export default function BillingPage() {
               paypalPlanId={
                 plans?.find((p) => p.id === selectedPlanId)?.paypalPlanId || ""
               }
-              subscriptionType={!loggedUser?.paypalSubscriptionId ? "create-subscription" : "update-subscription"}
+              subscriptionType={
+                !loggedUser?.paypalSubscriptionId
+                  ? "create-subscription"
+                  : "update-subscription"
+              }
               onSuccess={handlePaymentSuccess}
               onCancel={() => setShowPaymentDialog(false)}
             />

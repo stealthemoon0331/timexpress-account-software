@@ -232,10 +232,10 @@ export default function Home() {
               {plans?.map((plan) => (
                 <div
                   key={plan.id}
-                  className={`rounded-2xl shadow-md border p-6 flex flex-col justify-between cursor-pointer transition-transform duration-300 hover:scale-[1.02] hover:shadow-lg ${
+                  className={`rounded-2xl shadow-md border p-6 flex flex-col justify-between cursor-pointer transition-transform duration-300 hover:scale-[1.02] hover:shadow-lg border-gray-200 ${
                     plan.current
-                      ? "border-upwork-green hover:border-upwork-darkgreen"
-                      : "border-gray-200 dark:border-gray-700 hover:border-upwork-green"
+                      ? "hover:border-upwork-darkgreen"
+                      : "dark:border-gray-700 hover:border-upwork-green"
                   } bg-white dark:bg-gray-800`}
                 >
                   <div>

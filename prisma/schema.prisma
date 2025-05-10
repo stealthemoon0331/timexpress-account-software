@@ -24,6 +24,7 @@ model User {
   paypalSubscriptionId String? @unique
 
   lastLoginAt           DateTime?
+  systems        UserSystem[]
 
   accounts       Account[]
   sessions       Session[]
@@ -136,4 +137,21 @@ model Admin {
 enum Role {
   SUPER_ADMIN
   STANDARD
+}
+
+model System {
+  id     String   @id @default(cuid())
+  name   String   @unique
+  users  UserSystem[]
+}
+
+model UserSystem {
+  id       String @id @default(cuid())
+  userId   String
+  systemId String
+
+  user     User   @relation(fields: [userId], references: [id])
+  system   System @relation(fields: [systemId], references: [id])
+
+  @@unique([userId, systemId])
 }
