@@ -90,6 +90,7 @@ model Plan {
   paypalPlanId String?
 
   users       User[]
+  systems     PlanSystem[]
 }
 
 model Payment {
@@ -143,6 +144,7 @@ model System {
   id     String   @id @default(cuid())
   name   String   @unique
   users  UserSystem[]
+  plans  PlanSystem[]
 }
 
 model UserSystem {
@@ -154,4 +156,15 @@ model UserSystem {
   system   System @relation(fields: [systemId], references: [id])
 
   @@unique([userId, systemId])
+}
+
+model PlanSystem {
+  id       String @id @default(cuid())
+  planId   String
+  systemId String
+
+  plan     Plan   @relation(fields: [planId], references: [id])
+  system   System @relation(fields: [systemId], references: [id])
+
+  @@unique([planId, systemId])
 }

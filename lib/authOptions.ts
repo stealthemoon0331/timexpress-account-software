@@ -36,7 +36,10 @@ export const authOptions: NextAuthOptions = {
         if (!user || !user.password) throw new Error("User not found");
         if (!user.emailVerified) throw new Error("Email is not verified");
 
-        const isValid = await bcrypt.compare(credentials.password, user.password);
+        const isValid = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
         if (!isValid) throw new Error("Invalid credentials");
 
         return {
@@ -95,8 +98,12 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
 
-    async signIn({ user, account }) {
+    async signIn({ user, account, profile }) {
       if (!user?.email) return false;
+
+      const now = new Date();
+      const expires = new Date();
+      expires.setDate(now.getDate() + Number(process.env.TRIAL_DURATION));
 
       const existingUser = await prisma.user.findUnique({
         where: { email: user.email },
@@ -106,54 +113,70 @@ export const authOptions: NextAuthOptions = {
         where: { id: "free-trial" },
       });
 
-      const now = new Date();
-      const expires = new Date();
-      expires.setDate(now.getDate() + Number(process.env.TRIAL_DURATION));
-
       if (!existingUser) {
-        await prisma.user.upsert({
-          where: { email: user.email },
-          update: {
-            plan: { connect: { id: trialPlan?.id } },
-            planActivatedAt: now,
-            planExpiresAt: expires,
-            lastLoginAt: now,
-          },
-          create: {
+        // New user: create user + trial
+        await prisma.user.create({
+          data: {
             email: user.email,
             name: user.name,
             image: user.image,
             emailVerified: new Date(),
-            plan: { connect: { id: trialPlan?.id } },
+            plan: trialPlan ? { connect: { id: trialPlan.id } } : undefined,
             planActivatedAt: now,
             planExpiresAt: expires,
             lastLoginAt: now,
+            accounts: account
+              ? {
+                  create: {
+                    type: account.type,
+                    provider: account.provider,
+                    providerAccountId: account.providerAccountId,
+                    access_token: account.access_token,
+                    refresh_token: account.refresh_token,
+                    expires_at: account.expires_at,
+                    token_type: account.token_type,
+                    scope: account.scope,
+                    id_token: account.id_token,
+                    session_state: account.session_state,
+                  },
+                }
+              : undefined,
           },
         });
       } else {
-        // ✅ Update lastLoginAt for returning users
+        // Existing user: update login time
         await prisma.user.update({
           where: { email: user.email },
           data: { lastLoginAt: now },
         });
-      }
 
-      if (account?.type === "oauth" && existingUser) {
-        await prisma.account.upsert({
-          where: {
-            provider_providerAccountId: {
+        // Link OAuth account if it's not already linked
+        if (account?.provider && account?.providerAccountId) {
+          const existingAccount = await prisma.account.findFirst({
+            where: {
               provider: account.provider,
               providerAccountId: account.providerAccountId,
             },
-          },
-          update: {},
-          create: {
-            userId: existingUser.id,
-            type: "oauth",
-            provider: account.provider,
-            providerAccountId: account.providerAccountId,
-          },
-        });
+          });
+
+          if (!existingAccount) {
+            await prisma.account.create({
+              data: {
+                userId: existingUser.id,
+                type: account.type,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+                access_token: account.access_token,
+                refresh_token: account.refresh_token,
+                expires_at: account.expires_at,
+                token_type: account.token_type,
+                scope: account.scope,
+                id_token: account.id_token,
+                session_state: account.session_state,
+              },
+            });
+          }
+        }
       }
 
       return true;
