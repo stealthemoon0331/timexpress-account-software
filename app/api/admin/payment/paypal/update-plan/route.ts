@@ -24,6 +24,7 @@ export async function PUT(req: NextRequest) {
         description: planData.description,
         features: planData.features,
         price: price,  // Ensure price is passed here
+        systems: planData.systems
       },
     })
 

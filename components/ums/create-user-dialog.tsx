@@ -20,20 +20,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { accesses, branches, systemRoles } from "@/lib/ums/data";
+import {
+  accesses,
+  branches,
+  systemRoles,
+} from "@/lib/ums/data";
 import { X } from "lucide-react";
-import {
-  CRM_API_PATH,
-  FMS_API_PATH,
-  TMS_API_PATH,
-  WMS_API_PATH,
-} from "@/app/config/setting";
+// import {
+//   CRM_API_PATH,
+//   FMS_API_PATH,
+//   TMS_API_PATH,
+//   WMS_API_PATH,
+// } from "@/app/config/setting";
 import { system, Team, user } from "@/lib/ums/type";
-import {
-  getBranchName,
-  getRoleId,
-  getRoleName,
-} from "@/lib/ums/utils";
+import { getBranchName, getRoleId, getRoleName } from "@/lib/ums/utils";
 import { toast as toastify } from "react-toastify";
 import { toast as hotToast } from "react-hot-toast";
 import { useAuth } from "@/app/contexts/authContext";
@@ -41,12 +41,15 @@ import InputWrapper from "./input-wrapper";
 import { useData } from "@/app/contexts/dataContext";
 
 interface CreateUserDialogProps {
+  availableSystems: system[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   addNewUser: (user: user) => void;
+
 }
 
 export function CreateUserDialog({
+  availableSystems,
   open,
   onOpenChange,
   addNewUser,
@@ -556,46 +559,21 @@ export function CreateUserDialog({
                 Systems <span className="text-destructive">*</span>
               </Label>
               <div className="flex flex-wrap gap-4 pt-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="crm"
-                    checked={selectedSystems.includes("CRM")}
-                    onCheckedChange={() => handleSystemToggle("CRM")}
-                  />
-                  <Label htmlFor="crm" className="font-normal">
-                    CRM
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="wms"
-                    checked={selectedSystems.includes("WMS")}
-                    onCheckedChange={() => handleSystemToggle("WMS")}
-                  />
-                  <Label htmlFor="wms" className="font-normal">
-                    WMS
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="fms"
-                    checked={selectedSystems.includes("FMS")}
-                    onCheckedChange={() => handleSystemToggle("FMS")}
-                  />
-                  <Label htmlFor="fms" className="font-normal">
-                    FMS
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="tms"
-                    checked={selectedSystems.includes("TMS")}
-                    onCheckedChange={() => handleSystemToggle("TMS")}
-                  />
-                  <Label htmlFor="tms" className="font-normal">
-                    TMS
-                  </Label>
-                </div>
+                {availableSystems?.map((system: system) => (
+                  <div key={system} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={system.toLowerCase()}
+                      checked={selectedSystems.includes(system)}
+                      onCheckedChange={() => handleSystemToggle(system)}
+                    />
+                    <Label
+                      htmlFor={system.toLowerCase()}
+                      className="font-normal"
+                    >
+                      {system}
+                    </Label>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

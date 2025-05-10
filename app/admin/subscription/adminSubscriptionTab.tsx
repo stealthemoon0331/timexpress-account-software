@@ -16,41 +16,49 @@ import {
   DropResult,
 } from "@hello-pangea/dnd";
 import { CheckCircle } from "lucide-react";
+import Select from "react-select";
+
+const allSystems = [
+  { value: "CRM", label: "CRM" },
+  { value: "WMS", label: "WMS" },
+  { value: "FMS", label: "FMS" },
+];
 
 export function AdminSubscriptionsTab() {
   const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
   const [newPlanData, setNewPlanData] = useState<any | null>(null);
+  const [newSystem, setNewSystem] = useState("");
+
   const [newFeature, setNewFeature] = useState<string>("");
   const [loadingPlans, setLoadingPlans] = useState<{ [id: string]: boolean }>(
     {}
   );
   const [plans, setPlans] = useState<Plan[] | null>(initialPlans);
 
+  useEffect(() => {
+    const syncPlans = async () => {
+      try {
+        const res = await fetch("/api/payment/plans", { method: "GET" });
+        if (!res.ok) throw new Error("Failed to sync plans");
 
-  // useEffect(() => {
-  //   const syncPlans = async () => {
-  //     try {
-  //       const res = await fetch("/api/payment/plans", { method: "GET" });
-  //       if (!res.ok) throw new Error("Failed to sync plans");
+        const responseData = await res.json();
 
-  //       const responseData = await res.json();
+        const parsedPlans = responseData.map((plan: any) => ({
+          ...plan,
+          features:
+            typeof plan.features === "string"
+              ? JSON.parse(plan.features)
+              : plan.features,
+        }));
+        if (parsedPlans.length === 0) setPlans(initialPlans);
+        setPlans(parsedPlans);
+      } catch (err) {
+        console.error("Error loading plans:", err);
+      }
+    };
 
-  //       const parsedPlans = responseData.map((plan: any) => ({
-  //         ...plan,
-  //         features:
-  //           typeof plan.features === "string"
-  //             ? JSON.parse(plan.features)
-  //             : plan.features,
-  //       }));
-
-  //       setPlans(parsedPlans);
-  //     } catch (err) {
-  //       console.error("Error loading plans:", err);
-  //     }
-  //   };
-
-  //   syncPlans();
-  // }, []);
+    syncPlans();
+  }, []);
 
   const handleCreatePayPalPlan = async (plan: any) => {
     setLoadingPlans((prev) => ({ ...prev, [plan.id]: true }));
@@ -148,6 +156,15 @@ export function AdminSubscriptionsTab() {
 
     setNewPlanData({ ...newPlanData, features: updated });
   };
+
+  // const handleAddSystem = () => {
+  //   if (newSystem.trim() === "") return;
+  //   setNewPlanData({
+  //     ...newPlanData,
+  //     systems: [...newPlanData.systems, newSystem.trim()],
+  //   });
+  //   setNewSystem("");
+  // };
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -252,16 +269,20 @@ export function AdminSubscriptionsTab() {
                       )}
                     </Droppable>
                   </DragDropContext>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={newFeature}
-                      onChange={(e) => setNewFeature(e.target.value)}
-                      className="w-full p-2 border rounded"
-                      placeholder="New feature"
-                    />
-                    <Button onClick={handleAddFeature}>Add</Button>
-                  </div>
+                  <Select
+                    isMulti
+                    options={allSystems}
+                    value={allSystems.filter((opt) =>
+                      newPlanData.systems?.includes(opt.value)
+                    )}
+                    onChange={(selected) =>
+                      setNewPlanData({
+                        ...newPlanData,
+                        systems: selected.map((opt) => opt.value),
+                      })
+                    }
+                  />
+
                   <div className="flex gap-2 pt-4">
                     <Button
                       onClick={handleSaveEdit}
@@ -285,10 +306,9 @@ export function AdminSubscriptionsTab() {
                   <ul className="text-sm list-disc pl-5 space-y-1">
                     {plan.features.map((f: string, i: number) => (
                       <li key={i} className="flex items-start gap-2">
-                      <CheckCircle className="w-4 h-4 text-upwork-green mt-1" />
-                      <span>{f}</span>
-                    </li>
-                    
+                        <CheckCircle className="w-4 h-4 text-upwork-green mt-1" />
+                        <span>{f}</span>
+                      </li>
                     ))}
                   </ul>
                   <div className="pt-4 space-y-2">

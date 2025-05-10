@@ -1,3 +1,5 @@
+import { system } from "./ums/type";
+
 export interface Plan {
   id: string;
   name: string;
@@ -6,6 +8,7 @@ export interface Plan {
   features: string[];
   current: boolean;
   paypalPlanId: string;
+  systems: system[]
 }
 
 
@@ -22,7 +25,8 @@ export const plans: Plan[] = [
       "Automatic conversion to monthly plan after trial",
     ],
     current: true,
-    paypalPlanId: ""
+    paypalPlanId: "",
+    systems: ["CRM", "WMS", "FMS"]
   },
   {
     id: "starter",
@@ -39,7 +43,8 @@ export const plans: Plan[] = [
       "HR",
     ],
     current: false,
-    paypalPlanId: ""
+    paypalPlanId: "",
+    systems: ["CRM"]
   },
   {
     id: "pro-suite",
@@ -57,7 +62,8 @@ export const plans: Plan[] = [
       "HR",
     ],
     current: false,
-    paypalPlanId: ""
+    paypalPlanId: "",
+    systems: ["CRM", "WMS"]
   },
   {
     id: "elite",
@@ -76,7 +82,8 @@ export const plans: Plan[] = [
       "HR",
     ],
     current: false,
-    paypalPlanId: ""
+    paypalPlanId: "",
+    systems: ["CRM", "WMS", "FMS"]
   },
 ];
 

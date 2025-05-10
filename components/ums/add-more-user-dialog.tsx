@@ -21,7 +21,7 @@ import {
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { accesses, availableSystems, branches, systemRoles } from "@/lib/ums/data";
+import { accesses, branches, systemRoles } from "@/lib/ums/data";
 import { X } from "lucide-react";
 import {
   CRM_API_PATH,
@@ -418,11 +418,11 @@ export function AddMoreUserDialog({
               <div className="flex flex-wrap gap-4 pt-2">
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id="crm"
+                    id={system}
                     checked={true}
                     // onCheckedChange={() => handleSystemToggle("CRM")}
                   />
-                  <Label htmlFor="crm" className="font-normal">
+                  <Label htmlFor={system} className="font-normal">
                     {system}
                   </Label>
                 </div>

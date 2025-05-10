@@ -69,13 +69,13 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { availableSystems } from "@/lib/ums/data";
 import { AddMoreUserDialog } from "./add-more-user-dialog";
 import { set } from "date-fns";
 import InputWrapper from "./input-wrapper";
 import { useData } from "@/app/contexts/dataContext";
 import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
+import { useUser } from "@/app/contexts/UserContext";
 
 export default function UserManagement() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -84,9 +84,11 @@ export default function UserManagement() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isPasswordResetDialogOpen, setIsPasswordResetDialogOpen] =
     useState(false);
+  const [availableSystems, setAvailableSystems] =
+    useState<system[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchSystemQueryList, setSearchSystemQueryList] =
-    useState<system[]>(availableSystems);
+    useState<system[]>([]);
   const [selectedUser, setSelectedUser] = useState<user>({
     id: 0,
     name: "",
@@ -112,6 +114,7 @@ export default function UserManagement() {
   const [users, setUsers] = useState<user[]>([]);
 
   const [searchedUsers, setSearchedUsers] = useState<user[]>([]);
+
 
   const [updateFailedSystems, setUpdateFailedSystems] = useState<
     FailedSystem[]
@@ -145,21 +148,21 @@ export default function UserManagement() {
 
   useEffect(() => {
     if (!users) return;
-  
-    const filtered = users.filter(user => {
+
+    const filtered = users.filter((user) => {
       const matchesSearch =
         user.name?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
         user.email?.toLowerCase().includes(searchQuery?.toLowerCase());
-  
+
       const matchesSystem =
-        searchSystemQueryList.length === 0 ||
-        user.selected_systems?.some(system =>
-          searchSystemQueryList.includes(system)
+        searchSystemQueryList?.length === 0 ||
+        user.selected_systems?.some((system) =>
+          searchSystemQueryList?.includes(system)
         );
-  
+
       return matchesSearch && matchesSystem;
     });
-  
+
     setSearchedUsers(filtered);
   }, [searchQuery, users, searchSystemQueryList]);
 
@@ -184,6 +187,7 @@ export default function UserManagement() {
   const { checkAndUpdateAccessToken } = useAuth();
 
   const hasRun = useRef(false);
+  const { user: loggedUser } = useUser();
 
   useEffect(() => {
     setIsLoading(true);
@@ -312,6 +316,30 @@ export default function UserManagement() {
     }
   }, []);
 
+  useEffect(() => {
+    const fetchAvailableSystems = async () => {
+      try {
+        const response = await fetch("/api/payment/plans", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const fetchPlans = await response.json();
+        // Check if fetchData is an array
+        if (Array.isArray(fetchPlans)) {
+          setAvailableSystems(fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems);
+          setSearchSystemQueryList(fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems);
+        } else {
+          console.log("fetch plans error")
+          return false;
+        }
+      } catch (error) {}
+    };
+
+    fetchAvailableSystems()
+  }, [loggedUser]);
   const handleEditUser = (user: user) => {
     setSelectedUser(user);
     setIsEditDialogOpen(true);
@@ -509,12 +537,12 @@ export default function UserManagement() {
             <Filter className="h-4 w-4" />
           </Button>
 
-          {availableSystems.map((system: system) => (
+          {availableSystems?.map((system: system) => (
             <div key={system} className="flex flex-wrap gap-4 pt-2">
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id={system}
-                  checked={searchSystemQueryList.includes(system)}
+                  checked={searchSystemQueryList?.includes(system)}
                   onCheckedChange={() => handleSystemSearchQuery(system)}
                 />
                 <Label htmlFor={system} className="font-normal">
@@ -647,8 +675,7 @@ export default function UserManagement() {
                             );
                           })}
 
-                          {availableSystems
-                            .filter(
+                          {availableSystems?.filter(
                               (system: system) =>
                                 !user.selected_systems?.includes(system)
                             )
@@ -737,6 +764,7 @@ export default function UserManagement() {
       </div>
 
       <CreateUserDialog
+        availableSystems={availableSystems}
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
         addNewUser={addNewUser}

@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { accesses, availableSystems, branches, systemRoles } from "@/lib/ums/data";
+import { accesses, branches, systemRoles } from "@/lib/ums/data";
 
 import { X } from "lucide-react";
 

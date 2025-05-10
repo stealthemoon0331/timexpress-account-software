@@ -19,13 +19,14 @@ export async function GET() {
       where: { email: session.user.email },
     });
 
+    
     if (!user) {
       return NextResponse.json(
         { error: "You are not registered." },
         { status: 400 }
       );
     }
-
+    
     pool
       .getConnection()
       .then((connection) => {

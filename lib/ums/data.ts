@@ -1,6 +1,6 @@
 import { Branch, system, Team } from "./type";
 
-export const availableSystems: system[] = ["WMS", "CRM", "FMS", "TMS"];
+export const availableSystems: system[] = ["WMS", "CRM", "FMS"];
 
 // Mock data for system-specific roles
 export const systemRoles = {

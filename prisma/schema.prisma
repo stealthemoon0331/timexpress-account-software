@@ -8,30 +8,31 @@ datasource db {
 }
 
 model User {
-  id             String   @id @default(cuid())
-  name           String?
-  email          String   @unique
-  emailVerified  DateTime?
-  image          String?
-  password       String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                   String      @id @default(cuid())
+  name                 String?
+  email                String      @unique
+  emailVerified        DateTime?
+  image                String?
+  password             String?
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
 
   // fields for plan management
-  planId         String?   // Foreign key to Plan
-  planActivatedAt DateTime?
-  planExpiresAt  DateTime?
-  paypalSubscriptionId String? @unique
+  planId               String?     // Foreign key to Plan
+  planActivatedAt      DateTime?
+  planExpiresAt        DateTime?
+  paypalSubscriptionId String?     @unique
 
-  lastLoginAt           DateTime?
-  systems        UserSystem[]
+  lastLoginAt          DateTime?
 
-  accounts       Account[]
-  sessions       Session[]
-  plan           Plan?     @relation(fields: [planId], references: [id])
+  systems              Json?    // Directly storing system names as an array of strings
 
-  payments       Payment[] 
-  notifications  Notification[] // Relation to Notification model
+  accounts             Account[]
+  sessions             Session[]
+  plan                 Plan?       @relation(fields: [planId], references: [id])
+
+  payments             Payment[]
+  notifications        Notification[] // Relation to Notification model
 }
 
 model Notification {
@@ -89,8 +90,8 @@ model Plan {
   createdAt   DateTime @default(now())
   paypalPlanId String?
 
-  users       User[]
-  systems     PlanSystem[]
+  users       User[]   // Users linked to this plan
+  systems     Json? // Directly storing system names as an array of strings
 }
 
 model Payment {
@@ -143,28 +144,6 @@ enum Role {
 model System {
   id     String   @id @default(cuid())
   name   String   @unique
-  users  UserSystem[]
-  plans  PlanSystem[]
 }
 
-model UserSystem {
-  id       String @id @default(cuid())
-  userId   String
-  systemId String
 
-  user     User   @relation(fields: [userId], references: [id])
-  system   System @relation(fields: [systemId], references: [id])
-
-  @@unique([userId, systemId])
-}
-
-model PlanSystem {
-  id       String @id @default(cuid())
-  planId   String
-  systemId String
-
-  plan     Plan   @relation(fields: [planId], references: [id])
-  system   System @relation(fields: [systemId], references: [id])
-
-  @@unique([planId, systemId])
-}
