@@ -46,7 +46,7 @@ const PayFortForm = () => {
     const form = document.createElement("form");
     form.method = "POST";
     form.action = PAYMENT_URL;
-    form.target = "payfort_iframe";
+    form.target = "_top";
     form.style.display = "none";
 
     Object.entries(fullFields).forEach(([key, value]) => {
