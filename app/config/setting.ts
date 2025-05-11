@@ -1,4 +1,6 @@
 
+export const TEST = true;
+
 export const FMS_API_PATH = process.env.NEXT_PUBLIC_FMS_API_PATH || "http://localhost:4015";
 export const CRM_API_PATH = process.env.NEXT_PUBLIC_CRM_API_PATH || "http://localhost:4016";
 export const WMS_API_PATH = process.env.NEXT_PUBLIC_WMS_API_PATH || "http://localhost:4011";
@@ -22,3 +24,13 @@ export const DB_PASSWORD = process.env.DB_PASSWORD;
 export const DB_NAME = process.env.DB_NAME;
 export const DB_PORT = process.env.DB_PORT;
 
+
+// Database
+
+export const ACCESS_CODE = process.env.NEXT_PUBLIC_PAYFORT_ACCESS_CODE!;
+export const LANGUAGE = process.env.NEXT_PUBLIC_LANGUAGE!;
+export const MERCHANT_ID = process.env.NEXT_PUBLIC_PAYFORT_MERCHANT_IDENTIFIER!;
+export const PAYMENT_URL = process.env.NEXT_PUBLIC_PAYFORT_PAYMENT_URL!;
+export const REQUEST_PHRASE = process.env.NEXT_PUBLIC_PAYFORT_SHA_REQUEST_PHRASE!;
+export const RESPONSE_PHRASE = process.env.NEXT_PUBLIC_PAYFORT_SHA_RESPONSE_PHRASE!;
+export const RETURN_URL = process.env.NEXT_PUBLIC_PAYFORT_RETURN_URL!;
