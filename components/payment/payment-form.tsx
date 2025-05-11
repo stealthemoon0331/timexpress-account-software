@@ -26,6 +26,7 @@ import Image from "next/image";
 import prisma from "@/lib/prisma";
 import { addDays } from "date-fns";
 import { useSession } from "next-auth/react";
+import PayFortForm from "./payfort/page";
 
 interface PaymentFormProps {
   amount: number;
@@ -146,22 +147,27 @@ export function PaymentForm({
             </div>
 
             {paymentMethod === "paypal" && (
-              <PayPalWrapper planId={planId} paypalPlanId={paypalPlanId} subscriptionType={subscriptionType} />
+              <PayPalWrapper
+                planId={planId}
+                paypalPlanId={paypalPlanId}
+                subscriptionType={subscriptionType}
+              />
             )}
 
             {paymentMethod === "payfort" && (
-              <div className="flex flex-col items-center justify-center py-6 space-y-4">
-                <Image
-                  src="https://static.openfintech.io/payment_providers/payfort/logo.png?w=400&c=v0.59.26#w100"
-                  alt="Payfort"
-                  width={120}
-                  height={30}
-                />
-                <p className="text-sm text-muted-foreground text-center">
-                  You will be redirected to Payfort to complete your payment
-                  securely.
-                </p>
-              </div>
+              // <div className="flex flex-col items-center justify-center py-6 space-y-4">
+              //   <Image
+              //     src="https://static.openfintech.io/payment_providers/payfort/logo.png?w=400&c=v0.59.26#w100"
+              //     alt="Payfort"
+              //     width={120}
+              //     height={30}
+              //   />
+              //   <p className="text-sm text-muted-foreground text-center">
+              //     You will be redirected to Payfort to complete your payment
+              //     securely.
+              //   </p>
+              // </div>
+              <PayFortForm />
             )}
 
             <div className="rounded-md bg-muted p-4">
@@ -238,28 +244,34 @@ function PayPalWrapper({
           style={{ layout: "vertical" }}
           fundingSource="paypal"
           createSubscription={async () => {
-            if(subscriptionType === "create-subscription") {
-              const res = await fetch("/api/payment/paypal/create-subscription", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ paypalPlanId }),
-              });
-  
+            if (subscriptionType === "create-subscription") {
+              const res = await fetch(
+                "/api/payment/paypal/create-subscription",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ paypalPlanId }),
+                }
+              );
+
               const data = await res.json();
-              console.log("change subscription response data", data)
+              console.log("change subscription response data", data);
               toast.error(data.error);
               return data.id;
             }
 
-            if(subscriptionType === "update-subscription") {
-              const res = await fetch("/api/payment/paypal/change-subscription", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ paypalPlanId }),
-              });
-  
+            if (subscriptionType === "update-subscription") {
+              const res = await fetch(
+                "/api/payment/paypal/change-subscription",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ paypalPlanId }),
+                }
+              );
+
               const data = await res.json();
-              console.log("change subscription response data", data)
+              console.log("change subscription response data", data);
               toast.error(data.error);
               return data.id;
             }

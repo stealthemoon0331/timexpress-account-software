@@ -9,6 +9,7 @@ import {
   PAYMENT_URL,
   REQUEST_PHRASE,
 } from "@/app/config/setting";
+import { toast } from "react-toastify";
 
 const PayFortForm = () => {
   const [submitted, setSubmitted] = useState(false);
@@ -46,7 +47,7 @@ const PayFortForm = () => {
     const form = document.createElement("form");
     form.method = "POST";
     form.action = PAYMENT_URL;
-    form.target = "_top";
+    form.target = "payfort_iframe";
     form.style.display = "none";
 
     Object.entries(fullFields).forEach(([key, value]) => {
@@ -62,6 +63,33 @@ const PayFortForm = () => {
 
     setSubmitted(true);
   }, [submitted]);
+
+useEffect(() => {
+  const messageListener = (event: MessageEvent) => {
+    // ✅ Only allow messages from your own domain
+    const allowedOrigin = window.location.origin;
+    if (event.origin !== allowedOrigin) return;
+
+    // ✅ Ensure the message has the expected shape
+    const { status, token, ref, reason, last4 } = event.data || {};
+    if (!status || (status !== "success" && status !== "fail")) return;
+
+    // ✅ Process only relevant PayFort messages
+    if (status === "success") {
+      toast.success("Payment successful!");
+      // optionally: call backend API or store the token here
+    } else {
+      toast.error(`Payment failed: ${reason || "Unknown error"}`);
+    }
+
+    setSubmitted(false); // Reset so the user can retry if needed
+  };
+
+  window.addEventListener("message", messageListener);
+  return () => window.removeEventListener("message", messageListener);
+}, []);
+
+
 
   return (
     <div className="p-8">
