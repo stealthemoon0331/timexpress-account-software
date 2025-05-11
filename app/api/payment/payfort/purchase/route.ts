@@ -74,8 +74,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       },
       body: formBody.toString(),
     });
-
+    
+    consoleLog("PAYMENT_URL", PAYMENT_URL);
+    consoleLog("response", response);
     const result = await response.json();
+
     return NextResponse.json({ result }, { status: 200 });
   } catch (error) {
     console.error("PayFort Purchase Error:", error);
