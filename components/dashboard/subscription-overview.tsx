@@ -112,7 +112,7 @@ export function SubscriptionOverview() {
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Subscription Period</span>
           <span className="font-medium">
-            {daysRemaining + 1} days remaining ({percentRemaining}%)
+            {daysRemaining} days remaining ({percentRemaining}%)
           </span>
         </div>
         <Progress value={percentRemaining} className="h-2" />
