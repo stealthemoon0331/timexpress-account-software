@@ -35,12 +35,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const { signature: receivedSignature, ...fieldsToSign } = data;
   const expectedSignature = generateSignature(fieldsToSign, RESPONSE_PHRASE);
 
-  const {
-    response_code,
-    token_name,
-    card_number,
-    merchant_reference,
-  } = data;
+  const { response_code, token_name, card_number, merchant_reference } = data;
 
   const isSuccess = response_code === "18000";
   const isValid = receivedSignature === expectedSignature;
@@ -50,8 +45,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     reason: !isValid
       ? "invalid_signature"
       : isSuccess
-        ? null
-        : `code_${response_code}`,
+      ? null
+      : `code_${response_code}`,
     token: isSuccess ? token_name : null,
     ref: merchant_reference,
     last4: isSuccess ? card_number?.slice(-4) : null,
@@ -59,12 +54,47 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   // Return script with postMessage of result JSON
   return new NextResponse(
-    `<html><body>
+    `<html>
+    <head>
+      <style>
+        body {
+          background-color: #ffffff;
+          margin: 0;
+          padding: 2rem;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          color: #111827;
+        }
+        .spinner {
+          border: 4px solid #f3f3f3;
+          border-top: 4px solid #3b82f6;
+          border-radius: 50%;
+          width: 48px;
+          height: 48px;
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        p {
+          font-size: 1rem;
+          margin-top: 1.5rem;
+        }
+      </style>
+    </head>
+    <body>
       <script>
         window.parent.postMessage(${JSON.stringify(result)}, "*");
       </script>
+      <div class="spinner"></div>
       <p>Processing payment response...</p>
-    </body></html>`,
+    </body>
+  </html>`,
     {
       headers: {
         "Content-Type": "text/html",

@@ -64,47 +64,46 @@ const PayFortForm = () => {
     setSubmitted(true);
   }, [submitted]);
 
-useEffect(() => {
-  const messageListener = (event: MessageEvent) => {
-    // ✅ Only allow messages from your own domain
-    const allowedOrigin = window.location.origin;
-    if (event.origin !== allowedOrigin) return;
+  useEffect(() => {
+    const messageListener = (event: MessageEvent) => {
+      // ✅ Only allow messages from your own domain
+      const allowedOrigin = window.location.origin;
+      if (event.origin !== allowedOrigin) return;
 
-    // ✅ Ensure the message has the expected shape
-    const { status, token, ref, reason, last4 } = event.data || {};
-    if (!status || (status !== "success" && status !== "fail")) return;
+      // ✅ Ensure the message has the expected shape
+      const { status, token, ref, reason, last4 } = event.data || {};
+      if (!status || (status !== "success" && status !== "fail")) return;
 
-    // ✅ Process only relevant PayFort messages
-    if (status === "success") {
-      toast.success("Payment successful!");
-      // optionally: call backend API or store the token here
-    } else {
-      toast.error(`Payment failed: ${reason || "Unknown error"}`);
-    }
+      // ✅ Process only relevant PayFort messages
+      if (status === "success") {
+        toast.success("Payment successful!");
+        // optionally: call backend API or store the token here
+      } else {
+        toast.error(`Payment failed: ${reason || "Unknown error"}`);
+      }
 
-    setSubmitted(false); // Reset so the user can retry if needed
-  };
+      setSubmitted(false); // Reset so the user can retry if needed
+    };
 
-  window.addEventListener("message", messageListener);
-  return () => window.removeEventListener("message", messageListener);
-}, []);
-
-
+    window.addEventListener("message", messageListener);
+    return () => window.removeEventListener("message", messageListener);
+  }, []);
 
   return (
-    <div className="p-8">
-      <h2 className="text-xl font-semibold text-center mb-4">
-        Secure Card Payment
-      </h2>
-      <iframe
+    <iframe
         name="payfort_iframe"
         width="100%"
-        height="500"
+        height="400"
+        style={{
+          border: "1px solid #ccc",
+          borderRadius: "12px",
+          backgroundColor: "#f9fafb", 
+          overflow: "auto",
+        }}
         frameBorder="0"
         scrolling="no"
         title="PayFort Payment"
       ></iframe>
-    </div>
   );
 };
 
