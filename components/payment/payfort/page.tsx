@@ -11,9 +11,15 @@ import {
 } from "@/app/config/setting";
 import { toast } from "react-toastify";
 
-const PayFortForm = () => {
+interface PayFortFormProps {
+  amount: string; // amount in minor units (e.g. "10000" for 100 AED)
+  email: string;
+}
+
+const PayFortForm = ({ amount, email }: PayFortFormProps) => {
   const [submitted, setSubmitted] = useState(false);
 
+  // Submit form to load iframe with tokenization screen
   useEffect(() => {
     if (submitted) return;
 
@@ -27,6 +33,7 @@ const PayFortForm = () => {
       merchant_identifier: MERCHANT_ID,
       merchant_reference: merchantRef,
       return_url: returnUrl,
+      amount,
     };
 
     const signatureString =
@@ -38,11 +45,7 @@ const PayFortForm = () => {
       REQUEST_PHRASE;
 
     const signature = sha256(signatureString);
-
-    const fullFields = {
-      ...fields,
-      signature,
-    };
+    const fullFields = { ...fields, signature };
 
     const form = document.createElement("form");
     form.method = "POST";
@@ -54,7 +57,7 @@ const PayFortForm = () => {
       const input = document.createElement("input");
       input.type = "hidden";
       input.name = key;
-      input.value = value;
+      input.value = value.toString(); // fix type issue
       form.appendChild(input);
     });
 
@@ -62,48 +65,80 @@ const PayFortForm = () => {
     form.submit();
 
     setSubmitted(true);
-  }, [submitted]);
+  }, []);
 
+  // Handle tokenization result from PayFort
   useEffect(() => {
-    const messageListener = (event: MessageEvent) => {
-      // ✅ Only allow messages from your own domain
+    const messageListener = async (event: MessageEvent) => {
       const allowedOrigin = window.location.origin;
       if (event.origin !== allowedOrigin) return;
 
-      // ✅ Ensure the message has the expected shape
       const { status, token, ref, reason, last4 } = event.data || {};
       if (!status || (status !== "success" && status !== "fail")) return;
 
-      // ✅ Process only relevant PayFort messages
-      if (status === "success") {
-        toast.success("Payment successful!");
-        // optionally: call backend API or store the token here
+      if (status === "success" && token) {
+        toast.success("Card saved. Charging...");
+
+        // Call API to complete the PURCHASE
+        try {
+          const res = await fetch("/api/payment/payfort/purchase", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token_name: token, amount, email }),
+          });
+
+          const data = await res.json();
+
+          if (data.result.response_code?.startsWith("14")) {
+            toast.success("Payment charged successfully!");
+          } else {
+            toast.error(
+              `Charge failed: ${
+                data.result.response_message || "Unknown error"
+              }`
+            );
+          }
+        } catch (error) {
+          console.error("Charge error:", error);
+          toast.error("Payment charge failed.");
+        }
       } else {
-        toast.error(`Payment failed: ${reason || "Unknown error"}`);
+        toast.error(`Tokenization failed: ${reason || "Unknown error"}`);
       }
 
-      setSubmitted(false); // Reset so the user can retry if needed
+      setSubmitted(false); // Reset for retry
     };
 
     window.addEventListener("message", messageListener);
     return () => window.removeEventListener("message", messageListener);
-  }, []);
+  }, [amount, email]);
 
   return (
-    <iframe
-        name="payfort_iframe"
-        width="100%"
-        height="400"
-        style={{
-          border: "1px solid #ccc",
-          borderRadius: "12px",
-          backgroundColor: "#f9fafb", 
-          overflow: "auto",
-        }}
-        frameBorder="0"
-        scrolling="no"
-        title="PayFort Payment"
-      ></iframe>
+    <div className="p-8">
+      <h2 className="text-xl font-semibold text-center mb-4">
+        Secure Card Payment
+      </h2>
+
+      <div style={{ position: "relative", width: "100%", height: "400px" }}>
+        <iframe
+          name="payfort_iframe"
+          width="100%"
+          height="100%"
+          style={{
+            border: "1px solid #ccc",
+            borderRadius: "12px",
+            backgroundColor: "#f9fafb",
+            // overflow: "auto",
+            position: "absolute",
+            top: 0,
+            left: 0,
+          }}
+          // frameBorder="0"
+          // scrolling="auto"
+          title="PayFort Payment"
+        ></iframe>
+      </div>
+    </div>
   );
 };
 

@@ -155,19 +155,7 @@ export function PaymentForm({
             )}
 
             {paymentMethod === "payfort" && (
-              // <div className="flex flex-col items-center justify-center py-6 space-y-4">
-              //   <Image
-              //     src="https://static.openfintech.io/payment_providers/payfort/logo.png?w=400&c=v0.59.26#w100"
-              //     alt="Payfort"
-              //     width={120}
-              //     height={30}
-              //   />
-              //   <p className="text-sm text-muted-foreground text-center">
-              //     You will be redirected to Payfort to complete your payment
-              //     securely.
-              //   </p>
-              // </div>
-              <PayFortForm />
+              <PayFortForm amount={amount.toString()} email="test.gamil.com"/>
             )}
 
             <div className="rounded-md bg-muted p-4">
@@ -179,20 +167,6 @@ export function PaymentForm({
           </div>
 
           <div className="mt-6 flex flex-col gap-2">
-            {/* <Button
-              type="submit"
-              className="w-full bg-upwork-green hover:bg-upwork-darkgreen text-white"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                `Pay $ ${amount}`
-              )}
-            </Button> */}
             {onCancel && (
               <Button
                 type="button"
@@ -210,7 +184,6 @@ export function PaymentForm({
     </Card>
   );
 }
-
 function PayPalWrapper({
   planId,
   paypalPlanId,
