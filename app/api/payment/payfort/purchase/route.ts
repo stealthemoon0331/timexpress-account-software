@@ -36,7 +36,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     const merchantReference = `ref_${Date.now()}`;
-    const returnUrl = `${req.nextUrl.origin}/api/payment/payfort/handleResponse`;
+    // const returnUrl = `${req.nextUrl.origin}/api/payment/payfort/handleResponse`;
+    const returnUrl = `https://stage.shiper.io/api/payment/payfort/handleResponse`;
+
 
     const payload: Record<string, string | number> = {
       access_code: ACCESS_CODE,
