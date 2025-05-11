@@ -155,7 +155,7 @@ export function PaymentForm({
             )}
 
             {paymentMethod === "payfort" && (
-              <PayFortForm amount={amount.toString()} email="test.gamil.com"/>
+              <PayFortForm amount={"15"} email="test.gamil.com"/>
             )}
 
             <div className="rounded-md bg-muted p-4">
