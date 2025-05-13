@@ -57,8 +57,9 @@ import {
   ReportCardProps,
 } from "@/components/ui/reportCard";
 import LogoutButton from "@/components/admin/logout";
+import ProfileAvatar from "@/components/ui/profileAvatar";
 
-interface UserType {
+export interface UserType {
   id: string;
   name: string;
   image: string;
@@ -383,17 +384,7 @@ export default function AdminPage() {
                             {(currentPage - 1) * 10 + index + 1}
                           </TableCell>
                           <TableCell>
-                            <img
-                              src={
-                                user.image
-                                  ? user.image
-                                  : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                      user?.name || "User"
-                                    )}&background=ccc&color=555&rounded=true`
-                              }
-                              alt={user.name}
-                              className="h-8 w-8 rounded-full object-cover"
-                            />
+                            <ProfileAvatar loggedUser={user}/>
                           </TableCell>
                           <TableCell className="font-medium">
                             {user.name}

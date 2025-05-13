@@ -33,12 +33,17 @@ import { LoggedUser } from "@/types/user";
 import { isPlanExpired } from "@/lib/utils";
 import { useUser } from "@/app/contexts/UserContext";
 import NotificationBell from "@/lib/notification-bell";
+import ProfileAvatar from "../ui/profileAvatar";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
-  
+
   const { user: loggedUser, loading } = useUser();
-  
+
   const routes = [
     {
       href: "/dashboard/overview",
@@ -70,7 +75,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
-        <Sidebar >
+        <Sidebar>
           <SidebarHeader>
             <Link href="/" className="flex items-center gap-2 px-2">
               <Image
@@ -104,21 +109,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <SidebarFooter>
             <div className="flex items-center justify-between p-4">
               <div className="flex items-center gap-2">
-                <div className="relative">
-                  <Image
-                    src={
-                      loggedUser?.image ||
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        loggedUser?.name || "User"
-                      )}&background=ccc&color=555&rounded=true`
-                    }
-                    alt="Profile"
-                    width={32}
-                    height={32}
-                    className="h-8 w-8 rounded-full"
-                  />
-                  <span className="absolute right-0 top-0 flex h-2 w-2 rounded-full bg-upwork-green"></span>
-                </div>
+                <ProfileAvatar loggedUser={loggedUser} />
                 <div className="text-sm">
                   <p className="font-medium">{loggedUser?.name}</p>
                   {/* <p className="text-xs text-muted-foreground">Admin</p> */}
@@ -158,7 +149,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6">
             <SidebarTrigger />
             <div className="ml-auto flex items-center gap-4">
-            <NotificationBell/>
+              <NotificationBell />
               {/* <Button variant="outline" size="icon" className="relative">
                 <Icons.bell className="h-5 w-5" />
                 {notifications > 0 && (
@@ -175,18 +166,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     size="icon"
                     className="rounded-full"
                   >
-                    <Image
-                      src={
-                        loggedUser?.image ||
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          loggedUser?.name || "User"
-                        )}&background=ccc&color=555&rounded=true`
-                      }
-                      alt="Profile"
-                      width={32}
-                      height={32}
-                      className="h-8 w-8 rounded-full"
-                    />
+                    <ProfileAvatar loggedUser={loggedUser} />
                     <span className="sr-only">Open user menu</span>
                   </Button>
                 </DropdownMenuTrigger>
