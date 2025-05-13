@@ -29,7 +29,7 @@ export async function POST(req: Request) {
 
     const payload = {
       service_id: process.env.EMAILJS_SERVICE_ID,
-      template_id: process.env.EMAILJS_TEMPLATE_ID,
+      template_id: process.env.EMAILJS_MAIL_CONFIRM_TEMPLATE_ID,
       user_id: process.env.EMAILJS_USER_ID,
       accessToken: process.env.EMAILJS_ACCESS_TOKEN,
       template_params: {
