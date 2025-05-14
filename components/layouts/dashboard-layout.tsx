@@ -75,7 +75,7 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
-        <Sidebar>
+        <Sidebar className="gap-4">
           <SidebarHeader>
             <Link href="/" className="flex items-center gap-2 px-2">
               <Image
@@ -85,7 +85,7 @@ export default function DashboardLayout({
                 height={32}
                 className="h-8 w-8"
               />
-              <span className="text-xl font-bold">Shiper.io</span>
+              <span className="text-3xl font-bold">Shiper.io</span>
             </Link>
           </SidebarHeader>
           <SidebarContent className="px-4">
@@ -98,8 +98,8 @@ export default function DashboardLayout({
                     disabled={route.disabled}
                   >
                     <Link href={route.href}>
-                      <route.icon className="h-5 w-5" />
-                      <span>{route.label}</span>
+                      <route.icon className="h-10 w-10" />
+                      <span className="text-lg">{route.label}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
