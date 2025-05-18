@@ -104,23 +104,24 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      // In a real app, you would initiate OAuth flow here
-      console.log(`Logging in with ${provider}`);
-
-      // Simulate API call
-      await signIn(provider, {
+      const result = await signIn(provider, {
+        redirect: false,
         callbackUrl: "/dashboard/overview",
       });
-
-      toast.info(`Redirecting to ${provider} for authentication...`);
+      
+      if (result?.error) {
+        toast.error(`Authentication failed: ${result.error}`);
+      } else {
+        router.push("/dashboard/overview");
+        toast.success("Welcome to Shiper.io! Your account has been created.");
+      }
     } catch (error) {
-      toast.error(`Could not log in with ${provider}. Please try again.`);
+      console.error("Registration error:", error);
+      toast.error("Something went wrong with the authentication. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
-
-
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">

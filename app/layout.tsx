@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { SessionProviderWrapper } from "./session-provider";
+import { AuthProvider } from "@/components/providers/auth-provider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { UserProvider } from "./contexts/UserContext";
@@ -24,10 +24,10 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap" rel="stylesheet"/>
       </head>
       <body>
-          <SessionProviderWrapper>
+          <AuthProvider>
               {children}
             <ToastContainer position="top-right" autoClose={3000} />
-          </SessionProviderWrapper>
+          </AuthProvider>
       </body>
     </html>
   );

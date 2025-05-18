@@ -77,17 +77,20 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      // In a real app, you would initiate OAuth flow here
-      console.log(`Logging in with ${provider}`)
-
-      // Simulate API call
-      await signIn(provider, {
+      const result = await signIn(provider, {
+        redirect: false,
         callbackUrl: "/dashboard/overview"
       })
       
-      toast.success("Welcome back to Shiper.io!");
+      if (result?.error) {
+        toast.error(`Authentication failed: ${result.error}`)
+      } else {
+        router.push("/dashboard/overview")
+        toast.success("Welcome back to Shiper.io!")
+      }
     } catch (error) {
-      toast.error("Something went wrong. Please try again later.");
+      console.error("Login error:", error)
+      toast.error("Something went wrong with your login. Please try again.")
     } finally {
       setIsLoading(false)
     }
