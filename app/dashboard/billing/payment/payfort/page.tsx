@@ -11,12 +11,12 @@ import {
   PAYMENT_URL,
   REQUEST_PHRASE,
 } from "@/app/config/setting";
-import { toast } from "react-toastify";
-import { consoleLog } from "@/lib/utils";
+import { Loader } from "lucide-react";
+
 
 interface PayFortFormProps {
-  amount: string; // amount in minor units (e.g. "10000" for 100 AED)
-  email: string;
+  amount: number; // amount in minor units (e.g. "10000" for 100 AED)
+  email: string | undefined | null;
 }
 
 const PayFortForm = ({ amount, email }: PayFortFormProps) => {
@@ -26,18 +26,22 @@ const PayFortForm = ({ amount, email }: PayFortFormProps) => {
   useEffect(() => {
   if (submitted) return;
 
+  if(email === undefined || !email) {
+    return;
+  }
+
   const merchantRef = `ref_${Date.now()}`;
   const returnUrl = `https://stage.shiper.io/api/payment/payfort/payfort-complete`; // dummy success handler
 
   const requestParams: Record<string, string | number> = {
-    command: "PURCHASE", // ✅ matches PHP
+    command: "PURCHASE", 
     access_code: ACCESS_CODE,
     merchant_identifier: MERCHANT_ID,
     merchant_reference: merchantRef,
-    amount: amount, // must be in minor units: "10000"
-    currency: CURRENCY || "AED",
+    amount: amount, 
+    currency: CURRENCY,
     language: "en",
-    customer_email: "kijimatakuma0331@gmail.com",
+    customer_email: email,
     order_description: "Test Order",
     return_url: returnUrl,
   };
@@ -79,7 +83,7 @@ const PayFortForm = ({ amount, email }: PayFortFormProps) => {
 }, []);
 
   return(
-    <></>
+    <Loader/>
   )
 };
 
