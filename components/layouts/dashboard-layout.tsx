@@ -33,12 +33,17 @@ import { LoggedUser } from "@/types/user";
 import { isPlanExpired } from "@/lib/utils";
 import { useUser } from "@/app/contexts/UserContext";
 import NotificationBell from "@/lib/notification-bell";
+import ProfileAvatar from "../ui/profileAvatar";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
-  
+
   const { user: loggedUser, loading } = useUser();
-  
+
   const routes = [
     {
       href: "/dashboard/overview",
@@ -50,7 +55,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       href: "/dashboard/customers",
       label: "customers",
       icon: Icons.users,
-      active: pathname.startsWith("/dashboard/users"),
+      active: pathname.startsWith("/dashboard/customers"),
       disabled: isPlanExpired(loggedUser?.planExpiresAt),
     },
     {
@@ -70,7 +75,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
-        <Sidebar >
+        <Sidebar className="gap-4">
           <SidebarHeader>
             <Link href="/" className="flex items-center gap-2 px-2">
               <Image
@@ -80,7 +85,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 height={32}
                 className="h-8 w-8"
               />
-              <span className="text-xl font-bold">Shiper.io</span>
+              <span className="text-3xl font-bold">Shiper.io</span>
             </Link>
           </SidebarHeader>
           <SidebarContent className="px-4">
@@ -91,34 +96,43 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     asChild
                     isActive={route.active}
                     disabled={route.disabled}
+                    className={`
+            group flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200
+            ${
+              route.active
+                ? "bg-green-100 text-green-700 font-semibold"
+                : "text-gray-700 hover:bg-gray-100"
+            }
+            ${
+              route.disabled
+                ? "opacity-50 cursor-not-allowed"
+                : "cursor-pointer"
+            }
+          `}
                   >
                     <Link href={route.href}>
-                      <route.icon className="h-5 w-5" />
-                      <span>{route.label}</span>
+                      <route.icon
+                        className={`
+                h-6 w-6 transition-colors
+                ${
+                  route.active
+                    ? "text-green-600"
+                    : "text-gray-500 group-hover:text-gray-800"
+                }
+              `}
+                      />
+                      <span className="text-base">{route.label}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
           </SidebarContent>
+
           <SidebarFooter>
             <div className="flex items-center justify-between p-4">
               <div className="flex items-center gap-2">
-                <div className="relative">
-                  <Image
-                    src={
-                      loggedUser?.image ||
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        loggedUser?.name || "User"
-                      )}&background=ccc&color=555&rounded=true`
-                    }
-                    alt="Profile"
-                    width={32}
-                    height={32}
-                    className="h-8 w-8 rounded-full"
-                  />
-                  <span className="absolute right-0 top-0 flex h-2 w-2 rounded-full bg-upwork-green"></span>
-                </div>
+                <ProfileAvatar loggedUser={loggedUser} />
                 <div className="text-sm">
                   <p className="font-medium">{loggedUser?.name}</p>
                   {/* <p className="text-xs text-muted-foreground">Admin</p> */}
@@ -158,7 +172,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6">
             <SidebarTrigger />
             <div className="ml-auto flex items-center gap-4">
-            <NotificationBell/>
+              <NotificationBell />
               {/* <Button variant="outline" size="icon" className="relative">
                 <Icons.bell className="h-5 w-5" />
                 {notifications > 0 && (
@@ -175,18 +189,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     size="icon"
                     className="rounded-full"
                   >
-                    <Image
-                      src={
-                        loggedUser?.image ||
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          loggedUser?.name || "User"
-                        )}&background=ccc&color=555&rounded=true`
-                      }
-                      alt="Profile"
-                      width={32}
-                      height={32}
-                      className="h-8 w-8 rounded-full"
-                    />
+                    <ProfileAvatar loggedUser={loggedUser} />
                     <span className="sr-only">Open user menu</span>
                   </Button>
                 </DropdownMenuTrigger>
