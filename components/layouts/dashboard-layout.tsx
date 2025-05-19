@@ -55,7 +55,7 @@ export default function DashboardLayout({
       href: "/dashboard/customers",
       label: "customers",
       icon: Icons.users,
-      active: pathname.startsWith("/dashboard/users"),
+      active: pathname.startsWith("/dashboard/customers"),
       disabled: isPlanExpired(loggedUser?.planExpiresAt),
     },
     {
@@ -96,16 +96,39 @@ export default function DashboardLayout({
                     asChild
                     isActive={route.active}
                     disabled={route.disabled}
+                    className={`
+            group flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200
+            ${
+              route.active
+                ? "bg-green-100 text-green-700 font-semibold"
+                : "text-gray-700 hover:bg-gray-100"
+            }
+            ${
+              route.disabled
+                ? "opacity-50 cursor-not-allowed"
+                : "cursor-pointer"
+            }
+          `}
                   >
                     <Link href={route.href}>
-                      <route.icon className="h-10 w-10" />
-                      <span className="text-lg">{route.label}</span>
+                      <route.icon
+                        className={`
+                h-6 w-6 transition-colors
+                ${
+                  route.active
+                    ? "text-green-600"
+                    : "text-gray-500 group-hover:text-gray-800"
+                }
+              `}
+                      />
+                      <span className="text-base">{route.label}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
           </SidebarContent>
+
           <SidebarFooter>
             <div className="flex items-center justify-between p-4">
               <div className="flex items-center gap-2">

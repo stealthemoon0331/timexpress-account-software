@@ -99,6 +99,7 @@
     "zod": "latest"
   },
   "devDependencies": {
+    "@testing-library/user-event": "^14.6.1",
     "@types/bcrypt": "^5.0.2",
     "@types/file-saver": "^2.0.7",
     "@types/jsonwebtoken": "^9.0.9",

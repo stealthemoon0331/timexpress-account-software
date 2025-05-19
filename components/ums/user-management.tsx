@@ -59,7 +59,7 @@ import {
   Team,
   user,
 } from "@/lib/ums/type";
-import { ToastContainer, toast as toastify } from "react-toastify";
+import { toast, ToastContainer, toast as toastify } from "react-toastify";
 import { toast as hotToast } from "react-hot-toast";
 import { useAuth } from "@/app/contexts/authContext";
 import "@/lib/ums/css/loading.css";
@@ -383,8 +383,7 @@ export default function UserManagement() {
 
   const handleSendCredentialToUser = (user: user) => {
     setSelectedUser(user);
-    setIsSendDialogOpen(true);
-    setIsSending(false);
+    setIsSending(true);
   };
 
   const handleDeleteUser = (user: user) => {
@@ -427,9 +426,44 @@ export default function UserManagement() {
     consoleLog("user email", selectedUser?.email);
     consoleLog("user password", selectedUser?.password);
     consoleLog("user selected systems", selectedUser?.selected_systems);
+    consoleLog("admin email", loggedUser?.email);
+    setIsSendDialogOpen(true);
 
-  }
-  
+    const email = selectedUser?.email;
+    const password = selectedUser?.password;
+    const availableSystems = selectedUser?.selected_systems;
+    const adminEmail = loggedUser?.email;
+
+    try {
+      const res = await fetch("/api/ums/customers/send-credential", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          adminEmail,
+          availableSystems,
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        toast.error("Failed to send credentials");
+        throw new Error("Failed to send credentials");
+      }
+
+      toast.success("Sent credentials successfully!");
+      setIsSendDialogOpen(false);
+      return await res.json(); // { success: true }
+    } catch (err) {
+      console.error("Error sending credentials:", err);
+      toast.error("Failed to send credentials");
+      throw err;
+    }
+  };
+
   const confirmDeleteUser = async () => {
     deletedSystemCount = 0;
 
@@ -842,15 +876,12 @@ export default function UserManagement() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog
-        open={isSendDialogOpen}
-        onOpenChange={setIsSendDialogOpen}
-      >
+      <AlertDialog open={isSendDialogOpen} onOpenChange={setIsSendDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              The credential will be sent to 
+              The credential will be sent to
               <span className="font-semibold"> {selectedUser?.name}</span>. This
               action cannot be undone.
             </AlertDialogDescription>

@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
-import { PaymentForm } from "../payment/payment-form";
+import { PaymentForm } from "../../app/dashboard/billing/payment/payment-form";
 import { toast } from "react-toastify";
 import { getPlanTitle } from "@/lib/utils";
 import { Plan } from "@/lib/data";
