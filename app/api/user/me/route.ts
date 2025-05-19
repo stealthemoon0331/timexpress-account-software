@@ -20,6 +20,8 @@ export async function GET() {
       planId: true,
       planActivatedAt: true,
       planExpiresAt: true,
+      cardBrand: true,
+      cardLast4: true,
     },
   });
 

@@ -113,7 +113,9 @@ export function DashboardStats() {
         ? format(new Date(planExpiresAt), "MMMM d, yyyy")
         : "-",
       icon: Icons.calendar,
-      bottom: planId === "free-trial" ? "$15/month after trial" : "See billing section",
+      // bottom: planId === "free-trial" ? "$15/month after trial" : "See billing section",
+      bottom: "See billing section",
+
     },
     {
       title: "Features",
