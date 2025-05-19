@@ -16,7 +16,7 @@ export default function PaymentComplete() {
 
       // Call backend to verify signature and status
       try {
-        const res = await fetch("/api/payment/payfort/handleResponse?" + new URLSearchParams(params), {
+        const res = await fetch("/api/payment/payfort/handleResponse.ts?" + new URLSearchParams(params), {
           method: "GET",
         });
 
