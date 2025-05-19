@@ -28,7 +28,6 @@ export function SubscriptionOverview() {
   const [plans, setPlans] = useState<Plan[] | null>(null);
   const [plan, setPlan] = useState<Plan>();
 
-  
   // const { planId, planActivatedAt, planExpiresAt } = loggedUser;
 
   useEffect(() => {
@@ -57,15 +56,19 @@ export function SubscriptionOverview() {
   }, []);
 
   useEffect(() => {
-    if(plans) setPlan(plans.find((p) => p.id === loggedUser?.planId));
-  }, [plans, loggedUser?.planId])
+    if (plans) setPlan(plans.find((p) => p.id === loggedUser?.planId));
+  }, [plans, loggedUser?.planId]);
 
   // const plan = plans.find((p) => p.id === planId);
   const planName = plan?.name ?? "Unknown";
   const price = plan?.price ?? "-";
 
-  const startDate = loggedUser?.planActivatedAt ? new Date(loggedUser?.planActivatedAt) : null;
-  const endDate = loggedUser?.planExpiresAt ? new Date(loggedUser?.planExpiresAt) : null;
+  const startDate = loggedUser?.planActivatedAt
+    ? new Date(loggedUser?.planActivatedAt)
+    : null;
+  const endDate = loggedUser?.planExpiresAt
+    ? new Date(loggedUser?.planExpiresAt)
+    : null;
 
   const totalDays =
     startDate && endDate
@@ -88,7 +91,10 @@ export function SubscriptionOverview() {
     setShowPaymentDialog(false);
 
     toast.success(
-      `Your subscription has been updated to the ${getPlanTitle(plans || [], loggedUser?.planId)} plan.`
+      `Your subscription has been updated to the ${getPlanTitle(
+        plans || [],
+        loggedUser?.planId
+      )} plan.`
     );
   };
 
@@ -135,9 +141,15 @@ export function SubscriptionOverview() {
           </p>
         </div>
         <div className="mt-2 flex items-center text-xs text-muted-foreground">
-          <Icons.creditCard className="mr-1 h-3 w-3" />
-          <span>{"Visa ending in 4242"}</span>{" "}
-          {/* Replace with real data later */}
+          {loggedUser?.planId &&
+            loggedUser.planId !== "free-trial" &&
+            loggedUser.cardBrand &&
+            loggedUser.cardLast4 && (
+              <>
+                <Icons.creditCard className="mr-1 h-3 w-3" />
+                <span>{`${loggedUser.cardBrand} ending in ${loggedUser.cardLast4}`}</span>
+              </>
+            )}
         </div>
       </div>
 
@@ -175,12 +187,14 @@ export function SubscriptionOverview() {
           >
             {loggedUser?.planId && (
               <PaymentForm
-                amount={
-                  plan?.price || 0.00
-                }
+                amount={plan?.price || 0.0}
                 planId={loggedUser?.planId}
                 paypalPlanId={plan?.paypalPlanId || ""}
-                subscriptionType={!loggedUser?.paypalSubscriptionId ? "create-subscription" : "update-subscription"}
+                subscriptionType={
+                  !loggedUser?.paypalSubscriptionId
+                    ? "create-subscription"
+                    : "update-subscription"
+                }
                 onSuccess={handlePaymentSuccess}
                 onCancel={() => setShowPaymentDialog(false)}
               />

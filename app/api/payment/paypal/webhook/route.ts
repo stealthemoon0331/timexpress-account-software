@@ -89,6 +89,12 @@ export async function POST(req: Request) {
 
   const subscription = await subscriptionRes.json();
 
+  console.log("subscription => ", subscription);
+
+  const cardInfo = subscription.subscriber?.payment_source?.card;
+  const cardBrand = cardInfo?.brand || null;
+  const cardLast4 = cardInfo?.last_digits || null;
+
   const paypalPlanId = subscription.plan_id;
   const nextBillingTime = new Date(subscription.billing_info?.next_billing_time);
 
@@ -102,6 +108,8 @@ export async function POST(req: Request) {
     data: {
       planId,
       planExpiresAt: nextBillingTime,
+      cardBrand,
+      cardLast4,
     },
   });
 

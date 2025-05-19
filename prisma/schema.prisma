@@ -18,6 +18,8 @@ model User {
   updatedAt            DateTime    @updatedAt
 
   // fields for plan management
+  cardBrand          String?  
+  cardLast4          String?  
   planId               String?     // Foreign key to Plan
   planActivatedAt      DateTime?
   planExpiresAt        DateTime?

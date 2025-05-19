@@ -40,6 +40,7 @@ export async function POST(req: Request) {
     }
 
     const data = await response.json();
+
     return NextResponse.json({ id: data.id, links: data.links });
   } catch (error) {
     console.error("Error creating PayPal subscription:", error);
