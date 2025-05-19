@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sha256 } from "js-sha256";
 import { REQUEST_PHRASE } from "@/app/config/setting";
+import { consoleLog } from "@/lib/utils";
 
 function generateSignature(params: Record<string, string | number>): string {
   const sortedKeys = Object.keys(params).sort();
@@ -41,16 +42,25 @@ export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const params = Object.fromEntries(url.searchParams.entries());
 
+  consoleLog("url", url);
+  consoleLog("params", url);
+  
+
+
+
   const payfortSignature = params.signature;
   delete params.signature;
 
   const calculatedSignature = generateSignature(params);
 
   if (calculatedSignature !== payfortSignature) {
+    consoleLog("Invalid signature", true);
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
   if (params.response_code && params.response_code.startsWith("14")) {
+    consoleLog("Payment success", true);
+
     return NextResponse.json({ message: "Payment successful" });
   } else {
     return NextResponse.json({
