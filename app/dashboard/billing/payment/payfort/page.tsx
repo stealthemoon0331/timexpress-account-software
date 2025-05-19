@@ -5,11 +5,13 @@ import React, { useEffect, useState } from "react";
 import { sha256 } from "js-sha256";
 import {
   ACCESS_CODE,
+  COMMAND,
   CURRENCY,
   LANGUAGE,
   MERCHANT_ID,
   PAYMENT_URL,
   REQUEST_PHRASE,
+  RETURN_URL,
 } from "@/app/config/setting";
 import { Loader } from "lucide-react";
 
@@ -29,21 +31,28 @@ const PayFortForm = ({ amount, email }: PayFortFormProps) => {
   if(email === undefined || !email) {
     return;
   }
-
+  
+  const planId = "free-trial";
   const merchantRef = `ref_${Date.now()}`;
-  const returnUrl = `https://stage.shiper.io/api/payment/payfort/payfort-complete`; // dummy success handler
+  // const agreementId = `agreement_${planId}_${Date.now()}`;
+  const agreementId = "agreement_16845810331234567"
 
   const requestParams: Record<string, string | number> = {
-    command: "PURCHASE", 
+    command: COMMAND, 
     access_code: ACCESS_CODE,
     merchant_identifier: MERCHANT_ID,
     merchant_reference: merchantRef,
     amount: amount, 
     currency: CURRENCY,
-    language: "en",
+    language: LANGUAGE,
     customer_email: email,
     order_description: "Test Order",
-    return_url: returnUrl,
+    return_url: RETURN_URL,
+
+    // Subscription
+    recurring_mode: "FIXED",
+    agreement_id: agreementId,
+    recurring_transactions_count: 9999,
   };
 
   // ✅ Signature generation
@@ -64,7 +73,7 @@ const PayFortForm = ({ amount, email }: PayFortFormProps) => {
 
   const form = document.createElement("form");
   form.method = "POST";
-  form.action = "https://sbcheckout.payfort.com/FortAPI/paymentPage";
+  form.action = PAYMENT_URL;
   // form.target = "payfort_iframe";
   form.style.display = "none";
 
