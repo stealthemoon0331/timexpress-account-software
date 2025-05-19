@@ -27,6 +27,7 @@ import prisma from "@/lib/prisma";
 import { addDays } from "date-fns";
 import { useSession } from "next-auth/react";
 import PayFortForm from "./payfort/page";
+import { useUser } from "@/app/contexts/UserContext";
 
 interface PaymentFormProps {
   amount: number;
@@ -47,13 +48,13 @@ export function PaymentForm({
 }: PaymentFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("paypal");
+  const { user: loggedUser, loading } = useUser();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // In a real app, you would call your payment API here
       console.log(`Processing payment of ${amount} with ${paymentMethod}`);
 
       // Simulate API call
@@ -155,7 +156,7 @@ export function PaymentForm({
             )}
 
             {paymentMethod === "payfort" && (
-              <PayFortForm amount={"15"} email="test.gamil.com"/>
+              <PayFortForm amount={amount * 100} email={loggedUser?.email}/>
             )}
 
             <div className="rounded-md bg-muted p-4">
