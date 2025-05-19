@@ -8,7 +8,7 @@ import { UserProvider } from "./contexts/UserContext";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import AdminPage from "./admin/dashboard/page";
 import { useEffect } from "react";
-
+import { SessionProviderWrapper } from "./session-provider";
 export const metadata: Metadata = {
   title: "Shiper",
   description: "Shiper",
@@ -29,10 +29,10 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap" rel="stylesheet"/>
       </head>
       <body className="scroll-smooth">
-          <AuthProvider>
+          <SessionProviderWrapper>
               {children}
             <ToastContainer position="top-right" autoClose={3000} />
-          </AuthProvider>
+          </SessionProviderWrapper>
       </body>
     </html>
   );
