@@ -23,7 +23,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "react-toastify";
 import { Icons } from "@/components/icons";
-import { PaymentForm } from "@/components/payment/payment-form";
+import { PaymentForm } from "@/app/dashboard/billing/payment/payment-form";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { getPlanTitle } from "@/lib/utils";
 import { Plan } from "@/lib/data";
