@@ -1,3 +1,4 @@
+// app/dashboard/billing/complete
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -26,7 +27,7 @@ const PayFortForm = ({ amount, email }: PayFortFormProps) => {
   if (submitted) return;
 
   const merchantRef = `ref_${Date.now()}`;
-  const returnUrl = `https://stage.shiper.io/dashboard/billing/complete`; // dummy success handler
+  const returnUrl = `https://stage.shiper.io/api/payment/payfort/payfort-complete`; // dummy success handler
 
   const requestParams: Record<string, string | number> = {
     command: "PURCHASE", // ✅ matches PHP
