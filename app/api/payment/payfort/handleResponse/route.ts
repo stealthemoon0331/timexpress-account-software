@@ -1,58 +1,61 @@
-// /app/api/payment/payfort/handleResponse/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import { sha256 } from "js-sha256";
-import { RESPONSE_PHRASE } from "@/app/config/setting";
+import { REQUEST_PHRASE } from "@/app/config/setting";
 
-function generateSignature(data: Record<string, string>, phrase: string): string {
-  const sorted = Object.keys(data)
-    .sort()
-    .reduce((acc: Record<string, string>, key) => {
-      acc[key] = data[key];
-      return acc;
-    }, {});
-
-  const signatureString =
-    phrase +
-    Object.entries(sorted)
-      .map(([key, value]) => `${key}=${value}`)
-      .join("") +
-    phrase;
-
-  return sha256(signatureString);
+function generateSignature(params: Record<string, string | number>): string {
+  const sortedKeys = Object.keys(params).sort();
+  const str = REQUEST_PHRASE + sortedKeys.map(key => `${key}=${params[key]}`).join('') + REQUEST_PHRASE;
+  return sha256(str);
 }
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
-  const formData = await req.formData();
-  const data: Record<string, string> = {};
+export async function POST(request: NextRequest) {
+  // PayFort sends data via POST with form-urlencoded
+  const formData = await request.formData();
+  const params: Record<string, string> = {};
+  formData.forEach((value, key) => {
+    params[key] = value.toString();
+  });
 
-  for (const [key, value] of formData.entries()) {
-    data[key] = value.toString();
+  const payfortSignature = params.signature;
+  delete params.signature;
+
+  const calculatedSignature = generateSignature(params);
+
+  if (calculatedSignature !== payfortSignature) {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  const { signature: receivedSignature, ...fieldsToSign } = data;
-  const expectedSignature = generateSignature(fieldsToSign, RESPONSE_PHRASE);
+  if (params.response_code && params.response_code.startsWith("14")) {
+    // Payment successful
+    return NextResponse.json({ message: "Payment successful" });
+  } else {
+    return NextResponse.json({
+      error: "Payment failed",
+      details: params.response_message || "Unknown error",
+    }, { status: 400 });
+  }
+}
 
-  const isSuccess = data.response_code?.startsWith("14");
-  const isValid = receivedSignature === expectedSignature;
+// Optional: support GET if PayFort redirects with query params (rare)
+export async function GET(request: NextRequest) {
+  const url = new URL(request.url);
+  const params = Object.fromEntries(url.searchParams.entries());
 
-  const result = {
-    status: isValid && isSuccess ? "success" : "fail",
-    reason: !isValid ? "invalid_signature" : `code_${data.response_code}`,
-    amount: data.amount,
-    ref: data.merchant_reference,
-    last4: data.card_number?.slice(-4),
-  };
+  const payfortSignature = params.signature;
+  delete params.signature;
 
-  return new NextResponse(
-    `<html>
-      <body style="font-family: sans-serif; text-align: center; padding: 2rem;">
-        <script>
-          window.parent.postMessage(${JSON.stringify(result)}, "*");
-        </script>
-        <p>Processing payment result...</p>
-      </body>
-    </html>`,
-    { headers: { "Content-Type": "text/html" } }
-  );
+  const calculatedSignature = generateSignature(params);
+
+  if (calculatedSignature !== payfortSignature) {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+  }
+
+  if (params.response_code && params.response_code.startsWith("14")) {
+    return NextResponse.json({ message: "Payment successful" });
+  } else {
+    return NextResponse.json({
+      error: "Payment failed",
+      details: params.response_message || "Unknown error",
+    }, { status: 400 });
+  }
 }

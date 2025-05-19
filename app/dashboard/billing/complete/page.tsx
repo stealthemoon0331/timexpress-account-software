@@ -1,26 +1,50 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
-export default function PayFortResponse() {
-  const [message, setMessage] = useState("Processing...");
+export default function PaymentComplete() {
+  const searchParams = useSearchParams();
+
+  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [message, setMessage] = useState<string>("");
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const responseCode = params.get("response_code");
-    const responseMessage = params.get("response_message");
+    async function fetchResult() {
+      // PayFort will redirect here with query params
+      const params = Object.fromEntries(searchParams.entries());
 
-    if (responseCode?.startsWith("14")) {
-      setMessage("✅ Payment successful!");
-    } else {
-      setMessage(`❌ Payment failed: ${responseMessage || "Unknown error"}`);
+      // Call backend to verify signature and status
+      try {
+        const res = await fetch("/api/payment/payfort/handleResponse?" + new URLSearchParams(params), {
+          method: "GET",
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          setStatus("success");
+          setMessage(data.message || "Payment successful");
+        } else {
+          setStatus("error");
+          setMessage(data.error || "Payment failed");
+        }
+      } catch (e) {
+        setStatus("error");
+        setMessage("Failed to verify payment status");
+      }
     }
-  }, []);
 
-  return (
-    <div className="p-8 text-center">
-      <h2 className="text-2xl font-bold mb-4">PayFort Payment Result</h2>
-      <p>{message}</p>
-    </div>
-  );
+    fetchResult();
+  }, [searchParams]);
+
+  if (status === "loading") {
+    return <div>Loading payment result...</div>;
+  }
+
+  if (status === "success") {
+    return <div style={{ color: "green" }}>{message}</div>;
+  }
+
+  return <div style={{ color: "red" }}>{message}</div>;
 }

@@ -18,19 +18,6 @@ interface PayFortFormProps {
   email: string;
 }
 
-// Signature generator
-// function generateSignature(
-//   fields: Record<string, string | number>,
-//   phrase: string
-// ): string {
-//   const sorted = Object.keys(fields)
-//     .sort()
-//     .map((key) => `${key}=${fields[key]}`)
-//     .join("");
-
-//   return sha256(phrase + sorted + phrase);
-// }
-
 const PayFortForm = ({ amount, email }: PayFortFormProps) => {
   const [submitted, setSubmitted] = useState(false);
 
