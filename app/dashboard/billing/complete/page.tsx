@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { consoleLog } from "@/lib/utils";
 
 export default function PaymentComplete() {
   const searchParams = useSearchParams();
@@ -12,7 +13,11 @@ export default function PaymentComplete() {
   useEffect(() => {
     async function fetchResult() {
       // PayFort will redirect here with query params
+
       const params = Object.fromEntries(searchParams.entries());
+      consoleLog("params", params)
+      consoleLog("/api/payment/payfort/handleResponse?", new URLSearchParams(params))
+
 
       // Call backend to verify signature and status
       try {
