@@ -32,6 +32,7 @@ import Image from "next/image";
 import { LoggedUser } from "@/types/user";
 import { useUser } from "@/app/contexts/UserContext";
 import { toast } from "react-toastify";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const profileFormSchema = z.object({
   fullName: z.string().min(2, {
@@ -181,13 +182,42 @@ export default function AccountPage() {
     }
   }
 
+  // Function to get initials from name for fallback avatar
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Account</h1>
-        <p className="text-muted-foreground">
-          Manage your account settings and preferences.
-        </p>
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-8">
+        <div className="flex-shrink-0">
+          <Avatar className="h-24 w-24 border-2 border-gray-200">
+            <AvatarImage 
+              src={session?.user?.image || ""} 
+              alt={session?.user?.name || "User"}
+              className="object-cover"
+            />
+            <AvatarFallback className="text-xl bg-upwork-green text-white">
+              {loading ? (
+                <Icons.spinner className="h-6 w-6 animate-spin" />
+              ) : (
+                getInitials(session?.user?.name)
+              )}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Account</h1>
+          <p className="text-muted-foreground">
+            Manage your account settings and preferences.
+          </p>
+        </div>
       </div>
       <Separator />
       <div className="grid gap-6 md:grid-cols-2">
