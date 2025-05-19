@@ -27,10 +27,12 @@ export const DB_PORT = process.env.DB_PORT;
 
 // Database
 
+// Payfort
 export const ACCESS_CODE = process.env.NEXT_PUBLIC_PAYFORT_ACCESS_CODE!;
 export const LANGUAGE = process.env.NEXT_PUBLIC_LANGUAGE!;
 export const MERCHANT_ID = process.env.NEXT_PUBLIC_PAYFORT_MERCHANT_IDENTIFIER!;
 export const PAYMENT_URL = process.env.NEXT_PUBLIC_PAYFORT_PAYMENT_URL!;
+export const PAYFORT_PAYMENT_BACKEND_URL =  process.env.NEXT_PUBLIC_PAYFORT_PAYMENT_BACKEND_URL!;
 export const REQUEST_PHRASE = process.env.NEXT_PUBLIC_PAYFORT_SHA_REQUEST_PHRASE!;
 export const RESPONSE_PHRASE = process.env.NEXT_PUBLIC_PAYFORT_SHA_RESPONSE_PHRASE!;
 export const RETURN_URL = process.env.NEXT_PUBLIC_PAYFORT_RETURN_URL!;

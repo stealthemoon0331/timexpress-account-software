@@ -9,6 +9,7 @@ import {
   Trash2,
   Key,
   Link,
+  Send,
 } from "lucide-react";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { Button } from "@/components/ui/button";
@@ -58,7 +59,7 @@ import {
   Team,
   user,
 } from "@/lib/ums/type";
-import { ToastContainer, toast as toastify } from "react-toastify";
+import { toast, ToastContainer, toast as toastify } from "react-toastify";
 import { toast as hotToast } from "react-hot-toast";
 import { useAuth } from "@/app/contexts/authContext";
 import "@/lib/ums/css/loading.css";
@@ -76,19 +77,21 @@ import { useData } from "@/app/contexts/dataContext";
 import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
 import { useUser } from "@/app/contexts/UserContext";
+import { consoleLog } from "@/lib/utils";
 
 export default function UserManagement() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isCreateAddDialogOpen, setIsCreateAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isSendDialogOpen, setIsSendDialogOpen] = useState(false);
   const [isPasswordResetDialogOpen, setIsPasswordResetDialogOpen] =
     useState(false);
-  const [availableSystems, setAvailableSystems] =
-    useState<system[]>([]);
+  const [availableSystems, setAvailableSystems] = useState<system[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchSystemQueryList, setSearchSystemQueryList] =
-    useState<system[]>([]);
+  const [searchSystemQueryList, setSearchSystemQueryList] = useState<system[]>(
+    []
+  );
   const [selectedUser, setSelectedUser] = useState<user>({
     id: 0,
     name: "",
@@ -114,7 +117,6 @@ export default function UserManagement() {
   const [users, setUsers] = useState<user[]>([]);
 
   const [searchedUsers, setSearchedUsers] = useState<user[]>([]);
-
 
   const [updateFailedSystems, setUpdateFailedSystems] = useState<
     FailedSystem[]
@@ -182,6 +184,7 @@ export default function UserManagement() {
   );
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const { checkAndUpdateAccessToken } = useAuth();
@@ -329,16 +332,20 @@ export default function UserManagement() {
         const fetchPlans = await response.json();
         // Check if fetchData is an array
         if (Array.isArray(fetchPlans)) {
-          setAvailableSystems(fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems);
-          setSearchSystemQueryList(fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems);
+          setAvailableSystems(
+            fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
+          );
+          setSearchSystemQueryList(
+            fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
+          );
         } else {
-          console.log("fetch plans error")
+          console.log("fetch plans error");
           return false;
         }
       } catch (error) {}
     };
 
-    fetchAvailableSystems()
+    fetchAvailableSystems();
   }, [loggedUser]);
   const handleEditUser = (user: user) => {
     setSelectedUser(user);
@@ -374,6 +381,11 @@ export default function UserManagement() {
     return team ? team.teamName : "Unknown Team";
   };
 
+  const handleSendCredentialToUser = (user: user) => {
+    setSelectedUser(user);
+    setIsSending(true);
+  };
+
   const handleDeleteUser = (user: user) => {
     setSelectedUser(user);
     setIsDeleteDialogOpen(true);
@@ -407,6 +419,49 @@ export default function UserManagement() {
 
     hotToast.error(result.error || `Failed to remove from ${system}`);
     return false;
+  };
+
+  const confirmSendUserCredential = async () => {
+    consoleLog("selectedUser", selectedUser);
+    consoleLog("user email", selectedUser?.email);
+    consoleLog("user password", selectedUser?.password);
+    consoleLog("user selected systems", selectedUser?.selected_systems);
+    consoleLog("admin email", loggedUser?.email);
+    setIsSendDialogOpen(true);
+
+    const email = selectedUser?.email;
+    const password = selectedUser?.password;
+    const availableSystems = selectedUser?.selected_systems;
+    const adminEmail = loggedUser?.email;
+
+    try {
+      const res = await fetch("/api/ums/customers/send-credential", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          adminEmail,
+          availableSystems,
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        toast.error("Failed to send credentials");
+        throw new Error("Failed to send credentials");
+      }
+
+      toast.success("Sent credentials successfully!");
+      setIsSendDialogOpen(false);
+      return await res.json(); // { success: true }
+    } catch (err) {
+      console.error("Error sending credentials:", err);
+      toast.error("Failed to send credentials");
+      throw err;
+    }
   };
 
   const confirmDeleteUser = async () => {
@@ -675,7 +730,8 @@ export default function UserManagement() {
                             );
                           })}
 
-                          {availableSystems?.filter(
+                          {availableSystems
+                            ?.filter(
                               (system: system) =>
                                 !user.selected_systems?.includes(system)
                             )
@@ -715,11 +771,18 @@ export default function UserManagement() {
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
+                            className="text-black"
+                            onClick={() => handleSendCredentialToUser(user)}
+                          >
+                            <Send className="h-4 w-4 mr-2" />
+                            Send to User
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => handleDeleteUser(user)}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
+                            Delet
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -808,6 +871,28 @@ export default function UserManagement() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isSendDialogOpen} onOpenChange={setIsSendDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The credential will be sent to
+              <span className="font-semibold"> {selectedUser?.name}</span>. This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmSendUserCredential}
+              className="bg-emerald-600 text-white hover:bg-emerald-700"
+            >
+              {isSending ? "Sending..." : "Send"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
