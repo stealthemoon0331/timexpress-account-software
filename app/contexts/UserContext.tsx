@@ -27,6 +27,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         try {
           const res = await fetch("/api/user/me");
           const userData = await res.json();
+          console.log("userData => ", userData);
           setUser(userData);
         } catch (error) {
           console.error("Failed to fetch user:", error);
