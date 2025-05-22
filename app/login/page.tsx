@@ -160,7 +160,7 @@ export default function LoginPage() {
                     </FormItem>
                   )}
                 />
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="rememberMe"
                   render={({ field }) => (
@@ -173,7 +173,7 @@ export default function LoginPage() {
                       </div>
                     </FormItem>
                   )}
-                />
+                /> */}
                 <Button
                   type="submit"
                   className="w-full bg-upwork-green hover:bg-upwork-darkgreen text-white"
