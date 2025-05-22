@@ -294,7 +294,7 @@ export default function AccountPage() {
                 onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
                 className="space-y-4"
               >
-                <FormField
+                {/* <FormField
                   control={passwordForm.control}
                   name="currentPassword"
                   render={({ field }) => (
@@ -306,7 +306,7 @@ export default function AccountPage() {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
                 <FormField
                   control={passwordForm.control}
                   name="newPassword"

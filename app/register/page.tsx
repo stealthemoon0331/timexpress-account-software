@@ -91,7 +91,7 @@ export default function RegisterPage() {
         } catch (e) {
           // fallback error if JSON parse fails
         }
-        alert(errorMessage);
+        toast.error(errorMessage);
       }
     } catch (error) {
       toast.error("Your account was not created. Please try again.");
