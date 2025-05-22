@@ -82,6 +82,7 @@ export default function AccountPage() {
     }
 
     if (status === "authenticated" && session?.user) {
+
       // Set values to form fields
       profileForm.reset({
         fullName: loggedUser?.name || "",
@@ -155,11 +156,11 @@ export default function AccountPage() {
 
     try {
       // In a real app, you would call your API here
-      console.log(values);
       const res = await fetch("/api/user/me/password", {
         method: "PUT",
         body: JSON.stringify({
           id: loggedUser?.id,
+          currentPassword: values.currentPassword,
           password: values.newPassword,
         }),
 
@@ -167,15 +168,18 @@ export default function AccountPage() {
       });
 
       if (res.ok) {
-        toast.success("Your password has been updated successfully.");
-
-        passwordForm.reset({
-          currentPassword: "",
-          newPassword: "",
-          confirmPassword: "",
-        });
+        if (res.status == 401) {
+          toast.warn("Current Password is not correct");
+        }
       }
+
+      passwordForm.reset({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
     } catch (error) {
+      console.error("Password Update Error : ", error);
       toast.error("Your password was not updated. Please try again.");
     } finally {
       setIsPasswordLoading(false);
@@ -198,8 +202,8 @@ export default function AccountPage() {
       <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-8">
         <div className="flex-shrink-0">
           <Avatar className="h-24 w-24 border-2 border-gray-200">
-            <AvatarImage 
-              src={session?.user?.image || ""} 
+            <AvatarImage
+              src={session?.user?.image || ""}
               alt={session?.user?.name || "User"}
               className="object-cover"
             />
@@ -294,7 +298,7 @@ export default function AccountPage() {
                 onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
                 className="space-y-4"
               >
-                {/* <FormField
+                <FormField
                   control={passwordForm.control}
                   name="currentPassword"
                   render={({ field }) => (
@@ -306,7 +310,7 @@ export default function AccountPage() {
                       <FormMessage />
                     </FormItem>
                   )}
-                /> */}
+                />
                 <FormField
                   control={passwordForm.control}
                   name="newPassword"
