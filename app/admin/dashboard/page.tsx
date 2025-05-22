@@ -280,9 +280,9 @@ export default function AdminPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/dashboard/overview">
+          {/* <Link href="/dashboard/overview">
             <Button variant="outline">Dashboard</Button>
-          </Link>
+          </Link> */}
           <Button
             className="bg-upwork-green hover:bg-upwork-darkgreen text-white"
             onClick={exportToExcel}
