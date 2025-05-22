@@ -2,6 +2,7 @@ export interface LoggedUser {
     id: string;
     name?: string | null;
     email?: string | null;
+    password?: string | null;
     image?: string | null;
     planActivatedAt?: string | null;
     planExpiresAt?: string | null;
