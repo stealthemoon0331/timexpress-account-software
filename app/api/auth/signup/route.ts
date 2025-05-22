@@ -11,22 +11,47 @@ export async function POST(req: Request) {
 
   const existingUser = await prisma.user.findUnique({ where: { email } });
 
+  // If email already exists
   if (existingUser) {
-    return NextResponse.json({ error: "Email already in use" }, { status: 400 });
+    if (existingUser.emailVerified) {
+      // Already verified — do not allow update
+      return NextResponse.json({ error: "Email already in use" }, { status: 400 });
+    }
+
+    // Email not verified — update user record
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const updatedUser = await prisma.user.update({
+      where: { email },
+      data: {
+        name,
+        password: hashedPassword,
+        plan: { connect: { id: "free-trial" } },
+        planActivatedAt: new Date(),
+        planExpiresAt: new Date(
+          Date.now() + Number(process.env.TRIAL_DURATION) * 24 * 60 * 60 * 1000
+        ),
+      },
+    });
+
+    return NextResponse.json(updatedUser);
   }
 
+  // New user — create fresh account
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const user = await prisma.user.create({
+  const newUser = await prisma.user.create({
     data: {
       email,
       name,
       password: hashedPassword,
       plan: { connect: { id: "free-trial" } },
       planActivatedAt: new Date(),
-      planExpiresAt: new Date(Date.now() + Number(process.env.TRIAL_DURATION)* 24 * 60 * 60 * 1000), 
+      planExpiresAt: new Date(
+        Date.now() + Number(process.env.TRIAL_DURATION) * 24 * 60 * 60 * 1000
+      ),
     },
   });
 
-  return NextResponse.json(user);
+  return NextResponse.json(newUser);
 }
