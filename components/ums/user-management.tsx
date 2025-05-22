@@ -382,8 +382,10 @@ export default function UserManagement() {
   };
 
   const handleSendCredentialToUser = (user: user) => {
+    console.log("handleSendCredentialToUser => ", user);
     setSelectedUser(user);
-    setIsSending(true);
+
+    setIsSendDialogOpen(true);
   };
 
   const handleDeleteUser = (user: user) => {
@@ -427,12 +429,15 @@ export default function UserManagement() {
     consoleLog("user password", selectedUser?.password);
     consoleLog("user selected systems", selectedUser?.selected_systems);
     consoleLog("admin email", loggedUser?.email);
-    setIsSendDialogOpen(true);
+
+    setIsSending(true);
 
     const email = selectedUser?.email;
     const password = selectedUser?.password;
     const availableSystems = selectedUser?.selected_systems;
     const adminEmail = loggedUser?.email;
+
+    let result = null;
 
     try {
       const res = await fetch("/api/ums/customers/send-credential", {
@@ -451,17 +456,23 @@ export default function UserManagement() {
       if (!res.ok) {
         const error = await res.json();
         toast.error("Failed to send credentials");
-        throw new Error("Failed to send credentials");
+        throw new Error(
+          `Failed to send credentials: ${error.message || error}`
+        );
       }
 
+      result = await res.json();
       toast.success("Sent credentials successfully!");
-      setIsSendDialogOpen(false);
-      return await res.json(); // { success: true }
     } catch (err) {
       console.error("Error sending credentials:", err);
       toast.error("Failed to send credentials");
       throw err;
+    } finally {
+      setIsSending(false);
+      setIsSendDialogOpen(false);
     }
+
+    return result;
   };
 
   const confirmDeleteUser = async () => {
@@ -888,11 +899,17 @@ export default function UserManagement() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmSendUserCredential}
-              className="bg-emerald-600 text-white hover:bg-emerald-700"
-            >
-              {isSending ? "Sending..." : "Send"}
+            <AlertDialogAction asChild>
+              <button
+                onClick={async (e) => {
+                  e.preventDefault(); // prevent auto-close
+                  await confirmSendUserCredential(); // control everything in here
+                }}
+                className="bg-emerald-600 text-white hover:bg-emerald-700"
+                disabled={isSending}
+              >
+                {isSending ? "Sending..." : "Send"}
+              </button>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

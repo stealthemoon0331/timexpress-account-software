@@ -17,6 +17,7 @@ import {
 } from "@hello-pangea/dnd";
 import { CheckCircle } from "lucide-react";
 import Select from "react-select";
+import { set } from "date-fns";
 
 const allSystems = [
   { value: "CRM", label: "CRM" },
@@ -35,6 +36,9 @@ export function AdminSubscriptionsTab() {
   );
   const [plans, setPlans] = useState<Plan[] | null>(initialPlans);
 
+  // const planIdList = ["free-trial", "starter", "pro-suite", "elite"];
+  const [planIdList, setPlanIdList] = useState<string[]>([]);
+
   useEffect(() => {
     const syncPlans = async () => {
       try {
@@ -49,11 +53,12 @@ export function AdminSubscriptionsTab() {
             typeof plan.features === "string"
               ? JSON.parse(plan.features)
               : plan.features,
-        }));
+        })) as Plan[];
         if (parsedPlans.length === 0) {
-          setPlans(initialPlans);
+          setPlanIdList([]);
         } else {
-          setPlans(parsedPlans);
+          const uniquePlanIds = Array.from(new Set(parsedPlans.map((plan) => plan.id)));
+          setPlanIdList(uniquePlanIds);
         }
       } catch (err) {
         console.error("Error loading plans:", err);
@@ -63,7 +68,7 @@ export function AdminSubscriptionsTab() {
     syncPlans();
   }, []);
 
-  const handleCreatePayPalPlan = async (plan: any) => {
+  const handleCreatePayPalPlan = async (plan: Plan) => {
     setLoadingPlans((prev) => ({ ...prev, [plan.id]: true }));
     try {
       const res = await fetch("/api/admin/payment/paypal/create-paypal-plan", {
@@ -75,6 +80,7 @@ export function AdminSubscriptionsTab() {
       if (!res.ok)
         throw new Error(data.message || "Failed to create PayPal plan");
       toast.success(`PayPal plan created: ${data.planId}`);
+      setPlanIdList((prev) => prev.includes(plan.id) ? prev : [...prev, plan.id]);
     } catch (err: any) {
       toast.error(err.message);
     } finally {
@@ -315,13 +321,16 @@ export function AdminSubscriptionsTab() {
                     ))}
                   </ul>
                   <div className="pt-4 space-y-2">
-                    <Button
-                      onClick={() => handleCreatePayPalPlan(plan)}
-                      className="w-full"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Creating..." : "Create PayPal Plan"}
-                    </Button>
+                    {!planIdList.includes(plan.id) && (
+                      <Button
+                        onClick={() => handleCreatePayPalPlan(plan)}
+                        className="w-full"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? "Creating..." : "Create PayPal Plan"}
+                      </Button>
+                    )}
+
                     <Button
                       variant="outline"
                       className="w-full"

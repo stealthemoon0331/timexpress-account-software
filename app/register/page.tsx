@@ -91,7 +91,7 @@ export default function RegisterPage() {
         } catch (e) {
           // fallback error if JSON parse fails
         }
-        alert(errorMessage);
+        toast.error(errorMessage);
       }
     } catch (error) {
       toast.error("Your account was not created. Please try again.");
@@ -225,7 +225,7 @@ export default function RegisterPage() {
                     </FormItem>
                   )}
                 />
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="plan"
                   render={({ field }) => (
@@ -299,7 +299,7 @@ export default function RegisterPage() {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
                 <Button
                   type="submit"
                   className="w-full bg-upwork-green hover:bg-upwork-darkgreen text-white"
