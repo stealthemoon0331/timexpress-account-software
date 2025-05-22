@@ -382,8 +382,11 @@ export default function UserManagement() {
   };
 
   const handleSendCredentialToUser = (user: user) => {
+
+    console.log("handleSendCredentialToUser => ", user);
     setSelectedUser(user);
     setIsSending(true);
+    setIsSendDialogOpen(true);
   };
 
   const handleDeleteUser = (user: user) => {
@@ -427,7 +430,7 @@ export default function UserManagement() {
     consoleLog("user password", selectedUser?.password);
     consoleLog("user selected systems", selectedUser?.selected_systems);
     consoleLog("admin email", loggedUser?.email);
-    setIsSendDialogOpen(true);
+    
 
     const email = selectedUser?.email;
     const password = selectedUser?.password;

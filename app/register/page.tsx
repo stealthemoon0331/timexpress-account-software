@@ -225,7 +225,7 @@ export default function RegisterPage() {
                     </FormItem>
                   )}
                 />
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="plan"
                   render={({ field }) => (
@@ -299,7 +299,7 @@ export default function RegisterPage() {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
                 <Button
                   type="submit"
                   className="w-full bg-upwork-green hover:bg-upwork-darkgreen text-white"
