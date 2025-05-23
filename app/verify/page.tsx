@@ -35,7 +35,6 @@ const VerificationSuccess = () => {
   useEffect(() => {
     const verifyToken = async () => {
       if (!token) {
-        setStatus("invalid");
         return;
       }
 
