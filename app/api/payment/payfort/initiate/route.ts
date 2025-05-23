@@ -9,15 +9,18 @@ export async function GET() {
     access_code: ACCESS_CODE,
     merchant_identifier: MERCHANT_ID,
     merchant_reference: `SUB_${Date.now()}`,
-    amount: 10000, // In smallest currency unit (e.g., 100 AED = 10000)
+    amount: 1000, // In smallest currency unit (e.g., 100 AED = 10000)
     currency: "USD",
     language: "en",
     customer_email: "kijimatakuma0331@gmail.com",
-    return_url: `https://stage.shiper.io/api/payment/payfort`,
-    agreement_id: `AGREEMENT_${Date.now()}`,
+    // return_url: `https://stage.shiper.io/api/payment/payfort`,
+    return_url: `http://localhost:3000/api/payment/payfort/payfort-complete`,
+
+    // agreement_id: `AGREEMENT_${Date.now()}`,
     recurring_mode: "FIXED",
     recurring_transactions_count: 12,
-    eci: "RECURRING"
+    eci: "ECOMMERCE",
+    remember_me: "YES"
   };
 
   // Generate signature

@@ -20,10 +20,12 @@ const subscriptions: Record<
 
 export async function POST(req: Request) {
   const formData = await req.formData();
+
+  console.log("formData => ", formData);
   const responseCode = formData.get("response_code") as string | null;
   const merchantReference = formData.get("merchant_reference") as string | null;
   const customerEmail = formData.get("customer_email") as string | null;
-  const agreementId = formData.get("agreement_id") as string | null;
+  // const agreementId = formData.get("agreement_id") as string | null;
   const amount = formData.get("amount") as string | null;
   const signature = formData.get("signature") as string | null;
 
@@ -31,7 +33,7 @@ export async function POST(req: Request) {
     !responseCode ||
     !merchantReference ||
     !customerEmail ||
-    !agreementId ||
+    // !agreementId ||
     !amount ||
     !signature
   ) {
@@ -69,13 +71,13 @@ export async function POST(req: Request) {
     const now = new Date();
     const expiryDate = addMonths(now, 1);
 
-    subscriptions[merchantReference] = {
-      email: customerEmail,
-      agreementId,
-      expiry: expiryDate,
-    };
+    // subscriptions[merchantReference] = {
+    //   email: customerEmail,
+    //   // agreementId,
+    //   expiry: expiryDate,
+    // };
 
-    console.log("Subscription stored:", subscriptions[merchantReference]);
+    // console.log("Subscription stored:", subscriptions[merchantReference]);
 
     // Redirect user to frontend page
     return NextResponse.redirect(
