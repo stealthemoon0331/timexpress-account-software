@@ -68,7 +68,7 @@ export function AdminSubscriptionsTab() {
     syncPlans();
   }, []);
 
-  const handleCreatePayPalPlan = async (plan: Plan) => {
+  const handleCreatePlan = async (plan: Plan) => {
     setLoadingPlans((prev) => ({ ...prev, [plan.id]: true }));
     try {
       const res = await fetch("/api/admin/payment/paypal/create-paypal-plan", {
@@ -78,7 +78,7 @@ export function AdminSubscriptionsTab() {
       });
       const data = await res.json();
       if (!res.ok)
-        throw new Error(data.message || "Failed to create PayPal plan");
+        throw new Error(data.message || "Failed to create plan");
       toast.success(`PayPal plan created: ${data.planId}`);
       setPlanIdList((prev) => prev.includes(plan.id) ? prev : [...prev, plan.id]);
     } catch (err: any) {
@@ -323,11 +323,11 @@ export function AdminSubscriptionsTab() {
                   <div className="pt-4 space-y-2">
                     {!planIdList.includes(plan.id) && (
                       <Button
-                        onClick={() => handleCreatePayPalPlan(plan)}
+                        onClick={() => handleCreatePlan(plan)}
                         className="w-full"
                         disabled={isLoading}
                       >
-                        {isLoading ? "Creating..." : "Create PayPal Plan"}
+                        {isLoading ? "Creating..." : "Create Plan"}
                       </Button>
                     )}
 
