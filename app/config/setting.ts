@@ -37,3 +37,10 @@ export const REQUEST_PHRASE = process.env.NEXT_PUBLIC_PAYFORT_SHA_REQUEST_PHRASE
 export const RESPONSE_PHRASE = process.env.NEXT_PUBLIC_PAYFORT_SHA_RESPONSE_PHRASE!;
 export const RETURN_URL = process.env.NEXT_PUBLIC_PAYFORT_RETURN_URL!;
 export const CURRENCY = "USD";
+
+//AWS SES SMTP
+export const SMTPHOST=process.env.SMTPHOST;
+export const SMTPPORT=process.env.SMTPPORT;
+export const SMTPUSER=process.env.SMTPUSER;
+export const SMTPPASS=process.env.SMTPPASS;
+
