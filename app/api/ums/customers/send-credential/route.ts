@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import nodemailer from "nodemailer";
+import { SMTPHOST, SMTPPORT, SMTPUSER, SMTPPASS } from "@/app/config/setting";
 
 export async function POST(req: Request) {
   try {
@@ -13,30 +15,39 @@ export async function POST(req: Request) {
       );
     }
 
-    const payload = {
-      service_id: process.env.EMAILJS_SERVICE_ID_TWO,
-      template_id: process.env.EMAILJS_SEND_CREDENTIAL_TEMPLATE_TWO,
-      user_id: process.env.EMAILJS_USER_ID_TWO,
-      accessToken: process.env.EMAILJS_ACCESS_TOKEN_TWO,
-      template_params: {
-        email,
-        password,
-        adminEmail,
-        availableSystems,
+    const transporter = nodemailer.createTransport({
+      host: SMTPHOST,
+      port: SMTPPORT,
+      secure: true, // true if using port 465
+      auth: {
+        user: SMTPUSER,
+        pass: SMTPPASS,
       },
+    } as nodemailer.TransportOptions);
+
+    const mailOptions = {
+      from: "noreply@shiper.io",
+      to: email,
+      subject: "Your Account Credentials",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+          <h2>Welcome to Timexpress!</h2>
+          <p>Your account has been created. Below are your credentials:</p>
+          <ul>
+            <li><strong>Email:</strong> ${email}</li>
+            <li><strong>Password:</strong> ${password}</li>
+            <li><strong>Admin Email:</strong> ${adminEmail}</li>
+            <li><strong>Available Systems:</strong> ${availableSystems}</li>
+          </ul>
+          <p>Please change your password after logging in for the first time.</p>
+          <p>If you have any questions, feel free to contact our support team.</p>
+          <br/>
+          <p>– Timexpress Team</p>
+        </div>
+      `,
     };
 
-    const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("❌ EmailJS send failed:", errorText);
-      return NextResponse.json({ error: "Email sending failed." }, { status: 502 });
-    }
+    await transporter.sendMail(mailOptions);
 
     return NextResponse.json({ success: true, message: "Email sent successfully." });
   } catch (err) {

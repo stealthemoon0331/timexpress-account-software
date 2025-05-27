@@ -1,24 +1,26 @@
-import { NextResponse } from "next/server"
-import prisma from "@/lib/prisma"
-import { v4 as uuidv4 } from "uuid"
-import { addMinutes } from "date-fns"
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { v4 as uuidv4 } from "uuid";
+import { addMinutes } from "date-fns";
+import nodemailer from "nodemailer";
+import { SMTPHOST, SMTPPORT, SMTPUSER, SMTPPASS } from "@/app/config/setting";
 
 export async function POST(req: Request) {
-  const { email } = await req.json()
+  const { email } = await req.json();
 
   if (!email) {
-    return NextResponse.json({ error: "Email is required" }, { status: 400 })
+    return NextResponse.json({ error: "Email is required" }, { status: 400 });
   }
 
-  const user = await prisma.user.findUnique({ where: { email } })
+  const user = await prisma.user.findUnique({ where: { email } });
 
   if (!user) {
-    // Optionally hide existence of users
-    return NextResponse.json({ success: true })
+    // To avoid exposing whether the email exists
+    return NextResponse.json({ success: true });
   }
 
-  const token = uuidv4()
-  const expires = addMinutes(new Date(), 15)
+  const token = uuidv4();
+  const expires = addMinutes(new Date(), 15);
 
   await prisma.verificationToken.create({
     data: {
@@ -26,28 +28,44 @@ export async function POST(req: Request) {
       token,
       expires,
     },
-  })
-
-  const payload = {
-    service_id: process.env.EMAILJS_SERVICE_ID,
-    template_id: process.env.EMAILJS_PWD_RESET_TEMPLATE_ID,
-    user_id: process.env.EMAILJS_USER_ID,
-    accessToken: process.env.EMAILJS_ACCESS_TOKEN,
-    template_params: {
-      email: email,
-      link: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${token}`
-    },
-  };
-
-  const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
   });
 
-//   await sendPasswordResetEmail(email, token)
+  const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${token}`;
 
-  return NextResponse.json({ success: true })
+  const transporter = nodemailer.createTransport({
+    host: SMTPHOST,
+    port: SMTPPORT,
+    secure: true,
+    auth: {
+      user: SMTPUSER,
+      pass: SMTPPASS,
+    },
+  } as nodemailer.TransportOptions);
+
+  const mailOptions = {
+    from: "noreply@shiper.io",
+    to: email,
+    subject: "Password Reset Request",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+        <h2>Password Reset Request</h2>
+        <p>Hello,</p>
+        <p>You recently requested to reset your password. Click the button below to reset it:</p>
+        <a href="${resetLink}" style="display: inline-block; padding: 10px 20px; background-color: #333; color: #fff; text-decoration: none; border-radius: 4px;">Reset Password</a>
+        <p>If you did not request this, you can safely ignore this email.</p>
+        <p>This link will expire in 15 minutes.</p>
+        <br/>
+        <p>– Timexpress Team</p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (err) {
+    console.error("Error sending reset email:", err);
+    return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
 }
