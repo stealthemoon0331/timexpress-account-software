@@ -1,4 +1,20 @@
 import { system } from "./ums/type";
+import CRM from "@/public/icons/3.svg"
+import Fleet from "@/public/icons/2.svg"
+import WMS from "@/public/icons/8.svg"
+import TMS from "@/public/icons/1.svg"
+import HR from "@/public/icons/4.svg"
+import Accounting from "@/public/icons/5.svg"
+import Quote from "@/public/icons/6.svg"
+import ToDo from "@/public/icons/7.svg"
+import Sea from "@/public/icons/9.svg"
+import Air from "@/public/icons/10.svg"
+import Customs from "@/public/icons/11.svg"
+import Courier from "@/public/icons/12.svg"
+import RTO from "@/public/icons/13.svg"
+import Bullet from "@/public/icons/12.svg"
+import PUDO from "@/public/icons/14.svg"
+import Plugin from "@/public/icons/15.svg"
 
 export interface Plan {
   id: string;
@@ -108,82 +124,97 @@ export const systems = [
 
 export const products = [
   {
-    name: "Shypri CRM",
-    icon: "https://shiper.io/assets/img/newimg/3.svg",
+    name: "CRM",
+    icon: CRM,
     url: "https://shypri.com/",
   },
   {
-    name: "Fleetp Fleet Mgt",
-    icon: "https://shiper.io/assets/img/newimg/2.svg",
+    name: "Fleet",
+    icon: Fleet,
     url: "https://fleetp.com/",
   },
   {
-    name: "WMS Ninja Inventory",
-    icon: "https://shiper.io/assets/img/newimg/8.svg",
+    name: "WMS",
+    icon: WMS,
     url: "https://wmsninja.com/signin",
   },
   {
-    name: "Shypv B2C E-Commerce",
-    icon: "https://shiper.io/assets/img/newimg/1.svg",
-    url: "https://www.shypv.com/",
-  },
-  {
-    name: "ShypRTO Reverse Logistics",
-    icon: "https://shiper.io/assets/img/newimg/4.svg",
-    url: "http://shyprto.com/",
-  },
-  {
-    name: "Transport Management Software(TMS)",
-    icon: "https://shiper.io/assets/img/newimg/5.svg",
+    name: "TMS",
+    icon: TMS,
     url: "https://shiper.io/app/accounting",
   },
   {
-    name: "Hurricane Customs",
-    icon: "https://shiper.io/assets/img/newimg/6.svg",
-    url: "http://hurricanecommerce.com/",
+    name: "HR",
+    icon: HR,
+    url: "https://hr.shypon.com/",
   },
   {
-    name: "Arashyp Cross Border USA & UK",
-    icon: "https://shiper.io/assets/img/newimg/7.svg",
-    url: "https://www.arashyp.com/",
+    name: "Accounting",
+    icon: Accounting,
+    url: "https://stage.shypon.com/",
   },
   {
-    name: "SeaRates Sea Quotes",
-    icon: "https://shiper.io/assets/img/newimg/9.svg",
-    url: "https://www.searates.com/",
+    name: "Quote/Contracts",
+    icon: Quote,
+    url: "http://quote.shypon.com/",
   },
   {
-    name: "Freightos Air Quotes",
-    icon: "https://shiper.io/assets/img/newimg/10.svg",
+    name: "To Do",
+    icon: ToDo,
+    url: "https://www.arashyp.com",
+  },
+  {
+    name: "Sea",
+    icon: Sea,
+    url: "http://www.searates.com/",
+  },
+  {
+    name: "Air",
+    icon: Air,
     url: "https://www.freightos.com/",
   },
   {
-    name: "Timex C2C Express",
-    icon: "https://shiper.io/assets/img/newimg/11.svg",
-    url: "https://www.timexpress.ae/",
+    name: "Customs",
+    icon: Customs,
+    url: "https://shiper.io/#",
   },
   {
-    name: "ShypV Bullet Express",
-    icon: "https://shiper.io/assets/img/newimg/12.svg",
-    url: "https://www.shypv.com/go/book?login=true",
+    name: "Courier",
+    icon: Courier,
+    url: "https://shiper.io/#",
   },
+  // {
+  //   name: "Timex C2C Express",
+  //   icon: "https://shiper.io/assets/img/newimg/11.svg",
+  //   url: "https://www.timexpress.ae/",
+  // },
+  // {
+  //   name: "ShypV Bullet Express",
+  //   icon: "https://shiper.io/assets/img/newimg/12.svg",
+  //   url: "https://www.shypv.com/go/book?login=true",
+  // },
   
 ];
 
 export const products1 = [
   {
-    name: "Couryier USA",
-    icon: "https://shiper.io/assets/img/newimg/13.svg",
-    url: "https://couryier.us/",
+    name: "RTO",
+    icon: RTO,
+    url: "https://shyprto.com/",
+  },
+  {
+    name: "Bullet",
+    icon: Bullet,
+    url: "https://www.shypv.com/go/book?login=true",
   },
   {
     name: "PUDO",
-    icon: "https://shiper.io/assets/img/newimg/14.svg",
-    url: "https://www.pudo.ae/",
+    icon: PUDO,
+    url: "https://www.pudo.ae",
   },
   {
-    name: "Plug In's Shopify, Magento, Woo Commerce",
-    icon: "https://shiper.io/assets/img/newimg/15.svg",
+    name: "Plug in'",
+    icon: Plugin,
     url: "https://www.timexpress.ae/smart-send",
   },
 ]
