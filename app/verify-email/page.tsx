@@ -27,8 +27,6 @@ export default function VerifyEmailPage() {
     setEmail(emailFromUrl)
   }, [])
 
-  console.log("email => ", email);
-
   useEffect(() => {
     if (email && !hasAutoSentRef.current) {
       console.log("useEffect calling")

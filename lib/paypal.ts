@@ -44,7 +44,7 @@ export async function createPayPalProduct(name: string, token: string) {
   })
   const data = await res.json()
   
-  if (!res.ok) throw new Error("Failed to create PayPal product")
+  if (!res.ok) throw new Error("Failed to create product")
   return data
 }
 
@@ -93,6 +93,6 @@ export async function createPayPalPlan({
   const data = await res.json()
   console.log("PayPal API Response status:", res.status)
   console.log("PayPal API Response body:", data)
-  if (!res.ok) throw new Error("Failed to create PayPal billing plan")
+  if (!res.ok) throw new Error("Failed to create billing plan")
   return data
 }

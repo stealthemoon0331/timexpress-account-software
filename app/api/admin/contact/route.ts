@@ -1,5 +1,7 @@
 import { consoleLog } from "@/lib/utils";
 import { NextResponse } from "next/server";
+import nodemailer from "nodemailer";
+import { SMTPHOST, SMTPPORT, SMTPUSER, SMTPPASS } from "@/app/config/setting";
 
 export async function POST(req: Request) {
   try {
@@ -13,41 +15,36 @@ export async function POST(req: Request) {
       companySize,
       interest,
     } = body;
+
     consoleLog("country", country);
-    consoleLog("EMAILJS_SERVICE_ID_TWO", process.env.EMAILJS_SERVICE_ID_TWO)
-    consoleLog("EMAILJS_ACCESS_TOKEN_TWO", process.env.EMAILJS_ACCESS_TOKEN_TWO)
-    consoleLog("EMAILJS_USER_ID_TWO", process.env.EMAILJS_USER_ID_TWO)
-    consoleLog("EMAILJS_CONTACT_TEMPLATE_ID_TWO", process.env.EMAILJS_CONTACT_TEMPLATE_ID_TWO);
-    const payload = {
-      service_id: process.env.EMAILJS_SERVICE_ID_TWO,
-      template_id: process.env.EMAILJS_CONTACT_TEMPLATE_ID_TWO,
-      user_id: process.env.EMAILJS_USER_ID_TWO, // Usually required unless using accessToken only
-      accessToken: process.env.EMAILJS_ACCESS_TOKEN_TWO, // For private templates
-      template_params: {
-        fullName,
-        userEmail,
-        phone,
-        country,
-        company,
-        companySize,
-        interest,
-        email: process.env.COMPANY_CONTACT_EMAIL_TWO
+
+    const transporter = nodemailer.createTransport({
+      host: SMTPHOST,
+      port: SMTPPORT,
+      secure: true, // usually true for 465, false for 587
+      auth: {
+        user: SMTPUSER,
+        pass: SMTPPASS,
       },
+    } as nodemailer.TransportOptions);
+
+    const mailOptions = {
+      from: "noreply@shiper.io",
+      to: process.env.COMPANY_CONTACT_EMAIL_TWO,
+      subject: "New Contact Form Submission",
+      html: `
+        <h2>Contact Form Submission</h2>
+        <p><strong>Full Name:</strong> ${fullName}</p>
+        <p><strong>Email:</strong> ${userEmail}</p>
+        <p><strong>Phone:</strong> ${phone}</p>
+        <p><strong>Country:</strong> ${country}</p>
+        <p><strong>Company:</strong> ${company}</p>
+        <p><strong>Company Size:</strong> ${companySize}</p>
+        <p><strong>Interest:</strong> ${interest}</p>
+      `,
     };
 
-    const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("EmailJS error response:", errorText);
-      return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
-    }
+    await transporter.sendMail(mailOptions);
 
     return NextResponse.json({ success: true });
   } catch (err) {

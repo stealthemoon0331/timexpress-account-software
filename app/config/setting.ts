@@ -38,3 +38,10 @@ export const RETURN_URL = process.env.NEXT_PUBLIC_PAYFORT_RETURN_URL!;
 export const RETURN_PAGE_URL = process.env.NEXT_PUBLIC_PAYFORT_RETURN_PAGE_URL
 export const COMMAND = "PURCHASE";
 export const CURRENCY = "USD";
+
+//AWS SES SMTP
+export const SMTPHOST=process.env.SMTPHOST;
+export const SMTPPORT=process.env.SMTPPORT;
+export const SMTPUSER=process.env.SMTPUSER;
+export const SMTPPASS=process.env.SMTPPASS;
+
