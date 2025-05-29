@@ -4,7 +4,7 @@ import Image from "next/image";
 export default function LogisticsTagline() {
   return (
     <div className="flex flex-col items-center md:items-center md:text-left mt-10 font-caveat font-semibold leading-tight">
-      <h1 className="text-3xl sm:text-5xl md:text-[4rem] italic font-medium leading-snug">
+      <h1 className="text-5xl sm:text-5xl md:text-[4rem] italic font-medium leading-snug">
         "All your logistics on
         <br className="block md:hidden" />
         <span className="hidden md:inline">&nbsp;</span>
