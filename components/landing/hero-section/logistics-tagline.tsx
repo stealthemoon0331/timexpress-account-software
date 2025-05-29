@@ -1,32 +1,33 @@
-import ArrowBlue from "@/public/icons/arrow_blue.svg"
+import ArrowBlue from "@/public/icons/arrow_blue.svg";
 import Image from "next/image";
 
 export default function LogisticsTagline() {
   return (
-    <div className=" flex flex-col items-start font-caveat leading-[0.9] font-semibold text-center mt-10">
-      <h1 className="md:text-[4rem] sm:text-5xl font-caveat italic font-medium leading-snug">
+    <div className="flex flex-col items-center md:items-start text-center md:text-left mt-10 font-caveat font-semibold leading-tight">
+      
+      <h1 className="text-3xl sm:text-5xl md:text-[4rem] italic font-medium leading-snug">
         "All your logistics on <br />
-        <span className="bg-[url('/assets/img/green_highlight_01.png')] bg-center bg-no-repeat bg-contain whitespace-nowrap">
+        <span className="inline-block bg-[url('/assets/img/green_highlight_01.png')] bg-center bg-no-repeat bg-contain px-1 whitespace-nowrap">
           one platform."
         </span>
       </h1>
 
-      <h2 className="font-bold md:text-[4rem] text-2xl sm:text-3xl mt-6 font-caveat italic relative mb-5">
+      <h2 className="text-2xl sm:text-3xl md:text-[4rem] mt-6 italic font-bold relative mb-5">
         Easy, Fast and{" "}
-        <span className="relative bg-[url('/assets/img/darkgrey_highlight.png')] bg-bottom bg-no-repeat bg-contain whitespace-nowrap">
+        <span className="inline-block bg-[url('/assets/img/darkgrey_highlight.png')] bg-bottom bg-no-repeat bg-contain px-1 whitespace-nowrap">
           Reliable!
         </span>
-        {/* Optional doodle element (mimics the <em> with image + price) */}
-        <em className="absolute top-10 right hidden lg:inline rotate-[350deg] -mt-3 -me-10 text-center text-[#1bb6f9] font-caveat text-[1.75rem] leading-tight not-italic">
+
+        {/* Decorative pricing badge for large screens */}
+        <em className="hidden lg:flex flex-col items-center absolute top-full right-0 translate-y-[-50%] text-[#1bb6f9] font-caveat text-[1.75rem] leading-tight not-italic">
           <Image
             src={ArrowBlue}
             alt="Arrow Icon"
             loading="lazy"
-            className="block mb-3"
+            className="mb-2"
           />
-          <span>US$&nbsp;27.50 / month</span>
-          <br />
-          for ALL apps
+          <span>US$ 27.50 / month</span>
+          <span>for ALL apps</span>
         </em>
       </h2>
     </div>
