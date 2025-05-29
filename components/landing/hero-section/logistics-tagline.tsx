@@ -1,3 +1,6 @@
+import ArrowBlue from "@/public/icons/arrow_blue.svg"
+import Image from "next/image";
+
 export default function LogisticsTagline() {
   return (
     <div className=" flex flex-col items-start font-caveat leading-[0.9] font-semibold text-center mt-10">
@@ -15,8 +18,8 @@ export default function LogisticsTagline() {
         </span>
         {/* Optional doodle element (mimics the <em> with image + price) */}
         <em className="absolute top-10 right hidden lg:inline rotate-[350deg] -mt-3 -me-10 text-center text-[#1bb6f9] font-caveat text-[1.75rem] leading-tight not-italic">
-          <img
-            src="https://shiper.io/assets/img/arrow_blue.png"
+          <Image
+            src={ArrowBlue}
             alt="Arrow Icon"
             loading="lazy"
             className="block mb-3"

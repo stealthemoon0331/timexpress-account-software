@@ -8,6 +8,8 @@ import LogisticsTagline from "./logistics-tagline";
 import AnimatedSection from "../AnimatedAction";
 import { useState } from "react";
 import DemoModal from "../DemoModal";
+import HomeImage from "@/public/icons/WhatsApp Image.svg"
+
 
 export const HeroSection = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -40,7 +42,7 @@ export const HeroSection = () => {
 
             <div className="flex flex-col justify-center">
               <Image
-                src="https://shiper.io/assets/img/newimg/homeimg.svg"
+                src={HomeImage}
                 alt="Logistics illustration"
                 width={550}
                 height={400}

@@ -1,7 +1,7 @@
 // app/api/payment/payfort/initiate/route.ts
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { ACCESS_CODE, MERCHANT_ID, REQUEST_PHRASE } from "@/app/config/setting";
+import { ACCESS_CODE, MERCHANT_ID, REQUEST_PHRASE, RETURN_URL } from "@/app/config/setting";
 
 export async function GET() {
   const params = {
@@ -14,7 +14,7 @@ export async function GET() {
     language: "en",
     customer_email: "kijimatakuma0331@gmail.com",
     // return_url: `https://stage.shiper.io/api/payment/payfort`,
-    return_url: `http://localhost:3000/api/payment/payfort/payfort-complete`,
+    return_url: RETURN_URL,
 
     // agreement_id: `AGREEMENT_${Date.now()}`,
     recurring_mode: "FIXED",

@@ -94,22 +94,22 @@ const PayFortForm = ({ amount, email }: PayFortFormProps) => {
     const res = await fetch("/api/payment/payfort/initiate");
     const params = await res.json();
 
-    console.log("params => ", params);
+    console.log("* params => ", params);
     // return;
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = "https://sbcheckout.payfort.com/FortAPI/paymentPage";
+    // const form = document.createElement("form");
+    // form.method = "POST";
+    // form.action = "https://sbcheckout.payfort.com/FortAPI/paymentPage";
 
-    Object.entries(params).forEach(([key, value]) => {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = key;
-      input.value = value.toString();
-      form.appendChild(input);
-    });
+    // Object.entries(params).forEach(([key, value]) => {
+    //   const input = document.createElement("input");
+    //   input.type = "hidden";
+    //   input.name = key;
+    //   input.value = value.toString();
+    //   form.appendChild(input);
+    // });
 
-    document.body.appendChild(form);
-    form.submit();
+    // document.body.appendChild(form);
+    // form.submit();
   };
 
   return (
