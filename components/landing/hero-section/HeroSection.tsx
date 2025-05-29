@@ -19,19 +19,19 @@ export const HeroSection = () => {
         <div className="container px-6 md:px-12 lg:px-24">
           <div className="flex flex-col-reverse lg:flex-row items-center justify-between gap-12">
             {/* Text and Buttons */}
-            <div className="flex flex-col justify-center space-y-4 text-center lg:text-left">
+            <div className="flex flex-col justify-center space-y-4 text-center lg:text-left w-full">
               <LogisticsTagline />
 
-              <div className="flex flex-col gap-4 sm:flex-row justify-center lg:justify-start pt-8">
+              <div className="flex flex-col gap-4 sm:flex-row justify-center pt-8 items-center">
                 <Link href="/register">
-                  <Button className="px-8 bg-upwork-green hover:bg-upwork-darkgreen text-white w-full sm:w-auto">
+                  <Button className="px-8 bg-upwork-green hover:bg-upwork-darkgreen text-white w-auto">
                     Start now - It's free
                   </Button>
                 </Link>
                 <Button
                   variant="outline"
                   onClick={() => setModalOpen(true)}
-                  className="px-8 border-upwork-green text-upwork-green hover:bg-upwork-lightgreen w-full sm:w-auto"
+                  className="px-8 border-upwork-green text-upwork-green hover:bg-upwork-lightgreen w-auto"
                 >
                   Schedule a demo
                 </Button>
@@ -39,7 +39,7 @@ export const HeroSection = () => {
             </div>
 
             {/* Image */}
-            <div className="flex justify-center">
+            <div className="flex justify-center lg:hidden">
               <Image
                 src={HomeImage}
                 alt="Logistics illustration"
