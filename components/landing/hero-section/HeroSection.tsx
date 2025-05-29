@@ -39,7 +39,7 @@ export const HeroSection = () => {
             </div>
 
             {/* Image */}
-            <div className="flex justify-center lg:hidden">
+            <div className="flex justify-center md:hidden">
               <Image
                 src={HomeImage}
                 alt="Logistics illustration"
