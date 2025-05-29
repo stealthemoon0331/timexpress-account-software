@@ -6,14 +6,14 @@ export default function LogisticsTagline() {
     <div className=" flex flex-col items-start font-caveat leading-[0.9] font-semibold text-center mt-10">
       <h1 className="md:text-[4rem] sm:text-5xl font-caveat italic font-medium leading-snug">
         "All your logistics on <br />
-        <span className="bg-[url('https://shiper.io/assets/img/green_highlight_01.png')] bg-center bg-no-repeat bg-contain whitespace-nowrap">
+        <span className="bg-[url('/assets/img/green_highlight_01.png')] bg-center bg-no-repeat bg-contain whitespace-nowrap">
           one platform."
         </span>
       </h1>
 
       <h2 className="font-bold md:text-[4rem] text-2xl sm:text-3xl mt-6 font-caveat italic relative mb-5">
         Easy, Fast and{" "}
-        <span className="relative bg-[url('https://shiper.io/assets/img/darkgrey_highlight.png')] bg-bottom bg-no-repeat bg-contain whitespace-nowrap">
+        <span className="relative bg-[url('/assets/img/darkgrey_highlight.png')] bg-bottom bg-no-repeat bg-contain whitespace-nowrap">
           Reliable!
         </span>
         {/* Optional doodle element (mimics the <em> with image + price) */}

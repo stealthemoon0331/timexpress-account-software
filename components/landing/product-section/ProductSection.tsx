@@ -20,7 +20,7 @@ export const ProductsSection = ({ products, products1 }: Props) => (
   >
     <div
       aria-hidden="true"
-      className="absolute inset-0 bg-[url('https://shiper.io/assets/img/03.svg?c4=%23ffffff')] bg-top bg-no-repeat bg-[length:100%_auto] pointer-events-none"
+      className="absolute inset-0 bg-[url('/assets/img/03.svg')] bg-top bg-no-repeat bg-[length:100%_auto] pointer-events-none"
     ></div>
     <div className="container p-40 relative z-10 w-[65%]">
       {/* <div className="text-center space-y-4 mb-20">
