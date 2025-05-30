@@ -7,7 +7,7 @@ import HR from "@/public/icons/4.svg"
 import Accounting from "@/public/icons/5.svg"
 import Quote from "@/public/icons/6.svg"
 import ToDo from "@/public/icons/7.svg"
-import Sea from "@/public/icons/9.svg"
+import RAS from "@/public/icons/9.svg"
 import Air from "@/public/icons/10.svg"
 import Customs from "@/public/icons/11.svg"
 import Courier from "@/public/icons/12.svg"
@@ -161,27 +161,27 @@ export const products = [
   {
     name: "To Do",
     icon: ToDo,
-    url: "https://www.arashyp.com",
+    url: "https://todo.shypon.com",
   },
   {
-    name: "Sea",
-    icon: Sea,
-    url: "http://www.searates.com/",
+    name: "RAS",
+    icon: RAS,
+    url: "https://www.arashyp.com/",
   },
   {
-    name: "Air",
+    name: "Timesheet",
     icon: Air,
-    url: "https://www.freightos.com/",
+    url: "https://timesheet.shypon.com/",
   },
   {
     name: "Customs",
     icon: Customs,
-    url: "https://shiper.io/#",
+    url: "https://hurricanecommerce.com",
   },
   {
     name: "Courier",
     icon: Courier,
-    url: "https://shiper.io/#",
+    url: "https://parcels.shypv.com/",
   },
   // {
   //   name: "Timex C2C Express",
