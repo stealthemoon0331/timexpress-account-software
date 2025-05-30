@@ -15,9 +15,10 @@ export default function LogisticsTagline() {
 
       <h2 className="text-2xl sm:text-3xl md:text-[4rem] mt-6 italic font-bold relative mb-5">
         Easy, Fast and{" "}
-        <span className="inline-block bg-[url('/assets/img/darkgrey_highlight.png')] bg-bottom bg-no-repeat bg-contain px-1 whitespace-nowrap md:mt-10">
+        <span className="bg-[url('/assets/img/darkgrey_highlight.png')] bg-bottom bg-no-repeat bg-contain px-1 whitespace-nowrap md:mt-30">
           Reliable!
         </span>
+        {/* Reliable */}
         {/* Decorative pricing badge for large screens */}
         <em className="hidden xl:flex flex-col items-center absolute top-full right-[-100px] translate-y-[-0%] text-[#1bb6f9] font-caveat text-[1.75rem] leading-tight not-italic">
           <Image
