@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { nanoid } from "nanoid";
 
 export async function POST(req: Request) {
   const { name, email, password } = await req.json();
@@ -21,11 +22,16 @@ export async function POST(req: Request) {
     // Email not verified — update user record
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    const tenantId = nanoid();
+
+    console.log("tenantId ==> ", tenantId);
+
     const updatedUser = await prisma.user.update({
       where: { email },
       data: {
         name,
         password: hashedPassword,
+        tenantId: tenantId,
         plan: { connect: { id: "free-trial" } },
         planActivatedAt: new Date(),
         planExpiresAt: new Date(
