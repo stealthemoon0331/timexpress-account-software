@@ -20,11 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  accesses,
-  branches,
-  systemRoles,
-} from "@/lib/ums/data";
+import { accesses, branches, systemRoles } from "@/lib/ums/data";
 import { X } from "lucide-react";
 // import {
 //   CRM_API_PATH,
@@ -32,20 +28,26 @@ import { X } from "lucide-react";
 //   TMS_API_PATH,
 //   WMS_API_PATH,
 // } from "@/app/config/setting";
-import { system, Team, user } from "@/lib/ums/type";
+import {
+  FormUser,
+  SelectedSystemRoles,
+  system,
+  Team,
+  user,
+} from "@/lib/ums/type";
 import { getBranchName, getRoleId, getRoleName } from "@/lib/ums/utils";
 import { toast as toastify } from "react-toastify";
 import { toast as hotToast } from "react-hot-toast";
 import { useAuth } from "@/app/contexts/authContext";
 import InputWrapper from "./input-wrapper";
 import { useData } from "@/app/contexts/dataContext";
+// import { addUserToSystemsAndUMS } from "@/lib/ums/systemHandlers/add/addUserToKeycloak";
 
 interface CreateUserDialogProps {
   availableSystems: system[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   addNewUser: (user: user) => void;
-
 }
 
 export function CreateUserDialog({
@@ -59,7 +61,7 @@ export function CreateUserDialog({
   const [selectedAccess, setSelectedAccess] = useState<string>();
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [isSending, setIsSending] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormUser>({
     name: "",
     email: "",
     username: "",
@@ -76,10 +78,10 @@ export function CreateUserDialog({
     crm_user_role_id: -1,
     tms_user_id: -1,
     tms_user_role_id: -1,
-    selected_systems: [""],
+    selected_systems: [],
     access: "",
     teams: [""],
-    systems_with_permission: [""],
+    systems_with_permission: [],
   });
 
   const { access_token, addUserToKeycloak } = useAuth();
@@ -99,12 +101,13 @@ export function CreateUserDialog({
   }, [selectedTeams]);
 
   // System-specific role selections
-  const [systemRoleSelections, setSystemRoleSelections] = useState({
-    CRM: "",
-    WMS: "",
-    FMS: "",
-    TMS: "",
-  });
+  const [systemRoleSelections, setSystemRoleSelections] =
+    useState<SelectedSystemRoles>({
+      CRM: "",
+      WMS: "",
+      FMS: "",
+      TMS: "",
+    });
 
   const getTeamName = (teamId: string): string => {
     console.log(teamId);
@@ -212,7 +215,18 @@ export function CreateUserDialog({
       return;
     }
     console.log("selectedSystems before saving into system ", selectedSystems);
+
+    const keycloakResponse = await addUserToKeycloak(
+      formData.username,
+      formData.email,
+      formData.password,
+      selectedSystems
+    );
+
     // Create a user in the central SSO system
+
+    setIsSending(true);
+
     const ssoUser = {
       ...formData,
       systems: selectedSystems.map((system) => ({
@@ -225,21 +239,28 @@ export function CreateUserDialog({
       teams: formData.teams.filter((team) => team !== ""),
     };
 
-    let fms_user_id = -1;
-    let crm_user_id = -1;
-    let wms_user_id = -1;
-    let tms_user_id = -1;
-    let registered_system: any[] = [];
-    let countsOfRegisteredSystem = 0;
-    setIsSending(true);
-    const keycloakResponse = await addUserToKeycloak(
-      formData.username,
-      formData.email,
-      formData.password,
-      selectedSystems
-    );
-
     if (!keycloakResponse.error) {
+
+      // await addUserToSystemsAndUMS(
+      //   formData,
+      //   selectedSystems,
+      //   systemRoleSelections,
+      //   access_token,
+      //   selectedAccess,
+      //   selectedBranches
+      // ).then((res) => {
+
+      // }).catch((error) => {
+        
+      // });
+
+      let fms_user_id = -1;
+      let crm_user_id = -1;
+      let wms_user_id = -1;
+      let tms_user_id = -1;
+      let registered_system: any[] = [];
+      let countsOfRegisteredSystem = 0;
+
       try {
         const results = await Promise.allSettled(
           selectedSystems.map(async (system) => {
@@ -255,7 +276,9 @@ export function CreateUserDialog({
                 selectedAccess: selectedAccess,
               }),
             });
+
             const responseData = await response.json();
+            
             if (!response.ok) {
               const error = await response.json();
               throw new Error(error.message);
@@ -291,6 +314,7 @@ export function CreateUserDialog({
           duration: 5000,
         });
       }
+
       if (countsOfRegisteredSystem < selectedSystems.length) {
         toastify.warn("Failed to register user for all systems.", {
           autoClose: 3000,
@@ -349,13 +373,13 @@ export function CreateUserDialog({
           })
           .catch((error) => {
             console.error("Error creating user:", error);
-            hotToast.error(keycloakResponse.message, {
+            hotToast.error("Error creating users", {
               duration: 3000,
             });
             setIsSending(false);
           });
       } else {
-        hotToast.error("System Registeration Failed", {
+        hotToast.error("User was not registered at any system.", {
           duration: 5000,
         });
       }

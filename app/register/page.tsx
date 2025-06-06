@@ -112,6 +112,8 @@ export default function RegisterPage() {
       if (result?.error) {
         toast.error(`Authentication failed: ${result.error}`);
       } else {
+        
+
         router.push("/dashboard/overview");
         toast.success("Welcome to Shiper.io! Your account has been created.");
       }

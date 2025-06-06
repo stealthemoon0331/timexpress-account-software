@@ -159,6 +159,7 @@ export async function registerUserToWMS({
       id: roleId,
       role: getRoleName(system, roleId),
     },
+    tenant_id: ssoUser.tenant_id,
     status: 1,
   };
 

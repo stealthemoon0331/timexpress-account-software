@@ -21,45 +21,72 @@ const VerificationSuccess = () => {
   );
 
   // Get the email from the URL query parameters
-  const [token, setToken] = useState<string | null>(null)
-  const [email, setEmail] = useState<string | null>(null)
+  const [token, setToken] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const tokenFromUrl = params.get("token")
-    const emailFromUrl = params.get("email")
-    setToken(tokenFromUrl)
-    setEmail(emailFromUrl)
-  }, [])
+    const params = new URLSearchParams(window.location.search);
+    const tokenFromUrl = params.get("token");
+    const emailFromUrl = params.get("email");
+    setToken(tokenFromUrl);
+    setEmail(emailFromUrl);
+  }, []);
 
   useEffect(() => {
-    const verifyToken = async () => {
-      if (!token) {
-        return;
-      }
-
-      try {
-        const res = await fetch(`/api/auth/verify-token`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({token, email})
-        });
-
-        if (res.ok) {
-          setStatus("valid");
-          localStorage.setItem("token", token);
-        } else {
-          setStatus("invalid");
-        }
-      } catch (error) {
-        setStatus("invalid");
-      }
-    };
-
     verifyToken();
   }, [token, email]);
+
+  const verifyToken = async () => {
+    if (!token || !email) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/auth/verify-token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token, email }),
+      });
+
+      if (res.ok) {
+        setStatus("valid");
+
+        // Register User into available systems
+
+        registerAdminToSystems(email);
+
+        localStorage.setItem("token", token);
+      } else {
+        setStatus("invalid");
+      }
+    } catch (error) {
+      setStatus("invalid");
+    }
+  };
+
+  const registerAdminToSystems = async (email: string) => {
+    try {
+      const res = await fetch(`/api/user/system-registeration`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if(res.ok) {
+
+      } else {
+        
+      }
+
+    } catch (error) {
+
+    }
+  }
+
 
   // Auto-redirect to login after countdown
   useEffect(() => {
