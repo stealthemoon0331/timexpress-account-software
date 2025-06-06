@@ -15,8 +15,6 @@ export const KEYCLOAK_CLIENT_SECRET = process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_SE
 export const KEYCLOAK_REALM = process.env.NEXT_PUBLIC_KEYCLOAK_REALM || "";
 export const KEYCLOAK_USERNAME = process.env.NEXT_PUBLIC_KEYCLOAK_USERNAME || "";
 export const KEYCLOAK_PASSWORD = process.env.NEXT_PUBLIC_KEYCLOAK_PASSWORD || "";
-export const KEYCLOAK_WMS_UUID = process.env.NEXT_PUBLIC_KEYCLOAK_WMS_UUID || "";
-export const KEYCLOAK_WMS_ACCESS_ROLE_UUID=process.env.NEXT_PUBLIC_KEYCLOAK_WMS_ACCESS_UUID || "";
 
 export const DB_HOST = process.env.DB_HOST;
 export const DB_USER = process.env.DB_USER;
