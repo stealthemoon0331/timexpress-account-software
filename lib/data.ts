@@ -141,7 +141,7 @@ export const products = [
   {
     name: "TMS",
     icon: TMS,
-    url: "https://shiper.io/app/accounting",
+    url: "https://tms-dashboard.shypv.com",
   },
   {
     name: "HR",
@@ -151,7 +151,7 @@ export const products = [
   {
     name: "Accounting",
     icon: Accounting,
-    url: "https://stage.shypon.com/",
+    url: "https://accounts.shypon.com/",
   },
   {
     name: "Quote/Contracts",
