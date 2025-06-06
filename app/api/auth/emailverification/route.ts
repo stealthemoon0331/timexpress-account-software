@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import prisma from "@/lib/prisma";
 import { generateVerificationToken } from "@/lib/tokens";
-import { SMTPHOST, SMTPPASS, SMTPPORT, SMTPUSER } from "@/app/config/setting";
+import { SMTPHOST, SMTPPASS, SMTPPORT, SMTPUSER, } from "@/app/config/setting";
 
 export async function POST(req: Request) {
   try {
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     const transporter = nodemailer.createTransport({
       host: SMTPHOST,
       port: SMTPPORT,
-      secure: true, // true for port 465, false for other ports
+      secure: SMTPPORT === "465", // true for port 465, false for other ports
       auth: {
         user: SMTPUSER,
         pass: SMTPPASS,

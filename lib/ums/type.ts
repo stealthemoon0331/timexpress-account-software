@@ -23,6 +23,13 @@ export interface PermissionedSystem {
   systems: system[];
 }
 
+export interface SelectedSystemRoles {
+  CRM: string;
+  WMS: string;
+  FMS: string;
+  TMS: string;
+}
+
 export interface DecodedToken {
   id: number;
   name: string;
@@ -77,6 +84,29 @@ export type FormUser = {
   systems_with_permission: system[];
   access: string;
   teams: string[];
+};
+
+export type FormDataType = {
+  name: string;
+  email: string;
+  username: string;
+  password: string;
+  confirmPassword: string;
+  phone: string;
+  mobile: string;
+  fms_user_id: number;
+  fms_branch: string[];
+  fms_user_role_id: number;
+  wms_user_id: number;
+  wms_user_role_id: number;
+  crm_user_id: number;
+  crm_user_role_id: number;
+  tms_user_id: number;
+  tms_user_role_id: number;
+  selected_systems: string[];
+  access: string;
+  teams: string[];
+  systems_with_permission: string[];
 };
 
 export type ErrorResponse = {

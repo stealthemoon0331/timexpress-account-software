@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { nanoid } from "nanoid";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -114,7 +115,11 @@ export const authOptions: NextAuthOptions = {
         where: { id: "free-trial" },
       });
 
+      const tenantId = nanoid();
+
       if (!existingUser) {
+
+
         // New user: create user + trial
         await prisma.user.create({
           data: {
@@ -122,6 +127,7 @@ export const authOptions: NextAuthOptions = {
             name: user.name,
             image: user.image,
             emailVerified: new Date(),
+            tenantId: tenantId,
             plan: trialPlan ? { connect: { id: trialPlan.id } } : undefined,
             planActivatedAt: now,
             planExpiresAt: expires,
