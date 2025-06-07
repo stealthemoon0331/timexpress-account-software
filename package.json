@@ -6,7 +6,7 @@
     "dev": "npx prisma migrate dev",
     "build": "dotenv -e .env.production -- npx prisma migrate deploy && npx prisma generate && next build",
     "start": "dotenv -e .env.production -- npx prisma generate && next start",
-    "staging": "dotenv -e .env.staging npx prisma generate && next start",
+    "staging": "dotenv -e $DOTENV_CONFIG_PATH npx prisma generate && next start",
     "lint": "next lint",
     "seed": "ts-node prisma/seed.ts"
   },
