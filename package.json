@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "npx prisma migrate dev && next dev",
+    "dev": "npx prisma migrate dev",
     "build": "dotenv -e .env.production -- npx prisma migrate deploy && npx prisma generate && next build",
     "start": "dotenv -e .env.production -- npx prisma generate && next start",
     "staging": "dotenv -e .env.staging npx prisma generate && next start",
@@ -99,7 +99,7 @@
     "uuid": "latest",
     "vaul": "^0.9.6",
     "xlsx": "^0.18.5",
-    "zod": "latest"
+    "zod": "^3.25.56"
   },
   "devDependencies": {
     "@testing-library/user-event": "^14.6.1",

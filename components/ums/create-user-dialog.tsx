@@ -41,7 +41,7 @@ import { toast as hotToast } from "react-hot-toast";
 import { useAuth } from "@/app/contexts/authContext";
 import InputWrapper from "./input-wrapper";
 import { useData } from "@/app/contexts/dataContext";
-// import { addUserToSystemsAndUMS } from "@/lib/ums/systemHandlers/add/addUserToKeycloak";
+import { addUserToSystemsAndUMS } from "@/lib/ums/systemHandlers/add/addUserToSystemsAndUMS";
 
 interface CreateUserDialogProps {
   availableSystems: system[];
@@ -240,150 +240,30 @@ export function CreateUserDialog({
     };
 
     if (!keycloakResponse.error) {
+      const result = await addUserToSystemsAndUMS(
+        formData,
+        selectedSystems,
+        systemRoleSelections,
+        access_token,
+        selectedAccess,
+        selectedBranches
+      );
 
-      // await addUserToSystemsAndUMS(
-      //   formData,
-      //   selectedSystems,
-      //   systemRoleSelections,
-      //   access_token,
-      //   selectedAccess,
-      //   selectedBranches
-      // ).then((res) => {
+      if (result.success) {
+        addNewUser(result.data);
 
-      // }).catch((error) => {
-        
-      // });
+        toastify.success("Registered new user into UMS!", { autoClose: 3000 });
 
-      let fms_user_id = -1;
-      let crm_user_id = -1;
-      let wms_user_id = -1;
-      let tms_user_id = -1;
-      let registered_system: any[] = [];
-      let countsOfRegisteredSystem = 0;
-
-      try {
-        const results = await Promise.allSettled(
-          selectedSystems.map(async (system) => {
-            const response = await fetch(`/api/ums/systems/add/${system}`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                ssoUser: ssoUser,
-                systemRoleSelections: systemRoleSelections,
-                accessToken: access_token,
-                selectedAccess: selectedAccess,
-              }),
-            });
-
-            const responseData = await response.json();
-            
-            if (!response.ok) {
-              const error = await response.json();
-              throw new Error(error.message);
-            }
-
-            if (responseData.error) {
-              hotToast.error(responseData.message, { duration: 5000 });
-              throw new Error(responseData.message);
-            }
-
-            return responseData.data;
-          })
-        );
-
-        results.forEach((result) => {
-          if (result.status === "fulfilled") {
-            if (result.value.system === "FMS") {
-              fms_user_id = result.value.userid;
-            } else if (result.value.system === "WMS") {
-              wms_user_id = result.value.userid;
-            } else if (result.value.system === "CRM") {
-              crm_user_id = result.value.userid;
-            } else if (result.value.system === "TMS") {
-              tms_user_id = result.value.userid;
-            }
-            registered_system.push(result.value.system);
-            countsOfRegisteredSystem++;
-          }
-        });
-      } catch (error) {
-        // console.error("Error fetching user data:", error);
-        hotToast.error("Failed to register user for all systems.", {
-          duration: 5000,
-        });
-      }
-
-      if (countsOfRegisteredSystem < selectedSystems.length) {
-        toastify.warn("Failed to register user for all systems.", {
-          autoClose: 3000,
-        });
-      }
-
-      if (registered_system.length > 0) {
-        const newUser = {
-          name: ssoUser.name,
-          email: ssoUser.email,
-          username: ssoUser.username,
-          password: ssoUser.password,
-          phone: ssoUser.phone,
-          mobile: ssoUser.mobile,
-          fms_user_id: registered_system.includes("FMS") ? fms_user_id : -1,
-          fms_branch: registered_system.includes("FMS") ? selectedBranches : [],
-          fms_user_role_id: registered_system.includes("FMS")
-            ? getRoleId(systemRoleSelections["FMS"], "FMS")
-            : -1,
-          wms_user_id: registered_system.includes("WMS") ? wms_user_id : -1,
-          wms_user_role_id: registered_system.includes("WMS")
-            ? getRoleId(systemRoleSelections["WMS"], "WMS")
-            : -1,
-          crm_user_id: registered_system.includes("CRM") ? crm_user_id : -1,
-          crm_user_role_id: registered_system.includes("CRM")
-            ? getRoleId(systemRoleSelections["CRM"], "CRM")
-            : -1,
-          tms_user_id: registered_system.includes("TMS") ? tms_user_id : -1,
-          tms_user_role_id: registered_system.includes("TMS")
-            ? getRoleId(systemRoleSelections["TMS"], "TMS")
-            : -1,
-          selected_systems: registered_system,
-          systems_with_permission: registered_system,
-          access: registered_system.includes("TMS") ? selectedAccess : "0",
-          teams: registered_system.includes("TMS")
-            ? ssoUser.teams.filter((team) => team !== "")
-            : [""],
-        };
-
-        fetch(`/api/ums/customers`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(newUser),
-        })
-          .then(async (response) => {
-            if (response.ok) {
-              const data = await response.json();
-              addNewUser(data);
-
-              toastify.success("Regiserted new user into UMS!", {
-                autoClose: 3000,
-              });
-            }
-          })
-          .catch((error) => {
-            console.error("Error creating user:", error);
-            hotToast.error("Error creating users", {
-              duration: 3000,
-            });
-            setIsSending(false);
-          });
+        if (result.warning) {
+          toastify.warn(result.warning, { autoClose: 3000 });
+        }
       } else {
-        hotToast.error("User was not registered at any system.", {
+        hotToast.error(result.error || "Failed to register user", {
           duration: 5000,
         });
       }
 
+      // Finalize...
       // onOpenChange(false);
       setIsSending(false);
       setIsSending(false);
