@@ -7,6 +7,7 @@ export interface LoggedUser {
     planActivatedAt?: string | null;
     planExpiresAt?: string | null;
     planId?: string | null;
+    tenantId: string;
     paypalSubscriptionId?: string | null;
     cardBrand: string | null;
     cardLast4: string | null;

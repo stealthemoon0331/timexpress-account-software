@@ -159,9 +159,13 @@ export async function registerUserToWMS({
       id: roleId,
       role: getRoleName(system, roleId),
     },
-    tenant_id: ssoUser.tenant_id,
+    tenant_id: ssoUser.tenantId,
     status: 1,
   };
+
+  console.log(" Payload Admin => ", payload);
+  console.log(" WMS_API_PATH => ", WMS_API_PATH);
+
 
   const response = await fetch(`${WMS_API_PATH}/api/users/adduser`, {
     method: "POST",

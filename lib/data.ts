@@ -122,6 +122,13 @@ export const systems = [
   },
 ]
 
+export const AllSystems: system[] = [
+  "CRM",
+  "FMS",
+  "WMS",
+  "TMS"
+]
+
 export const products = [
   {
     name: "CRM",

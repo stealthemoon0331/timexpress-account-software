@@ -2,7 +2,7 @@ import { FormUser, SelectedSystemRoles, system } from "../../type";
 import { getRoleId } from "../../utils";
 
 export const addUserToSystemsAndUMS = async (
-  user: FormUser,
+  user: any,
   systemsToRegister: system[],
   seletectedSystemRoles: SelectedSystemRoles,
   keycloakAccessToken: string | null,
@@ -20,6 +20,7 @@ export const addUserToSystemsAndUMS = async (
           system
         ),
       })),
+      //@ts-ignore
       teams: user.teams.filter((team) => team !== ""),
     };
 
@@ -29,8 +30,6 @@ export const addUserToSystemsAndUMS = async (
     let tms_user_id = -1;
     let registered_system: any[] = [];
     let countsOfRegisteredSystem = 0;
-
-    let returnData = {};
 
     // Register user into portal systems...
 
@@ -105,6 +104,7 @@ export const addUserToSystemsAndUMS = async (
         password: ssoUser.password,
         phone: ssoUser.phone,
         mobile: ssoUser.mobile,
+        tenantId: ssoUser.tenantId,
         fms_user_id: registered_system.includes("FMS") ? fms_user_id : -1,
         fms_branch: registered_system.includes("FMS")
           ? selectedBranchesForFMS
@@ -128,9 +128,12 @@ export const addUserToSystemsAndUMS = async (
         systems_with_permission: registered_system,
         access: registered_system.includes("TMS") ? selectedAccessForTMS : "0",
         teams: registered_system.includes("TMS")
+        // @ts-ignore
           ? ssoUser.teams.filter((team) => team !== "")
           : [""],
       };
+
+      console.log("*** newUser *** ", newUser);
 
       const umsResponse = await fetch(`/api/ums/customers`, {
         method: "POST",
@@ -155,30 +158,7 @@ export const addUserToSystemsAndUMS = async (
             ? "Failed to register user for some systems."
             : undefined
       };
-        // .then(async (response) => {
-        //   if (response.ok) {
-        //     const data = await response.json();
-        //     addNewUser(data);
-
-        //     toastify.success("Regiserted new user into UMS!", {
-        //       autoClose: 3000,
-        //     });
-        //   }
-        // })
-        // .catch((error) => {
-        //   console.error("Error creating user:", error);
-        //   hotToast.error("Error creating user...", {
-        //     duration: 3000,
-        //   });
-        //   setIsSending(false);
-        // });
-
   } catch (error: any) {
-    // console.error("Error fetching user data:", error);
-    // hotToast.error("Failed to register user for all systems.", {
-    //   duration: 5000,
-    // });
-
     return {
         success: false,
         error: error.message || "Unknown error occured",

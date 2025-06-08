@@ -12,6 +12,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Icons } from "@/components/icons";
+import { addUserToSystemsAndUMS } from "@/lib/ums/systemHandlers/add/addUserToSystemsAndUMS";
+import { useAuth } from "../contexts/authContext";
+import { AllSystems, systems } from "@/lib/data";
 
 const VerificationSuccess = () => {
   const router = useRouter();
@@ -23,6 +26,8 @@ const VerificationSuccess = () => {
   // Get the email from the URL query parameters
   const [token, setToken] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
+
+  const { access_token, addUserToKeycloak } = useAuth();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -55,7 +60,77 @@ const VerificationSuccess = () => {
 
         // Register User into available systems
 
-        registerAdminToSystems(email);
+        const adminFormData = {
+          name: "",
+          email: email,
+          username: "",
+          password: "",
+          confirmPassword: "",
+          phone: "",
+          mobile: "",
+          selected_systems: AllSystems,
+          teams: ["0"], // test
+          systems_with_permission: AllSystems,
+        };
+
+        const systemAdminRoles = {
+          CRM: "2",
+          WMS: "1",
+          FMS: "1",
+          TMS: "2",
+        };
+
+        const tmsAdminAccess = "1";
+
+        const fmsBranches = ["0"];
+
+        try {
+          const keycloakResponse = await addUserToKeycloak(
+            adminFormData.username,
+            adminFormData.email,
+            adminFormData.password,
+            AllSystems
+          );
+
+          if (keycloakResponse.error) {
+            throw new Error(keycloakResponse.message);
+          }
+
+          const result = await addUserToSystemsAndUMS(
+            adminFormData,
+            AllSystems,
+            systemAdminRoles,
+            access_token,
+            tmsAdminAccess,
+            fmsBranches
+          );
+
+          if (result.success) {
+            // addNewUser(result.data);
+            // toastify.success("Registered new user into UMS!", {
+            //   autoClose: 3000,
+            // });
+
+            if (result.warning) {
+              // toastify.warn(result.warning, { autoClose: 3000 });
+            }
+
+            // Reset form states
+            // resetForm();
+          } else {
+            throw new Error(result.error || "Failed to register user");
+          }
+        } catch (error: unknown) {
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : "An unexpected error occurred";
+          // hotToast.error(errorMessage, {
+          //   duration: 5000,
+          // });
+        } finally {
+          // setIsSending(false); // Always reset isSending in the end
+        }
 
         localStorage.setItem("token", token);
       } else {
@@ -66,27 +141,21 @@ const VerificationSuccess = () => {
     }
   };
 
-  const registerAdminToSystems = async (email: string) => {
-    try {
-      const res = await fetch(`/api/user/system-registeration`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
+  // const registerAdminToSystems = async (email: string) => {
+  //   try {
+  //     const res = await fetch(`/api/user/system-registeration`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ email }),
+  //     });
 
-      if(res.ok) {
-
-      } else {
-        
-      }
-
-    } catch (error) {
-
-    }
-  }
-
+  //     if (res.ok) {
+  //     } else {
+  //     }
+  //   } catch (error) {}
+  // };
 
   // Auto-redirect to login after countdown
   useEffect(() => {

@@ -651,7 +651,7 @@ export default function UserManagement() {
                     <TableCell>
                       {index + (currentPage - 1) * itemsPerPage + 1}
                     </TableCell>
-                    <TableCell className="font-medium">{user.name}</TableCell>
+                    <TableCell className="font-medium">{user.name} {loggedUser?.email === user.email ? "( me )" : ""}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{user.password}</TableCell>
                     <TableCell>{user.phone}</TableCell>

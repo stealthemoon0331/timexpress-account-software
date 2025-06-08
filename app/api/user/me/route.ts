@@ -19,6 +19,7 @@ export async function GET() {
       password: true,
       image: true,
       planId: true,
+      tenantId: true,
       planActivatedAt: true,
       planExpiresAt: true,
       cardBrand: true,

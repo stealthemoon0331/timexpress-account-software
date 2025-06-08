@@ -42,6 +42,7 @@ import { useAuth } from "@/app/contexts/authContext";
 import InputWrapper from "./input-wrapper";
 import { useData } from "@/app/contexts/dataContext";
 import { addUserToSystemsAndUMS } from "@/lib/ums/systemHandlers/add/addUserToSystemsAndUMS";
+import { useUser } from "@/app/contexts/UserContext";
 
 interface CreateUserDialogProps {
   availableSystems: system[];
@@ -67,6 +68,7 @@ export function CreateUserDialog({
     username: "",
     password: "",
     confirmPassword: "",
+    tenant_id: "",
     phone: "",
     mobile: "",
     fms_user_id: -1,
@@ -85,7 +87,7 @@ export function CreateUserDialog({
   });
 
   const { access_token, addUserToKeycloak } = useAuth();
-
+  const { user: loggedUser } = useUser();
   const { teams } = useData();
 
   useEffect(() => {
@@ -134,28 +136,29 @@ export function CreateUserDialog({
     }));
   };
 
-  const handleSubmit = async () => {
-    if (formData.username == "") {
+const handleSubmit = async () => {
+  try {
+    if (formData.username === "") {
       toastify.warn("Please input username");
       return;
     }
 
-    if (formData.email == "") {
+    if (formData.email === "") {
       toastify.warn("Please input email");
       return;
     }
 
-    if (formData.password == "") {
+    if (formData.password === "") {
       toastify.warn("Please input password");
       return;
     }
 
-    if (formData.mobile == "") {
+    if (formData.mobile === "") {
       toastify.warn("Please input mobile number");
       return;
     }
 
-    if (formData.phone == "") {
+    if (formData.phone === "") {
       toastify.warn("Please input phone number");
       return;
     }
@@ -174,14 +177,17 @@ export function CreateUserDialog({
       toastify.warn("Please select a role for FMS");
       return;
     }
+
     if (selectedSystems.includes("WMS") && systemRoleSelections.WMS === "") {
       toastify.warn("Please select a role for WMS");
       return;
     }
+
     if (selectedSystems.includes("CRM") && systemRoleSelections.CRM === "") {
       toastify.warn("Please select a role for CRM");
       return;
     }
+
     if (selectedSystems.includes("TMS") && systemRoleSelections.TMS === "") {
       toastify.warn("Please select a role for TMS");
       return;
@@ -201,20 +207,21 @@ export function CreateUserDialog({
       return;
     }
 
-    if (selectedSystems.includes("TMS") && selectedAccess == "") {
+    if (selectedSystems.includes("TMS") && selectedAccess === "") {
       toastify.warn("Please select access");
       return;
     }
 
-    if (
-      selectedSystems.includes("TMS") &&
-      selectedAccess === "0" &&
-      formData.teams.filter((team) => team !== "").length === 0
-    ) {
-      toastify.warn("Please select teams in TMS setting");
-      return;
-    }
+    setIsSending(true); // Set to true at the start of async operations
+
     console.log("selectedSystems before saving into system ", selectedSystems);
+
+    console.log(" 🍀 ::::: addUserToKeycloak ::::: 🍀 ");
+    console.log("formData.username : ", formData.username);
+    console.log("formData.email : ", formData.email);
+    console.log("formData.password : ", formData.password);
+    console.log("selectedSystems : ", selectedSystems);
+
 
     const keycloakResponse = await addUserToKeycloak(
       formData.username,
@@ -223,88 +230,85 @@ export function CreateUserDialog({
       selectedSystems
     );
 
-    // Create a user in the central SSO system
+    if (keycloakResponse.error) {
+      throw new Error(keycloakResponse.message);
+    }
 
-    setIsSending(true);
+    console.log(" 🍀::::: addUserToSystemsAndUMS ::::: 🍀 ");
+    console.log("formData : ", formData);
+    console.log("selectedSystems : ", selectedSystems);
+    console.log("access_token : ", access_token);
+    console.log("selectedAccess : ", selectedAccess);
+    console.log("selectedBranches : ", selectedBranches);
 
-    const ssoUser = {
-      ...formData,
-      systems: selectedSystems.map((system) => ({
-        name: system,
-        roleId: getRoleId(
-          systemRoleSelections[system as keyof typeof systemRoleSelections],
-          system
-        ),
-      })),
-      teams: formData.teams.filter((team) => team !== ""),
-    };
+    const updatedFormData = {...formData, tenantId: loggedUser?.tenantId}
 
-    if (!keycloakResponse.error) {
-      const result = await addUserToSystemsAndUMS(
-        formData,
-        selectedSystems,
-        systemRoleSelections,
-        access_token,
-        selectedAccess,
-        selectedBranches
-      );
+    console.log("*** updatedFormData *** ", updatedFormData);
 
-      if (result.success) {
-        addNewUser(result.data);
+    const result = await addUserToSystemsAndUMS(
+      updatedFormData,
+      selectedSystems,
+      systemRoleSelections,
+      access_token,
+      selectedAccess,
+      selectedBranches
+    );
 
-        toastify.success("Registered new user into UMS!", { autoClose: 3000 });
+    if (result.success) {
+      addNewUser(result.data);
+      toastify.success("Registered new user into UMS!", { autoClose: 3000 });
 
-        if (result.warning) {
-          toastify.warn(result.warning, { autoClose: 3000 });
-        }
-      } else {
-        hotToast.error(result.error || "Failed to register user", {
-          duration: 5000,
-        });
+      if (result.warning) {
+        toastify.warn(result.warning, { autoClose: 3000 });
       }
 
-      // Finalize...
-      // onOpenChange(false);
-      setIsSending(false);
-      setIsSending(false);
-
-      setFormData({
-        name: "",
-        email: "",
-        username: "",
-        password: "",
-        confirmPassword: "",
-        phone: "",
-        mobile: "",
-        fms_user_id: -1,
-        fms_branch: [],
-        fms_user_role_id: -1,
-        wms_user_id: -1,
-        wms_user_role_id: -1,
-        crm_user_id: -1,
-        crm_user_role_id: -1,
-        tms_user_id: -1,
-        tms_user_role_id: -1,
-        access: "",
-        teams: [],
-        selected_systems: [],
-        systems_with_permission: [],
-      });
-      setSelectedBranches([]);
-      setSelectedSystems([]);
-      setSystemRoleSelections({
-        FMS: "",
-        WMS: "",
-        CRM: "",
-        TMS: "",
-      });
-      setSelectedAccess("");
+      // Reset form states
+      resetForm();
     } else {
-      hotToast.error(keycloakResponse.message, {
-        duration: 3000,
-      });
-      setIsSending(false);
+      throw new Error(result.error || "Failed to register user");
     }
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+    hotToast.error(errorMessage, {
+      duration: 5000,
+    });
+  } finally {
+    setIsSending(false); // Always reset isSending in the end
+  }
+};
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      email: "",
+      username: "",
+      password: "",
+      confirmPassword: "",
+      tenant_id: loggedUser?.tenantId || "",
+      phone: "",
+      mobile: "",
+      fms_user_id: -1,
+      fms_branch: [],
+      fms_user_role_id: -1,
+      wms_user_id: -1,
+      wms_user_role_id: -1,
+      crm_user_id: -1,
+      crm_user_role_id: -1,
+      tms_user_id: -1,
+      tms_user_role_id: -1,
+      access: "",
+      teams: [],
+      selected_systems: [],
+      systems_with_permission: [],
+    });
+    setSelectedBranches([]);
+    setSelectedSystems([]);
+    setSystemRoleSelections({
+      FMS: "",
+      WMS: "",
+      CRM: "",
+      TMS: "",
+    });
+    setSelectedAccess("");
   };
 
   const cancelBranchSelection = (branch: string) => {
@@ -336,6 +340,7 @@ export function CreateUserDialog({
       username: "",
       password: "",
       confirmPassword: "",
+      tenant_id: loggedUser?.tenantId || "",
       phone: "",
       mobile: "",
       fms_user_id: 0,

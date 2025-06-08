@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "npx prisma migrate dev && next dev",
+    "dev": "next dev",
     "build": "dotenv -e .env.production -- npx prisma migrate deploy && npx prisma generate && next build",
     "start": "dotenv -e .env.production -- npx prisma generate && next start",
     "staging": "dotenv -e $DOTENV_CONFIG_PATH npx prisma generate && next start",

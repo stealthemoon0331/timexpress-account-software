@@ -38,7 +38,7 @@ export async function GET() {
       });
 
       const [users] = await pool.query(
-        `SELECT id, name, username, email, password, phone, mobile, fms_user_id, fms_branch,
+        `SELECT id, name, username, email, password, tenant_id, phone, mobile, fms_user_id, fms_branch,
          fms_user_role_id, wms_user_id, wms_user_role_id, crm_user_id, crm_user_role_id, tms_user_id, 
          tms_user_role_id, teams, access, selected_systems, systems_with_permission, status
          FROM customers WHERE status = 1 AND adminId = ?`,
@@ -105,9 +105,11 @@ export async function POST(request: Request) {
 
     const query =
       "INSERT INTO customers (" +
-      "name, email, username, password, phone, mobile, fms_user_id, fms_branch, " +
+      "name, email, username, password, phone, tenant_id, mobile, fms_user_id, fms_branch, " +
       "fms_user_role_id, wms_user_id, wms_user_role_id, crm_user_id, crm_user_role_id, tms_user_id, tms_user_role_id, teams, access, selected_systems, systems_with_permission, status, adminId" +
-      ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+      ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    console.log("**** customerData.tenantId *** ", customerData.tenantId);
 
     const values = [
       customerData.name,
@@ -115,6 +117,7 @@ export async function POST(request: Request) {
       customerData.username,
       customerData.password,
       customerData.phone,
+      customerData.tenantId,
       customerData.mobile,
       customerData.fms_user_id,
       JSON.stringify(customerData.fms_branch),

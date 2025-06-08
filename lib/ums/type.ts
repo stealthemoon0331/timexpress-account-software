@@ -69,6 +69,7 @@ export type FormUser = {
   username: string;
   password: string;
   confirmPassword: string;
+  tenant_id: string;
   phone: string;
   mobile: string;
   fms_user_id: number;
@@ -92,6 +93,7 @@ export type FormDataType = {
   username: string;
   password: string;
   confirmPassword: string;
+  tenantId: string;
   phone: string;
   mobile: string;
   fms_user_id: number;
