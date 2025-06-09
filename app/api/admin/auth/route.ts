@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     where: { email },
   });
 
-  if (!admin || !password === admin?.password) {
+  if (!admin || !(password === admin?.password)) {
     return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
   }
 

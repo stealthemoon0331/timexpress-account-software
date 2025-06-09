@@ -37,6 +37,15 @@ model User {
 
   payments             Payment[]
   notifications        Notification[] // Relation to Notification model
+
+  tenant               Tenants?    @relation("UserToTenant")
+}
+
+model Tenants {
+  id        String   @id @default(cuid())
+  email   String   @unique
+  tenantId  String   @unique
+  admin     User     @relation("UserToTenant", fields: [email], references: [email])
 }
 
 model Notification {

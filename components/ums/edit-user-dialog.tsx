@@ -60,6 +60,7 @@ export function EditUserDialog({
     username: "",
     password: "",
     confirmPassword: "",
+    tenant_id: "",
     phone: "",
     mobile: "",
     fms_user_id: 0,
@@ -116,6 +117,7 @@ export function EditUserDialog({
         username: user.username || "",
         password: user.password || "",
         confirmPassword: "",
+        tenant_id: "",
         phone: user.phone || "",
         mobile: user.mobile || "",
         fms_user_id: user.fms_user_id || 0,
@@ -390,6 +392,7 @@ export function EditUserDialog({
         access: selectedAccess, //
         teams: formData.teams, //
       };
+      
       await fetch(`/api/ums/customers/${user.id}`, {
         method: "PUT",
         headers: {

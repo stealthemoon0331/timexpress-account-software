@@ -115,7 +115,6 @@ export const authOptions: NextAuthOptions = {
         where: { id: "free-trial" },
       });
 
-      const tenantId = nanoid();
 
       if (!existingUser) {
 
@@ -127,7 +126,6 @@ export const authOptions: NextAuthOptions = {
             name: user.name,
             image: user.image,
             emailVerified: new Date(),
-            tenantId: tenantId,
             plan: trialPlan ? { connect: { id: trialPlan.id } } : undefined,
             planActivatedAt: now,
             planExpiresAt: expires,

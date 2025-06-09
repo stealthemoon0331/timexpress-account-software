@@ -34,6 +34,7 @@ import {
 } from "@/lib/ums/type";
 import { addUserToSystemsAndUMS } from "@/lib/ums/systemHandlers/add/addUserToSystemsAndUMS";
 import { useData } from "@/app/contexts/dataContext";
+import { checkIfHasTenant, registerTenantId } from "@/lib/tenant";
 
 interface FormData {
   name: string;
@@ -50,6 +51,7 @@ interface FormData {
 
 export default function SystemRegistration() {
   const [registeredUser, setRegisteredUser] = useState<FormUser | null>(null);
+  const [hasTenant, setHasTenant] = useState<boolean>(false);
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -80,6 +82,7 @@ export default function SystemRegistration() {
   ];
 
   useEffect(() => {
+    checkTenant();
     fetchUsers();
   }, []);
 
@@ -94,11 +97,28 @@ export default function SystemRegistration() {
       confirmPassword: "",
       phone: "",
       mobile: "",
-      tenantId: loggedUser?.tenantId || "",
+      tenantId: "",
       teams: teams,
       systems: [],
     });
   }, [loggedUser, teams]);
+
+  const checkTenant = async () => {
+    if (loggedUser?.email) {
+      const checkingResponse = await checkIfHasTenant(loggedUser.email);
+      if (!checkingResponse.error) {
+        const tenantId = checkingResponse.data;
+        console.log("*** tenantId *** ", tenantId);
+        if (tenantId) {
+          setHasTenant(true);
+        } else {
+          setHasTenant(false);
+        }
+      } else {
+        console.error(checkingResponse.errorMessage);
+      }
+    }
+  }
 
   const fetchUsers = async () => {
     try {
@@ -110,7 +130,6 @@ export default function SystemRegistration() {
       });
       const fetchData = await response.json();
 
-      console.log("fetchData ===>>> ", fetchData);
       // Check if fetchData is an array
       if (Array.isArray(fetchData)) {
         if (fetchData.length > 0) {
@@ -250,15 +269,34 @@ export default function SystemRegistration() {
     }
 
     console.log("Form Data => ", formData);
+    
+
+    //Generating the talentId and then register into table
+    let tenantId = "";
+    if(loggedUser?.email) {
+      const tenantRegResponse = await registerTenantId(loggedUser.email);
+
+      if(!tenantRegResponse.error) {
+        tenantId = tenantRegResponse.tenantId;
+      } else {
+        hotToast.error(tenantRegResponse?.errorMessage || "Error", {
+          duration: 3000
+        })
+
+        return;
+      }
+    }
 
     setIsRegistering(true);
 
+    const formDataWithTenantId = {...formData, tenantId};
+
     try {
       const keycloakResponse = await addUserToKeycloak(
-        formData.username,
-        formData.email,
-        formData.password,
-        formData.systems
+        formDataWithTenantId.username,
+        formDataWithTenantId.email,
+        formDataWithTenantId.password,
+        formDataWithTenantId.systems
       );
 
       if (keycloakResponse.error) {
@@ -276,9 +314,11 @@ export default function SystemRegistration() {
 
       const fmsBranches = ["0"];
 
+      
+
       const result = await addUserToSystemsAndUMS(
-        formData,
-        formData.systems,
+        formDataWithTenantId,
+        formDataWithTenantId.systems,
         systemAdminRoles,
         access_token,
         tmsAdminAccess,
@@ -350,7 +390,7 @@ export default function SystemRegistration() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4 sm:p-6 md:p-8">
       {/* Left Panel: Form */}
-      {!registeredUser ? (
+      {!hasTenant ? (
         <div className="space-y-4">
           <h2 className="text-lg sm:text-xl font-semibold">System Account</h2>
           <div className="space-y-3">
@@ -498,7 +538,7 @@ export default function SystemRegistration() {
                     fullWidth
                     label="Username"
                     variant="outlined"
-                    value={registeredUser.username}
+                    value={registeredUser?.username}
                     onChange={(e) => handleChange("username", e.target.value)}
                   />
                 </ListItem>
@@ -556,7 +596,7 @@ export default function SystemRegistration() {
                     fullWidth
                     label="Phone"
                     variant="outlined"
-                    value={registeredUser.phone}
+                    value={registeredUser?.phone}
                     onChange={(e) => handleChange("phone", e.target.value)}
                     InputProps={{
                       startAdornment: (
@@ -572,7 +612,7 @@ export default function SystemRegistration() {
                     fullWidth
                     label="Mobile"
                     variant="outlined"
-                    value={registeredUser.mobile}
+                    value={registeredUser?.mobile}
                     onChange={(e) => handleChange("mobile", e.target.value)}
                     InputProps={{
                       startAdornment: (
@@ -601,7 +641,7 @@ export default function SystemRegistration() {
                 <ListItem>
                   <ListItemText
                     primary="Name"
-                    secondary={registeredUser.name || "N/A"}
+                    secondary={registeredUser?.name || "N/A"}
                   />
                 </ListItem>
                 {/* Add other read-only fields */}
@@ -611,38 +651,38 @@ export default function SystemRegistration() {
               <ListItem>
                 <ListItemText
                   primary="Name"
-                  secondary={registeredUser.name || "N/A"}
+                  secondary={registeredUser?.name || "N/A"}
                 />
               </ListItem>
               <ListItem>
                 <ListItemText
                   primary="Email"
-                  secondary={registeredUser.email || "N/A"}
+                  secondary={registeredUser?.email || "N/A"}
                 />
               </ListItem>
               <ListItem>
                 <ListItemText
                   primary="Username"
-                  secondary={registeredUser.username || "N/A"}
+                  secondary={registeredUser?.username || "N/A"}
                 />
               </ListItem>
               <ListItem>
                 <ListItemText
                   primary="Phone"
-                  secondary={registeredUser.phone || "N/A"}
+                  secondary={registeredUser?.phone || "N/A"}
                 />
               </ListItem>
               <ListItem>
                 <ListItemText
                   primary="Mobile"
-                  secondary={registeredUser.mobile || "N/A"}
+                  secondary={registeredUser?.mobile || "N/A"}
                 />
               </ListItem>
               <ListItem>
                 <ListItemText
                   primary="Selected Systems"
                   secondary={
-                    registeredUser.selected_systems.length
+                    registeredUser?.selected_systems.length
                       ? formData.systems.join(", ")
                       : "None Selected"
                   }
