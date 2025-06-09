@@ -5,10 +5,10 @@ export const createUserTableQuery = `
       CREATE TABLE IF NOT EXISTS customers (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
-        username VARCHAR(255) NOT NULL UNIQUE,
-        email VARCHAR(255) NOT NULL UNIQUE,
+        username VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL,
         password VARCHAR(255) NOT NULL,
-        tenant_id VARCHAR(255) NOT NULL UNIQUE,
+        tenant_id VARCHAR(255) NOT NULL,
         phone VARCHAR(255),
         mobile VARCHAR(255),
         fms_user_id INT,
