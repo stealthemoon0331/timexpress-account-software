@@ -77,15 +77,15 @@ export default function DashboardLayout({
       <div className="flex min-h-screen w-full">
         <Sidebar className="gap-4">
           <SidebarHeader>
-            <Link href="/" className="flex items-center gap-2 px-2">
+            <Link href="/" className="flex items-center">
               <Image
                 src="/logo.svg"
                 alt="Shiper.io"
                 width={32}
                 height={32}
-                className="h-8 w-8"
+                className="w-[60%] p-4"
               />
-              <span className="text-3xl font-bold">Shiper.io</span>
+              {/* <span className="text-3xl font-bold">Shiper.io</span> */}
             </Link>
           </SidebarHeader>
           <SidebarContent className="px-4">
