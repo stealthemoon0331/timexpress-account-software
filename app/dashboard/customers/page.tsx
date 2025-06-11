@@ -51,34 +51,7 @@ export default function page() {
               <ThemeToggle />
             </div> */}
           </div>
-          <Tabs defaultValue="systems" className="w-full">
-            <TabsList className="grid w-full md:w-auto grid-cols-2">
-              <TabsTrigger value="systems">Register to System</TabsTrigger>
-              <TabsTrigger
-                value="customers"
-                onClick={() => checkAdminRegisteration()}
-              >
-                Users
-              </TabsTrigger>
-              {/* <TabsTrigger value="roles">Roles</TabsTrigger> */}
-            </TabsList>
-            <TabsContent value="systems" className="mt-6">
-              <SystemRegisteration />
-            </TabsContent>
-            <TabsContent value="customers" className="mt-6">
-              {hasTenant ? (
-                <UserManagement />
-              ) : (
-                <p> You didnt register tenant yet. Please register</p>
-              )}
-            </TabsContent>
-            {/* <TabsContent value="roles" className="mt-6">
-            <RoleManagement />
-          </TabsContent>
-          <TabsContent value="systems" className="mt-6">
-            <SystemIntegration />
-          </TabsContent> */}
-          </Tabs>
+          <UserManagement />
         </main>
       </DataProvider>
     </AuthProvider>
