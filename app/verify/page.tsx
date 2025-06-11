@@ -27,8 +27,6 @@ const VerificationSuccess = () => {
   const [token, setToken] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
 
-  const { access_token, addUserToKeycloak } = useAuth();
-
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const tokenFromUrl = params.get("token");
