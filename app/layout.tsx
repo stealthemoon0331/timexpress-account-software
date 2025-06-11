@@ -13,6 +13,11 @@ export const metadata: Metadata = {
   title: "Shiper",
   description: "Shiper",
   generator: "takuma",
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+    ]
+  }
 };
 
 export default function RootLayout({
@@ -27,6 +32,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap" rel="stylesheet"/>
+        <link rel="shortcut icon" href="/favicon.ico" />
       </head>
       <body className="scroll-smooth">
           <SessionProviderWrapper>
