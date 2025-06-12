@@ -5,23 +5,19 @@
   "scripts": {
     "dev": "next dev",
     "lint": "next lint",
-    "seed": "cross-env-shell \"dotenv -e .env.development -- ts-node prisma/seed.ts\"",
-
-    "build": "cross-env-shell \"dotenv -e .env.production -- npx prisma migrate deploy && npx prisma generate && next build\"",
-    "build:staging": "cross-env-shell \"dotenv -c staging -- npx prisma migrate deploy && npx prisma generate && next build\"", 
-    "build:prod": "cross-env-shell \"dotenv -c production -- npx prisma migrate deploy && npx prisma generate && next build\"",
+    "seed": "dotenv -e .env.development -- ts-node prisma/seed.ts",
+    "build": "dotenv -e .env.production -- sh -c 'npx prisma migrate deploy && npx prisma generate && next build'",
+    "build:staging": "dotenv -e .env.staging -- sh -c 'npx prisma migrate deploy && npx prisma generate && next build'",
+    "build:prod": "dotenv -e .env.production -- sh -c 'npx prisma migrate deploy && npx prisma generate && next build'",
     "build:both": "npm run build:staging && npm run build:prod",
-
-    "start:staging": "cross-env-shell \"dotenv -c staging -- node server.js\"",
-    "start:prod": "cross-env-shell \"dotenv -c production -- node server.js\"",
+    "start:staging": "dotenv -e .env.staging -- NODE_ENV=staging node server.js",
+    "start:prod": "dotenv -e .env.production -- NODE_ENV=production node server.js",
     "start:both": "npm-run-all start:prod start:staging",
-
     "deploy:staging": "npm run build:staging && npm run start:staging",
     "deploy:prod": "npm run build:prod && npm run start:prod",
     "deploy:both": "npm-run-all deploy:prod deploy:staging",
-
-    "debugenv": "cross-env-shell \"dotenv -c staging -- node -e \\\"console.log(process.env.MY_TEST_VAR)\\\"\"",
-    "debugprodenv": "cross-env-shell \"dotenv -c prod -- node -e \\\"console.log(process.env.MY_TEST_VAR)\\\"\""
+    "debugenv": "dotenv -e .env.staging -- node -e \"console.log(process.env.MY_TEST_VAR)\"",
+    "debugprodenv": "dotenv -e .env.production -- node -e \"console.log(process.env.MY_TEST_VAR)\""
   },
   "dependencies": {
     "@auth/core": "^0.38.0",
