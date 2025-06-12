@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "dotenv -e .env.production -- npx prisma migrate deploy && npx prisma generate && next build",
-    "start": "dotenv -e .env.production -- npx prisma generate && next start",
-    "staging": "dotenv -e $DOTENV_CONFIG_PATH npx prisma generate && next start",
+    "build": "dotenv -e .env.production -- sh -c 'npx prisma migrate deploy && npx prisma generate && next build'",
+    "start": "dotenv -e .env.production -- sh -c 'NODE_ENV=production next start'",
+    "staging": "dotenv -e .env.staging -- sh -c 'npx prisma migrate deploy && npx prisma generate && next build'",
     "lint": "next lint",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "dotenv -e .env.development -- ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@auth/core": "^0.38.0",
@@ -60,9 +60,10 @@
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
     "date-fns": "4.1.0",
-    "dotenv": "^16.4.7",
+    "dotenv": "^16.5.0",
     "drizzle-orm": "latest",
     "embla-carousel-react": "8.5.1",
+    "express": "^5.1.0",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.11.0",
     "input-otp": "1.4.1",
