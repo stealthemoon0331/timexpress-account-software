@@ -89,12 +89,12 @@ export default function SystemRegistration() {
   const systemOptions = [
     // { value: "FMS" as system, label: "FMS" },
     // { value: "TMS" as system, label: "TMS" },
-    // { value: "CRM" as system, label: "CRM" },
+    { value: "CRM" as system, label: "CRM" },
     { value: "WMS" as system, label: "WMS" },
   ];
 
   const systemAdminRoles = {
-    CRM: "2",
+    CRM: "Admin",
     WMS: "Admin",
     FMS: "1",
     TMS: "2",
@@ -422,29 +422,11 @@ export default function SystemRegistration() {
       } else {
         hotToast.error(`Keycloak Error : ${keycloakUpdateResponse.message}`);
       }
-    } catch (error) {
-      hotToast.error(`Failed update error ${error ? ": " + error : ""}`);
+    } catch (error: any) {
+      hotToast.error(`Failed update error ${error.message ? ": " + error.message : ""}`);
     } finally {
       setIsUpdating(false);
     }
-
-    // try {
-    //   // Call your backend to update the registered fields
-    //   const result = await updateUserDetailsAPI(formData);
-    //   if (result.success) {
-    //     hotToast.success("User details updated successfully", { duration: 3000 });
-    //     setEditMode(false); // Exit edit mode
-    //   } else {
-    //     throw new Error(result.error || "Failed to update user details");
-    //   }
-    // } catch (error: unknown) {
-    //   hotToast.error(
-    //     error instanceof Error ? error.message : "An unexpected error occurred",
-    //     { duration: 5000 }
-    //   );
-    // } finally {
-    //   setIsRegistering(false);
-    // }
   };
 
   const handleCancelEdit = () => {
