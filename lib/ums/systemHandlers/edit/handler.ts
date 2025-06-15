@@ -102,7 +102,17 @@ export async function updateUserInWMS({
   system,
 }: UpdateParams) {
   try {
-    
+    console.log("system : ", system);
+    console.log("roleId : ", roleId);
+
+    console.log("updateParam : ", {
+          ...formData,
+          role: {
+                id: roleId,
+                role: getRoleName(system, roleId),
+              },
+        })
+
     const response = await fetch(
       `${WMS_API_PATH}/api/users/${user.wms_user_id}`,
       {
@@ -113,6 +123,7 @@ export async function updateUserInWMS({
         },
         body: JSON.stringify({
           ...formData,
+          tenant_id:"1234wew",
           role: {
                 id: roleId,
                 role: getRoleName(system, roleId),

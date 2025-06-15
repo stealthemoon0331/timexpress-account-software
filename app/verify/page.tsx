@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Icons } from "@/components/icons";
-import { addUserToSystemsAndUMS } from "@/lib/ums/systemHandlers/add/addUserToSystemsAndUMS";
+import { addUserToSystemsAndUMS } from "@/lib/ums/systemHandlers/add/addUserToPortals";
 import { useAuth } from "../contexts/authContext";
 import { AllSystems, systems } from "@/lib/data";
 
