@@ -6,8 +6,6 @@ export async function GET(req: Request) {
   
   const email = url.searchParams.get("email");
 
-  
-
   if (!email) {
     return NextResponse.json({ error: "Request Error" }, { status: 400 });
   }
