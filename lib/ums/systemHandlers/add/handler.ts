@@ -10,7 +10,7 @@ import { getRoleName } from "@/lib/ums/utils";
 
 interface RegistrationParams {
   ssoUser: any;
-  roleId: number,
+  roleId: number;
   accessToken?: string;
   selectedAccess?: any;
   system: system;
@@ -66,6 +66,7 @@ export async function registerUserToFMS({
     phone: ssoUser.phone,
     branch: ssoUser.fms_branch,
     roleId: roleId,
+    tenantId: ssoUser.tenantId,
     status: 1,
   };
   console.log("FMS payload ==> ", payload);
@@ -94,6 +95,7 @@ export async function registerUserToCRM({
     phone: ssoUser.phone,
     mobile: ssoUser.mobile,
     role_id: roleId,
+    tenant_id: ssoUser.tenantId,
     status: 1,
   };
 
@@ -111,12 +113,24 @@ export async function registerUserToCRM({
       throw new Error(userData?.message || "CRM user registration failed");
     }
 
+    const salesPayload = {
+      name: ssoUser.name,
+      username: ssoUser.username,
+      email: ssoUser.email,
+      password: ssoUser.password,
+      phone: ssoUser.phone,
+      mobile: ssoUser.mobile,
+      role_id: roleId,
+      tenantId: ssoUser.tenantId,
+      status: 1,
+    };
+
     const salesRes = await fetch(`${CRM_API_PATH}/api/salespersons`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(salesPayload),
     });
 
     const salesData = await safeParseJSON(salesRes);
@@ -137,10 +151,16 @@ export async function registerUserToCRM({
       },
     };
   } catch (err) {
-    console.error("❌ CRM Registration Error:", err instanceof Error ? err.message : err);
+    console.error(
+      "❌ CRM Registration Error:",
+      err instanceof Error ? err.message : err
+    );
     return {
       isError: true,
-      message: err instanceof Error ? `CRM : ${err.message}` : "CRM registration failed",
+      message:
+        err instanceof Error
+          ? `CRM : ${err.message}`
+          : "CRM registration failed",
       data: null,
     };
   }
@@ -165,7 +185,6 @@ export async function registerUserToWMS({
 
   console.log(" Payload Admin => ", payload);
   console.log(" WMS_API_PATH => ", WMS_API_PATH);
-
 
   const response = await fetch(`${WMS_API_PATH}/api/users/adduser`, {
     method: "POST",

@@ -118,9 +118,6 @@ export default function UserManagement() {
 
   const [searchedUsers, setSearchedUsers] = useState<user[]>([]);
 
-  const [updateFailedSystems, setUpdateFailedSystems] = useState<
-    FailedSystem[]
-  >([]);
 
   const [permissionedSystems, setPermissionedSystems] = useState<
     PermissionedSystem[]
@@ -553,10 +550,7 @@ export default function UserManagement() {
     setSelectedUser(user);
   };
 
-  const getUpdateFailedSystems = (userId: number, systems: system[]) => {
-    console.log(userId, systems);
-    setUpdateFailedSystems((prev) => [...prev, { userId, systems }]);
-  };
+ 
 
   const handleResetPassword = (user: any) => {
     setSelectedUser(user);
@@ -858,7 +852,6 @@ export default function UserManagement() {
           onOpenChange={setIsEditDialogOpen}
           user={selectedUser}
           addUpdatedUser={addUpdatedUser}
-          getUpdateFailedSystems={getUpdateFailedSystems}
         />
       )}
 

@@ -1,7 +1,7 @@
 import { FormUser, SelectedSystemRoles, system } from "../../type";
 import { getRoleId } from "../../utils";
 
-export const addUserToSystemsAndUMS = async (
+export const addUserToPortals = async (
   user: any,
   systemsToRegister: system[],
   seletectedSystemRoles: SelectedSystemRoles,
@@ -20,6 +20,7 @@ export const addUserToSystemsAndUMS = async (
           system
         ),
       })),
+      branch: selectedBranchesForFMS,
       //@ts-ignore
       teams: user.teams.filter((team) => team !== ""),
     };
