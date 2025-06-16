@@ -4,6 +4,7 @@ import { getRoleName } from "@/lib/ums/utils";
 import { NextResponse } from "next/server";
 import { PoolConnection } from "mysql2/promise";
 import { system } from "@/lib/ums/type";
+import prisma from "@/lib/prisma";
 
 interface CustomerResult {
   id: number;
