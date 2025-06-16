@@ -41,7 +41,7 @@ import { toast as hotToast } from "react-hot-toast";
 import { useAuth } from "@/app/contexts/authContext";
 import InputWrapper from "./input-wrapper";
 import { useData } from "@/app/contexts/dataContext";
-import { addUserToSystemsAndUMS } from "@/lib/ums/systemHandlers/add/addUserToSystemsAndUMS";
+import { addUserToPortals } from "@/lib/ums/systemHandlers/add/addUserToPortals";
 import { useUser } from "@/app/contexts/UserContext";
 
 interface CreateUserDialogProps {
@@ -245,7 +245,7 @@ const handleSubmit = async () => {
 
     console.log("*** updatedFormData *** ", updatedFormData);
 
-    const result = await addUserToSystemsAndUMS(
+    const result = await addUserToPortals(
       updatedFormData,
       selectedSystems,
       systemRoleSelections,

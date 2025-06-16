@@ -32,9 +32,11 @@ import {
   Team,
   user,
 } from "@/lib/ums/type";
-import { addUserToSystemsAndUMS } from "@/lib/ums/systemHandlers/add/addUserToSystemsAndUMS";
+import { addUserToPortals } from "@/lib/ums/systemHandlers/add/addUserToPortals";
 import { useData } from "@/app/contexts/dataContext";
 import { checkIfHasTenant, registerTenantId } from "@/lib/tenant";
+import { updateUserToPortals } from "@/lib/ums/systemHandlers/edit/updateUserToPortals";
+import { getRoleName } from "@/lib/ums/utils";
 
 interface FormData {
   name: string;
@@ -44,9 +46,10 @@ interface FormData {
   confirmPassword: string;
   phone: string;
   mobile: string;
+  fms_branch: string[];
   tenantId: string;
-  teams: Team[];
-  systems: system[];
+  teams: string[];
+  selected_systems: system[];
 }
 
 export default function SystemRegistration() {
@@ -60,26 +63,48 @@ export default function SystemRegistration() {
     confirmPassword: "",
     phone: "",
     mobile: "",
+    fms_branch: [],
     tenantId: "",
     teams: [],
-    systems: [],
+    selected_systems: [],
   });
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isRegistering, setIsRegistering] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const { user: loggedUser, loading } = useUser();
-  const { access_token, addUserToKeycloak } = useAuth();
+  const { access_token, addUserToKeycloak, updateUserInKeycloak } = useAuth();
   const { teams } = useData();
 
+  const requiredFields: { field: keyof FormData; label: string }[] = [
+    { field: "name", label: "Name" },
+    { field: "email", label: "Email" },
+    { field: "username", label: "Username" },
+    { field: "password", label: "Password" },
+    { field: "confirmPassword", label: "Confirm Password" },
+    { field: "selected_systems", label: "Selected Systems" },
+  ];
+
   const systemOptions = [
-    // { value: "FMS" as system, label: "FMS" },
+    { value: "FMS" as system, label: "FMS" },
     // { value: "TMS" as system, label: "TMS" },
-    // { value: "CRM" as system, label: "CRM" },
+    { value: "CRM" as system, label: "CRM" },
     { value: "WMS" as system, label: "WMS" },
   ];
+
+  const systemAdminRoles = {
+    CRM: "Admin",
+    WMS: "Admin",
+    FMS: "Admin",
+    TMS: "2",
+  };
+
+  const tmsAdminAccess = "1";
+
+  const fmsBranches = ["0"];
 
   useEffect(() => {
     checkTenant();
@@ -88,6 +113,8 @@ export default function SystemRegistration() {
 
   useEffect(() => {
     //Get registered data
+
+    console.log("teams => ", teams);
 
     setFormData({
       name: loggedUser?.name || "",
@@ -98,8 +125,9 @@ export default function SystemRegistration() {
       phone: "",
       mobile: "",
       tenantId: "",
-      teams: teams,
-      systems: [],
+      fms_branch: fmsBranches,
+      teams: teams?.map((team) => team.teamId.toString()),
+      selected_systems: [],
     });
   }, [loggedUser, teams]);
 
@@ -118,7 +146,7 @@ export default function SystemRegistration() {
         console.error(checkingResponse.errorMessage);
       }
     }
-  }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -171,40 +199,17 @@ export default function SystemRegistration() {
                 systems_with_permission.push(system);
               });
               data.systems_with_permission = systems_with_permission;
-              // setPermissionedSystems((prev) => {
-              //   return [
-              //     ...prev,
-              //     { userId: data.id, systems: data.systems_with_permission },
-              //   ];
-              // });
             }
           });
-          // setIsLoading(false);
-          // setUsers(fetchData);
 
           if (fetchData.find((data) => data.email === loggedUser?.email)) {
             console.log("fetchdata for checking registeration", fetchData);
 
-            setRegisteredUser(fetchData[0]);
+            setRegisteredUser(
+              fetchData.find((data) => data.email === loggedUser?.email)
+            );
           }
           return true;
-        } else {
-          toastify.warning(
-            "You are not registered into Systems. Please register.",
-            {
-              position: "top-right",
-              autoClose: 3000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "light",
-            }
-          );
-          // setIsLoading(false);
-          // setUsers([]);
-          return false;
         }
       } else {
         // setIsLoading(false);
@@ -241,14 +246,6 @@ export default function SystemRegistration() {
   };
 
   const handleRegistration = async () => {
-    const requiredFields: { field: keyof FormData; label: string }[] = [
-      { field: "name", label: "Name" },
-      { field: "email", label: "Email" },
-      { field: "username", label: "Username" },
-      { field: "password", label: "Password" },
-      { field: "confirmPassword", label: "Confirm Password" },
-    ];
-
     // Check for empty fields
     for (let { field, label } of requiredFields) {
       if (!formData[field]) {
@@ -259,9 +256,15 @@ export default function SystemRegistration() {
       }
     }
 
+    if (formData.selected_systems.length === 0) {
+      hotToast.error(`Please select any system.`, {
+        duration: 3000,
+      });
+      return;
+    }
+
     // Additional password match validation
     if (formData.password !== formData.confirmPassword) {
-      alert(`Password is not matched.`);
       hotToast.error(`Password is not matched.`, {
         duration: 3000,
       });
@@ -269,19 +272,19 @@ export default function SystemRegistration() {
     }
 
     console.log("Form Data => ", formData);
-    
 
     //Generating the talentId and then register into table
     let tenantId = "";
-    if(loggedUser?.email) {
+
+    if (loggedUser?.email) {
       const tenantRegResponse = await registerTenantId(loggedUser.email);
 
-      if(!tenantRegResponse.error) {
+      if (!tenantRegResponse.error) {
         tenantId = tenantRegResponse.tenantId;
       } else {
         hotToast.error(tenantRegResponse?.errorMessage || "Error", {
-          duration: 3000
-        })
+          duration: 3000,
+        });
 
         return;
       }
@@ -289,36 +292,23 @@ export default function SystemRegistration() {
 
     setIsRegistering(true);
 
-    const formDataWithTenantId = {...formData, tenantId};
+    const formDataWithTenantId = { ...formData, tenantId };
 
     try {
       const keycloakResponse = await addUserToKeycloak(
         formDataWithTenantId.username,
         formDataWithTenantId.email,
         formDataWithTenantId.password,
-        formDataWithTenantId.systems
+        formDataWithTenantId.selected_systems
       );
 
       if (keycloakResponse.error) {
         throw new Error(keycloakResponse.message);
       }
 
-      const systemAdminRoles = {
-        CRM: "2",
-        WMS: "Admin",
-        FMS: "1",
-        TMS: "2",
-      };
-
-      const tmsAdminAccess = "1";
-
-      const fmsBranches = ["0"];
-
-      
-
-      const result = await addUserToSystemsAndUMS(
+      const result = await addUserToPortals(
         formDataWithTenantId,
-        formDataWithTenantId.systems,
+        formDataWithTenantId.selected_systems,
         systemAdminRoles,
         access_token,
         tmsAdminAccess,
@@ -331,12 +321,17 @@ export default function SystemRegistration() {
       );
 
       if (result.success) {
+        
+        setRegisteredUser(result.data);
+        
+        setHasTenant(true);
+        
         toastify.success("Registered new user into UMS!", { autoClose: 3000 });
-
+        
         if (result.warning) {
           toastify.warn(result.warning, { autoClose: 3000 });
         }
-
+        
         // Reset form states
       } else {
         throw new Error(result.error || "Failed to register user");
@@ -362,24 +357,79 @@ export default function SystemRegistration() {
   };
 
   const handleSaveUpdates = async () => {
-    setIsRegistering(true);
-    // try {
-    //   // Call your backend to update the registered fields
-    //   const result = await updateUserDetailsAPI(formData);
-    //   if (result.success) {
-    //     hotToast.success("User details updated successfully", { duration: 3000 });
-    //     setEditMode(false); // Exit edit mode
-    //   } else {
-    //     throw new Error(result.error || "Failed to update user details");
-    //   }
-    // } catch (error: unknown) {
-    //   hotToast.error(
-    //     error instanceof Error ? error.message : "An unexpected error occurred",
-    //     { duration: 5000 }
-    //   );
-    // } finally {
-    //   setIsRegistering(false);
+    console.log("formData to be updated : ", formData);
+
+    if (!registeredUser) return;
+
+    for (let { field, label } of requiredFields) {
+      if (!formData[field]) {
+        hotToast.error(`${field} are required`, {
+          duration: 3000,
+        });
+        return;
+      }
+    }
+
+    // if (formData.selected_systems.length === 0) {
+    //   hotToast.error(`Please select any system.`, {
+    //     duration: 3000,
+    //   });
+    //   return;
     // }
+
+    // Additional password match validation
+    if (formData.password !== formData.confirmPassword) {
+      hotToast.error(`Password is not matched.`, {
+        duration: 3000,
+      });
+      return;
+    }
+
+    console.log("handleSaveUpdates() is called");
+    console.log("formData is ", formData);
+
+    try {
+      setIsUpdating(true);
+
+      const keycloakUpdateResponse = await updateUserInKeycloak(
+        registeredUser.email,
+        // formData.email,
+        formData.username,
+        formData.password,
+        [],
+        registeredUser.selected_systems
+      );
+
+      if (!keycloakUpdateResponse.error) {
+        console.log("updateUserToPortal calling");
+
+        const portalUpdateResponse: any = await updateUserToPortals(
+          formData,
+          registeredUser.selected_systems,
+          systemAdminRoles,
+          access_token,
+          tmsAdminAccess,
+          registeredUser
+        );
+
+        if (portalUpdateResponse.success) {
+          // addUpdatedUser(portalUpdateResponse.data);
+          toastify.success("Successfully updated!");
+
+          handleCancelEdit();
+          
+          setRegisteredUser(portalUpdateResponse.data)
+        } else {
+          throw new Error(portalUpdateResponse.error);
+        }
+      } else {
+        hotToast.error(`Keycloak Error : ${keycloakUpdateResponse.message}`);
+      }
+    } catch (error: any) {
+      hotToast.error(`Failed update error ${error.message ? ": " + error.message : ""}`);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const handleCancelEdit = () => {
@@ -505,11 +555,11 @@ export default function SystemRegistration() {
               isMulti
               options={systemOptions}
               value={systemOptions.filter((option) =>
-                formData.systems.includes(option.value)
+                formData.selected_systems.includes(option.value)
               )}
               onChange={(selected) =>
                 handleChange(
-                  "systems",
+                  "selected_systems",
                   selected.map((option) => option.value)
                 )
               }
@@ -538,7 +588,7 @@ export default function SystemRegistration() {
                     fullWidth
                     label="Username"
                     variant="outlined"
-                    value={registeredUser?.username}
+                    value={formData?.username}
                     onChange={(e) => handleChange("username", e.target.value)}
                   />
                 </ListItem>
@@ -596,7 +646,7 @@ export default function SystemRegistration() {
                     fullWidth
                     label="Phone"
                     variant="outlined"
-                    value={registeredUser?.phone}
+                    value={formData?.phone}
                     onChange={(e) => handleChange("phone", e.target.value)}
                     InputProps={{
                       startAdornment: (
@@ -612,7 +662,7 @@ export default function SystemRegistration() {
                     fullWidth
                     label="Mobile"
                     variant="outlined"
-                    value={registeredUser?.mobile}
+                    value={formData?.mobile}
                     onChange={(e) => handleChange("mobile", e.target.value)}
                     InputProps={{
                       startAdornment: (
@@ -630,22 +680,15 @@ export default function SystemRegistration() {
                       onClick={handleSaveUpdates}
                       startIcon={<SaveIcon />}
                     >
-                      Save
+                      {isUpdating ? "Saving..." : "Save"}
                     </Button>
                     <Button onClick={handleCancelEdit}>Cancel</Button>
                   </div>
                 </ListItem>
               </List>
             ) : (
-              <List>
-                <ListItem>
-                  <ListItemText
-                    primary="Name"
-                    secondary={registeredUser?.name || "N/A"}
-                  />
-                </ListItem>
-                {/* Add other read-only fields */}
-              </List>
+              <>
+              </>
             )}
             <List>
               <ListItem>
@@ -678,12 +721,13 @@ export default function SystemRegistration() {
                   secondary={registeredUser?.mobile || "N/A"}
                 />
               </ListItem>
+
               <ListItem>
                 <ListItemText
                   primary="Selected Systems"
                   secondary={
                     registeredUser?.selected_systems.length
-                      ? formData.systems.join(", ")
+                      ? registeredUser.selected_systems.join(", ")
                       : "None Selected"
                   }
                 />
