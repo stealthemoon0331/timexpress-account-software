@@ -1,4 +1,5 @@
 //api/user/register-tenant/route.ts
+import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
