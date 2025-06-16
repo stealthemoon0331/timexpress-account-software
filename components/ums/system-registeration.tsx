@@ -46,6 +46,7 @@ interface FormData {
   confirmPassword: string;
   phone: string;
   mobile: string;
+  fms_branch: string[];
   tenantId: string;
   teams: string[];
   selected_systems: system[];
@@ -62,6 +63,7 @@ export default function SystemRegistration() {
     confirmPassword: "",
     phone: "",
     mobile: "",
+    fms_branch: [],
     tenantId: "",
     teams: [],
     selected_systems: [],
@@ -87,7 +89,7 @@ export default function SystemRegistration() {
   ];
 
   const systemOptions = [
-    // { value: "FMS" as system, label: "FMS" },
+    { value: "FMS" as system, label: "FMS" },
     // { value: "TMS" as system, label: "TMS" },
     { value: "CRM" as system, label: "CRM" },
     { value: "WMS" as system, label: "WMS" },
@@ -96,7 +98,7 @@ export default function SystemRegistration() {
   const systemAdminRoles = {
     CRM: "Admin",
     WMS: "Admin",
-    FMS: "1",
+    FMS: "Admin",
     TMS: "2",
   };
 
@@ -123,7 +125,8 @@ export default function SystemRegistration() {
       phone: "",
       mobile: "",
       tenantId: "",
-      teams: teams.map((team) => team.teamId.toString()),
+      fms_branch: fmsBranches,
+      teams: teams?.map((team) => team.teamId.toString()),
       selected_systems: [],
     });
   }, [loggedUser, teams]);

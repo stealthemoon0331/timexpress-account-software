@@ -66,6 +66,7 @@ export async function registerUserToFMS({
     phone: ssoUser.phone,
     branch: ssoUser.fms_branch,
     roleId: roleId,
+    tenantId: ssoUser.tenantId,
     status: 1,
   };
   console.log("FMS payload ==> ", payload);

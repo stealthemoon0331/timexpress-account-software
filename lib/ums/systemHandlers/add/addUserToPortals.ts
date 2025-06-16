@@ -20,6 +20,7 @@ export const addUserToPortals = async (
           system
         ),
       })),
+      branch: selectedBranchesForFMS,
       //@ts-ignore
       teams: user.teams.filter((team) => team !== ""),
     };
