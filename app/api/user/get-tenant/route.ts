@@ -32,8 +32,38 @@ interface CustomerResult {
   adminId: number;
 }
 
+const allowedOrigins = [
+  "http://localhost:5000",
+  "https://wmsninja.com",
+  "https://fleetp.com",
+  "https://shypri.com",
+];
+
+const getCorsHeaders = (req: Request) => {
+  const origin = req.headers.get("Origin");
+  const isAllowedOrigin = origin && allowedOrigins.includes(origin || "");
+
+  return {
+    "Access-Control-Allow-Origin": isAllowedOrigin ? origin : allowedOrigins[0], // Default to the first allowed origin if not matched
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Max-Age": "86400",
+  };
+};
+
+export async function OPTIONS(req: Request) {
+  const corsHeaders = getCorsHeaders(req);
+
+  return new Response(null, {
+    status: 200,
+    headers: corsHeaders,
+  });
+}
+
 export async function GET(req: Request) {
   let connection: PoolConnection | null = null;
+  
+  const corsHeaders = getCorsHeaders(req);
 
   try {
     // Validate request URL
@@ -43,7 +73,7 @@ export async function GET(req: Request) {
     if (!email) {
       return NextResponse.json(
         { error: "Email parameter is required" },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -52,7 +82,7 @@ export async function GET(req: Request) {
     if (!emailRegex.test(email)) {
       return NextResponse.json(
         { error: "Invalid email format" },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -66,7 +96,7 @@ export async function GET(req: Request) {
       console.error("Database connection error:", dbError);
       return NextResponse.json(
         { error: "Database connection failed" },
-        { status: 503 }
+        { status: 503, headers: corsHeaders }
       );
     }
 
@@ -86,7 +116,7 @@ export async function GET(req: Request) {
       console.error("Database query error:", queryError);
       return NextResponse.json(
         { error: "Failed to fetch customer data" },
-        { status: 500 }
+        { status: 500, headers: corsHeaders }
       );
     }
 
@@ -94,7 +124,7 @@ export async function GET(req: Request) {
     if (!result || result.length === 0) {
       return NextResponse.json(
         { error: "Customer not found or inactive" },
-        { status: 404 }
+        { status: 404, headers: corsHeaders }
       );
     }
 
@@ -105,7 +135,7 @@ export async function GET(req: Request) {
     if (!adminId) {
       return NextResponse.json(
         { error: "Admin ID not found for customer" },
-        { status: 404 }
+        { status: 404, headers: corsHeaders }
       );
     }
 
@@ -126,13 +156,16 @@ export async function GET(req: Request) {
       console.error("Prisma query error:", prismaError);
       return NextResponse.json(
         { error: "Failed to fetch admin data" },
-        { status: 500 }
+        { status: 500, headers: corsHeaders }
       );
     }
 
     // Check if admin exists
     if (!admin) {
-      return NextResponse.json({ error: "Admin not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Admin not found" },
+        { status: 404, headers: corsHeaders }
+      );
     }
 
     // Build role information with error handling
@@ -177,20 +210,20 @@ export async function GET(req: Request) {
     if (error instanceof TypeError) {
       return NextResponse.json(
         { error: "Invalid request format" },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
     if (error instanceof SyntaxError) {
       return NextResponse.json(
         { error: "Invalid request syntax" },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   } finally {
     // Always release the connection
