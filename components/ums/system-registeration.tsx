@@ -158,6 +158,8 @@ export default function SystemRegistration() {
       });
       const fetchData = await response.json();
 
+      console.log("fetchData from ums/customers => ", fetchData);
+
       // Check if fetchData is an array
       if (Array.isArray(fetchData)) {
         if (fetchData.length > 0) {

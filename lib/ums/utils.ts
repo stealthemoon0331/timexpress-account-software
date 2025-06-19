@@ -36,20 +36,20 @@ export function getBranchName(branchId: string): string {
 
 export function getRoleName(
   system: keyof typeof systemRoles,
-  roleId: number
+  roleId: number | string
 ): string | null {
   return systemRoles[system].find((role) => role.roleId == roleId)?.name || "N/A";
 }
 
 
 
-export function getRoleId(roleName: string, system: keyof typeof systemRoles): number {
+export function getRoleId(roleName: string, system: keyof typeof systemRoles): number | string {
   console.log("system ", system, " roleName : ", roleName);
   const roleId = systemRoles[system].find((role) => role.name === roleName)?.roleId;
   return roleId !== undefined ? roleId : -1;
 }
 
-export function getIdByRoleType(roleType: string, system: keyof typeof systemRoles): number {
+export function getIdByRoleType(roleType: string, system: keyof typeof systemRoles): number | string {
   const roleId = systemRoles[system].find((role: any) => role.role_type == roleType)?.roleId;
   return roleId !== undefined ? roleId : -1;
 }

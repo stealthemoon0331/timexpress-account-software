@@ -1,4 +1,5 @@
 import {
+  registerUserToAMS,
   registerUserToCRM,
   registerUserToFMS,
   registerUserToTMS,
@@ -75,6 +76,18 @@ export async function POST(
           message: tmsResponse.message,
           data: { system: system, userid: tmsResponse.data?.personnel_id },
         });
+      case "AMS":
+        const amsResponse = await registerUserToAMS({
+          ssoUser,
+          roleId,
+          system,
+        });
+        return NextResponse.json({
+          error: amsResponse.isError,
+          message: amsResponse.message,
+          data: { system: system, userid: amsResponse.data?.id },
+        });
+
       default:
         return NextResponse.json({ error: "Invalid system" }, { status: 400 });
     }
