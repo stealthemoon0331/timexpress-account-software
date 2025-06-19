@@ -37,6 +37,7 @@ import { useAuth } from "@/app/contexts/authContext";
 import { set } from "date-fns";
 import InputWrapper from "./input-wrapper";
 import { useData } from "@/app/contexts/dataContext";
+import { useUser } from "@/app/contexts/UserContext";
 
 interface AddUserDialogProps {
   open: boolean;
@@ -59,6 +60,7 @@ export function AddMoreUserDialog({
     username: "",
     password: "",
     confirmPassword: "",
+    tenant_id: "",
     phone: "",
     mobile: "",
     fms_user_id: -1,
@@ -92,6 +94,7 @@ export function AddMoreUserDialog({
   });
 
   const { access_token, updateUserInKeycloak } = useAuth();
+  const { user: loggedUser } = useUser();
 
   const { teams } = useData();
 
@@ -103,6 +106,7 @@ export function AddMoreUserDialog({
         username: user.username || "",
         password: user.password || "",
         confirmPassword: "",
+        tenant_id: loggedUser?.tenantId || "",
         phone: user.phone || "",
         mobile: user.mobile || "",
         fms_user_id: user.fms_user_id || -1,

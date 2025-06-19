@@ -25,7 +25,6 @@ export async function updateUserInFMS({
   system,
 }: UpdateParams) {
   try {
-
     const response = await fetch(`${FMS_API_PATH}/api/updateuser`, {
       method: "POST",
       headers: {
@@ -41,6 +40,7 @@ export async function updateUserInFMS({
         phone: formData.phone,
         fms_branch: formData.fms_branch,
         roleId: roleId,
+        tenantId: formData.tenantId,
         status: 1,
       }),
     });
@@ -102,7 +102,17 @@ export async function updateUserInWMS({
   system,
 }: UpdateParams) {
   try {
-    
+    console.log("system : ", system);
+    console.log("roleId : ", roleId);
+
+    console.log("updateParam : ", {
+          ...formData,
+          role: {
+                id: roleId,
+                role: getRoleName(system, roleId),
+              },
+        })
+
     const response = await fetch(
       `${WMS_API_PATH}/api/users/${user.wms_user_id}`,
       {
@@ -113,6 +123,7 @@ export async function updateUserInWMS({
         },
         body: JSON.stringify({
           ...formData,
+          tenant_id: user.tenantId,
           role: {
                 id: roleId,
                 role: getRoleName(system, roleId),

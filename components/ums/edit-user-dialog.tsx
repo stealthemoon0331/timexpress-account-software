@@ -24,24 +24,26 @@ import { accesses, branches, systemRoles } from "@/lib/ums/data";
 
 import { X } from "lucide-react";
 
-import { FormUser, system, Team, user } from "@/lib/ums/type";
 import {
-  getBranchName,
-  getIdByRoleType,
-  getRoleName,
-} from "@/lib/ums/utils";
+  FormUser,
+  SelectedSystemRoles,
+  system,
+  Team,
+  user,
+} from "@/lib/ums/type";
+import { getBranchName, getIdByRoleType, getRoleName } from "@/lib/ums/utils";
 import { toast as toastify } from "react-toastify";
 import { toast as hotToast } from "react-hot-toast";
 import { useAuth } from "@/app/contexts/authContext";
 import InputWrapper from "./input-wrapper";
 import { useData } from "@/app/contexts/dataContext";
+import { updateUserToPortals } from "@/lib/ums/systemHandlers/edit/updateUserToPortals";
 
 interface EditUserDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   user: user;
   addUpdatedUser: (user: user) => void;
-  getUpdateFailedSystems: (userId: number, systems: system[]) => void;
 }
 
 export function EditUserDialog({
@@ -49,7 +51,6 @@ export function EditUserDialog({
   onOpenChange,
   user,
   addUpdatedUser,
-  getUpdateFailedSystems,
 }: EditUserDialogProps) {
   const [selectedSystems, setSelectedSystems] = useState<system[]>([]);
   const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
@@ -82,26 +83,25 @@ export function EditUserDialog({
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
 
   // System-specific role selections
-  const [systemRoleSelections, setSystemRoleSelections] = useState<
-    Record<string, string>
-  >({
-    FMS:
-      user.fms_user_role_id === -1
-        ? ""
-        : getRoleName("FMS", user.fms_user_role_id) || "",
-    WMS:
-      user.wms_user_role_id === -1
-        ? ""
-        : getRoleName("WMS", user.wms_user_role_id) || "",
-    CRM:
-      user.crm_user_role_id === -1
-        ? ""
-        : getRoleName("CRM", user.crm_user_role_id) || "",
-    TMS:
-      user.tms_user_id === -1
-        ? ""
-        : getRoleName("TMS", user.tms_user_role_id) || "",
-  });
+  const [systemRoleSelections, setSystemRoleSelections] =
+    useState<SelectedSystemRoles>({
+      FMS:
+        user.fms_user_role_id === -1
+          ? ""
+          : getRoleName("FMS", user.fms_user_role_id) || "",
+      WMS:
+        user.wms_user_role_id === -1
+          ? ""
+          : getRoleName("WMS", user.wms_user_role_id) || "",
+      CRM:
+        user.crm_user_role_id === -1
+          ? ""
+          : getRoleName("CRM", user.crm_user_role_id) || "",
+      TMS:
+        user.tms_user_id === -1
+          ? ""
+          : getRoleName("TMS", user.tms_user_role_id) || "",
+    });
 
   const { access_token, updateUserInKeycloak } = useAuth();
 
@@ -265,165 +265,54 @@ export function EditUserDialog({
     const deselectedSystemsToUpdateRole = user.selected_systems.filter(
       (system) => !selectedSystems.includes(system)
     );
-    const selectedSystemsToUpdateRole = user.selected_systems.filter(
-      (system) => selectedSystems.includes(system)
+    const selectedSystemsToUpdateRole = user.selected_systems.filter((system) =>
+      selectedSystems.includes(system)
     );
-    
-    const updateResponse = await updateUserInKeycloak(
+
+    const keycloakUpdateResponse = await updateUserInKeycloak(
       user.email,
       // formData.email,
       formData.username,
       formData.password,
       deselectedSystemsToUpdateRole,
-      selectedSystems,
+      selectedSystems
     );
 
     if (selectedSystems.length === 0) {
       toastify.info("You just updated the permission of users in keycloak", {
-        autoClose: 4000
+        autoClose: 4000,
       });
-      
+
       setIsUpdating(false);
       return;
     }
 
-    if (!updateResponse.error) {
-      let countsOfUpdatedSystem = 0;
-      let fms_user_role_id = -1;
-      let crm_user_role_id = -1;
-      let wms_user_role_id = -1;
-      let tms_user_role_id = -1;
-      let updated_systems: system[] = [];
-      try {
-        setIsUpdating(false);
-        const results = await Promise.allSettled(
-          selectedSystems.map(async (system) => {
-            const response = await fetch(`/api/ums/systems/edit/${system}`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                formData,
-                systemRoleSelections,
-                accessToken: access_token,
-                selectedAccess,
-                user,
-              }),
-            });
-
-            const responseData = await response.json();
-            if (!response.ok || responseData.isError) {
-              throw new Error(responseData.message || "Update failed");
-            }
-            return responseData;
-          })
-        );
-        results.forEach((result) => {
-          if (result.status === "fulfilled") {
-            updated_systems.push(result.value.system);
-            if (result.value.system === "FMS") {
-              fms_user_role_id = result.value?.data?.roleId;
-            }
-
-            if (result.value.system === "CRM") {
-              crm_user_role_id = result.value.data.role_id;
-            }
-
-            if (result.value.system === "WMS") {
-              wms_user_role_id = result.value.data.role.id;
-            }
-
-            const role = result.value.data.data?.role;
-
-            if (result.value.system === "TMS" && role) {
-              tms_user_role_id = getIdByRoleType(role, "TMS");
-            }
-
-            countsOfUpdatedSystem++;
-            toastify.success(`${result.value.system} user updated`, {
-              autoClose: 3000,
-            });
-          } else {
-            hotToast.error(result.reason.message);
-          }
-        });
-      } catch (error) {
-        console.error("Update error:", error);
-        hotToast.error("An error occurred during updates");
-      }
-
-      if (countsOfUpdatedSystem !== selectedSystems.length) {
-        const failedSystems: system[] = selectedSystems.filter(
-          (system) => !updated_systems.includes(system)
-        );
-        getUpdateFailedSystems(user.id, failedSystems);
-        // Handle the case where not all systems were updated successfully with toast
-        hotToast.error(`Failed to update ${failedSystems.join(", ")} user`);
-      }
-
-      // Update user in the central SSO system
-      const updateduser = {
-        name: formData.name,
-        email: formData.email,
-        username: formData.username,
-        password: formData.password ? formData.password : user.password,
-        phone: formData.phone,
-        mobile: formData.mobile,
-        fms_user_id: user.fms_user_id,
-        fms_branch: formData.fms_branch, //
-        fms_user_role_id: updated_systems.includes("FMS")
-          ? fms_user_role_id
-          : user.fms_user_role_id, //
-        wms_user_id: user.wms_user_id,
-        wms_user_role_id: updated_systems.includes("WMS")
-          ? wms_user_role_id
-          : user.wms_user_role_id, //
-        crm_user_id: user.crm_user_id,
-        crm_user_role_id: updated_systems.includes("CRM")
-          ? crm_user_role_id
-          : user.crm_user_role_id, //
-        tms_user_id: user.tms_user_id,
-        tms_user_role_id: updated_systems.includes("TMS")
-          ? tms_user_role_id
-          : user.tms_user_role_id, //
-        selected_systems: user.selected_systems, //
-        systems_with_permission: updated_systems, //
-        access: selectedAccess, //
-        teams: formData.teams, //
-      };
-      
-      await fetch(`/api/ums/customers/${user.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updateduser),
-      })
-        .then((response) => {
-          if (response.ok) {
-            toastify.success("UMS updated!");
-            const updatedUserWithId = {
-              ...updateduser,
-              id: user.id,
-            };
-            addUpdatedUser(updatedUserWithId);
-            onOpenChange(false);
-          } else {
-            hotToast.error("Failed to update user");
-          }
-          setIsUpdating(false);
-        })
-        .catch((error) => {
-          setIsUpdating(false);
-          hotToast.error("Error updating user:", {
-            duration: 5000,
-          });
-        });
-    } else {
-      hotToast.error(`Keycloak Error : ${updateResponse.message}`);
+    if (!keycloakUpdateResponse.error) {
       setIsUpdating(false);
+
+      console.log("updateUserToPortal calling")
+
+      const portalUpdateResponse: any = await updateUserToPortals(
+        formData,
+        selectedSystems,
+        systemRoleSelections,
+        access_token,
+        selectedAccess,
+        user
+      );
+
+      if (portalUpdateResponse.success) {
+        addUpdatedUser(portalUpdateResponse.data);
+        toastify.success("Successfully updated!")
+        onOpenChange(false);
+      } else {
+        hotToast.error(portalUpdateResponse.error);
+      }
+    } else {
+      hotToast.error(`Keycloak Error : ${keycloakUpdateResponse.message}`);
     }
+
+    setIsUpdating(false);
   };
 
   const cancelBranchSelection = (branch: string) => {
@@ -643,7 +532,9 @@ export function EditUserDialog({
                           handleRoleChange(system, value)
                         }
                       >
-                        <SelectTrigger id={`edit-${system?.toLowerCase()}-role`}>
+                        <SelectTrigger
+                          id={`edit-${system?.toLowerCase()}-role`}
+                        >
                           <SelectValue placeholder={`Select ${system} role`} />
                         </SelectTrigger>
                         <SelectContent>
