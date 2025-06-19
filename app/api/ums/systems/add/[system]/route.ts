@@ -82,10 +82,13 @@ export async function POST(
           roleId,
           system,
         });
+
+        console.log("amsResponse => ", amsResponse);
+
         return NextResponse.json({
           error: amsResponse.isError,
           message: amsResponse.message,
-          data: { system: system, userid: amsResponse.data?.id },
+          data: { system: system, userid: amsResponse.data?.user.id },
         });
 
       default:

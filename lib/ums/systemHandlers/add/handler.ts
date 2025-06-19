@@ -263,7 +263,8 @@ export async function registerUserToAMS({
 }: RegistrationParams) {
   const payload = {
     email: ssoUser.email,
-    name: ssoUser.name,
+    firstName: ssoUser.name.split(" ")[0],
+    lastName: ssoUser.name.split(" ")[1],
     password: ssoUser.password,
     role: roleId,
     tenantId: ssoUser.tenantId,

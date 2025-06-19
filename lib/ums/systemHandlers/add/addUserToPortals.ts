@@ -70,6 +70,8 @@ export const addUserToPortals = async (
       if (result.status === "fulfilled") {
         const val = result.value;
 
+        console.log("val of results => ", val);
+
         if (val.system === "FMS") fms_user_id = val.userid;
         else if (val.system === "WMS") wms_user_id = val.userid;
         else if (val.system === "CRM") crm_user_id = val.userid;          
@@ -127,8 +129,9 @@ export const addUserToPortals = async (
         tms_user_role_id: registered_system.includes("TMS")
           ? getRoleId(seletectedSystemRoles["TMS"], "TMS")
           : -1,
-        ams_user_id: registered_system.includes("AMS"),
-        ams_user_role_id: registered_system.includes("AMS"),
+        ams_user_id: registered_system.includes("AMS") ? ams_user_id : -1,
+        ams_user_role_id: registered_system.includes("AMS") ? getRoleId(seletectedSystemRoles["AMS"], "AMS")
+        : -1,
         selected_systems: registered_system,
         systems_with_permission: registered_system,
         access: registered_system.includes("TMS") ? selectedAccessForTMS : "0",
