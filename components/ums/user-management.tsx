@@ -105,7 +105,7 @@ export default function UserManagement() {
     tms_user_id: -1,
     tms_user_role_id: -1,
     ams_user_id: -1,
-    ams_user_role_id: "",
+    ams_user_role_id: -1,
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -199,6 +199,7 @@ export default function UserManagement() {
           },
         });
         const fetchData = await response.json();
+
         // Check if fetchData is an array
         if (Array.isArray(fetchData)) {
           if (fetchData.length > 0) {
@@ -250,6 +251,9 @@ export default function UserManagement() {
                 });
               }
             });
+
+            console.log("fetchData => ", fetchData)
+
             setIsLoading(false);
             setUsers(fetchData);
             return true;
@@ -343,6 +347,7 @@ export default function UserManagement() {
     fetchAvailableSystems();
   }, [loggedUser]);
   const handleEditUser = (user: user) => {
+
     setSelectedUser(user);
     setIsEditDialogOpen(true);
   };
@@ -661,6 +666,8 @@ export default function UserManagement() {
                               roleId = user.crm_user_role_id;
                             else if (system === "TMS")
                               roleId = user.tms_user_role_id;
+                              else if (system === "AMS")
+                              roleId = user.ams_user_role_id;
                             return (
                               <Tooltip.Root key={system}>
                                 <Tooltip.Trigger

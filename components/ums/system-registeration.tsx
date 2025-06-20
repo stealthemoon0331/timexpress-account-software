@@ -591,6 +591,15 @@ export default function SystemRegistration() {
                 <ListItem>
                   <TextField
                     fullWidth
+                    label="name"
+                    variant="outlined"
+                    value={formData?.name}
+                    onChange={(e) => handleChange("name", e.target.value)}
+                  />
+                </ListItem>
+                <ListItem>
+                  <TextField
+                    fullWidth
                     label="Username"
                     variant="outlined"
                     value={formData?.username}
