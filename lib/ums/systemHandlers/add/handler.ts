@@ -3,6 +3,7 @@ import {
   FMS_API_PATH,
   TMS_API_PATH,
   WMS_API_PATH,
+  AMS_API_PATH,
 } from "@/app/config/setting";
 import { systemRoles } from "@/lib/ums/data";
 import { system } from "@/lib/ums/type";
@@ -10,7 +11,7 @@ import { getRoleName } from "@/lib/ums/utils";
 
 interface RegistrationParams {
   ssoUser: any;
-  roleId: number;
+  roleId: number | string;
   accessToken?: string;
   selectedAccess?: any;
   system: system;
@@ -253,4 +254,33 @@ export async function registerUserToTMS({
     message: "User registered successfully",
     data: responseData?.data,
   };
+}
+
+export async function registerUserToAMS({
+  ssoUser,
+  roleId,
+  system,
+}: RegistrationParams) {
+  const payload = {
+    email: ssoUser.email,
+    firstName: ssoUser.name.split(" ")[0],
+    lastName: ssoUser.name.split(" ")[1],
+    password: ssoUser.password,
+    role: roleId,
+    tenantId: ssoUser.tenantId,
+    status: 1,
+  };
+
+  console.log(" Payload Admin => ", payload);
+  console.log(" AMS_API_PATH => ", AMS_API_PATH);
+
+  const response = await fetch(`${AMS_API_PATH}/api/auth/signup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return await handleAPIResponse(system, response, "Failed to register user");
 }

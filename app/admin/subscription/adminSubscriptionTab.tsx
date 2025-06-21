@@ -23,6 +23,7 @@ const allSystems = [
   { value: "CRM", label: "CRM" },
   { value: "WMS", label: "WMS" },
   { value: "FMS", label: "FMS" },
+  { value: "AMS", label: "AMS" }, //Accounting Management System
 ];
 
 export function AdminSubscriptionsTab() {

@@ -1,4 +1,5 @@
 import {
+  updateUserInAMS,
   updateUserInCRM,
   updateUserInFMS,
   updateUserInTMS,
@@ -20,7 +21,11 @@ export async function POST(
     selectedTmsAccess,
     user,
   } = await req.json();
+
   const roleId = getRoleId(systemRoleSelections[system], system as system);
+
+  console.log("Form Data from edit endpoint => ", formData);
+  
   try {
     switch (system) {
       case "FMS":
@@ -62,6 +67,21 @@ export async function POST(
           system,
         });
         return NextResponse.json(tmsResponse);
+
+      case "AMS":
+        console.log("AMS formData => ", formData);
+        console.log("AMS roleId => ", roleId);
+        console.log("AMS user => ", user);
+        console.log("AMS system => ", system);
+
+
+        const amsResponse = await updateUserInAMS({
+          formData,
+          roleId,
+          user,
+          system,
+        });
+        return NextResponse.json(amsResponse);
 
       default:
         return NextResponse.json(

@@ -10,7 +10,6 @@ export async function POST(req: NextRequest) {
     // if (!isAdmin) return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
 
     const plan = await req.json()
-    console.log("plan ==> ", plan)
     if (!plan?.id || !plan?.name || plan.price == null) {
       return NextResponse.json({ message: "Invalid plan data" }, { status: 400 })
     }

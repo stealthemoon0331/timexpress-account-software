@@ -45,12 +45,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { PasswordResetDialog } from "@/components/ums/password-reset-dialog";
-import {
-  CRM_API_PATH,
-  FMS_API_PATH,
-  TMS_API_PATH,
-  WMS_API_PATH,
-} from "@/app/config/setting";
+
 import { getBranchName, getRoleName } from "@/lib/ums/utils";
 import {
   FailedSystem,
@@ -109,6 +104,8 @@ export default function UserManagement() {
     crm_user_role_id: -1,
     tms_user_id: -1,
     tms_user_role_id: -1,
+    ams_user_id: -1,
+    ams_user_role_id: -1,
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -128,6 +125,7 @@ export default function UserManagement() {
     CRM: false,
     WMS: false,
     TMS: false,
+    AMS: false,
     count: 0,
   });
 
@@ -201,6 +199,7 @@ export default function UserManagement() {
           },
         });
         const fetchData = await response.json();
+
         // Check if fetchData is an array
         if (Array.isArray(fetchData)) {
           if (fetchData.length > 0) {
@@ -252,6 +251,9 @@ export default function UserManagement() {
                 });
               }
             });
+
+            console.log("fetchData => ", fetchData)
+
             setIsLoading(false);
             setUsers(fetchData);
             return true;
@@ -345,6 +347,7 @@ export default function UserManagement() {
     fetchAvailableSystems();
   }, [loggedUser]);
   const handleEditUser = (user: user) => {
+
     setSelectedUser(user);
     setIsEditDialogOpen(true);
   };
@@ -523,6 +526,7 @@ export default function UserManagement() {
               CRM: false,
               WMS: false,
               TMS: false,
+              AMS: false,
               count: 0,
             });
           } else {
@@ -653,7 +657,7 @@ export default function UserManagement() {
                       <div className="flex flex-wrap gap-1">
                         <Tooltip.Provider>
                           {user.selected_systems?.map((system: system) => {
-                            let roleId = -1;
+                            let roleId: string | number = -1;
                             if (system === "FMS")
                               roleId = user.fms_user_role_id;
                             else if (system === "WMS")
@@ -662,6 +666,8 @@ export default function UserManagement() {
                               roleId = user.crm_user_role_id;
                             else if (system === "TMS")
                               roleId = user.tms_user_role_id;
+                              else if (system === "AMS")
+                              roleId = user.ams_user_role_id;
                             return (
                               <Tooltip.Root key={system}>
                                 <Tooltip.Trigger

@@ -93,6 +93,8 @@ export default function SystemRegistration() {
     // { value: "TMS" as system, label: "TMS" },
     { value: "CRM" as system, label: "CRM" },
     { value: "WMS" as system, label: "WMS" },
+    { value: "AMS" as system, label: "AMS" },
+
   ];
 
   const systemAdminRoles = {
@@ -100,6 +102,7 @@ export default function SystemRegistration() {
     WMS: "Admin",
     FMS: "Admin",
     TMS: "2",
+    AMS: "Admin",
   };
 
   const tmsAdminAccess = "1";
@@ -157,6 +160,8 @@ export default function SystemRegistration() {
         },
       });
       const fetchData = await response.json();
+
+      console.log("fetchData from ums/customers => ", fetchData);
 
       // Check if fetchData is an array
       if (Array.isArray(fetchData)) {
@@ -583,6 +588,15 @@ export default function SystemRegistration() {
             </Typography>
             {editMode ? (
               <List>
+                <ListItem>
+                  <TextField
+                    fullWidth
+                    label="name"
+                    variant="outlined"
+                    value={formData?.name}
+                    onChange={(e) => handleChange("name", e.target.value)}
+                  />
+                </ListItem>
                 <ListItem>
                   <TextField
                     fullWidth

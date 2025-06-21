@@ -80,6 +80,8 @@ export function CreateUserDialog({
     crm_user_role_id: -1,
     tms_user_id: -1,
     tms_user_role_id: -1,
+    ams_user_id: -1,
+    ams_user_role_id: "",
     selected_systems: [],
     access: "",
     teams: [""],
@@ -109,6 +111,7 @@ export function CreateUserDialog({
       WMS: "",
       FMS: "",
       TMS: "",
+      AMS: "",
     });
 
   const getTeamName = (teamId: string): string => {
@@ -136,146 +139,154 @@ export function CreateUserDialog({
     }));
   };
 
-const handleSubmit = async () => {
-  try {
-    if (formData.username === "") {
-      toastify.warn("Please input username");
-      return;
-    }
-
-    if (formData.email === "") {
-      toastify.warn("Please input email");
-      return;
-    }
-
-    if (formData.password === "") {
-      toastify.warn("Please input password");
-      return;
-    }
-
-    if (formData.mobile === "") {
-      toastify.warn("Please input mobile number");
-      return;
-    }
-
-    if (formData.phone === "") {
-      toastify.warn("Please input phone number");
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      toastify.warn("Passwords do not match");
-      return;
-    }
-
-    if (selectedSystems.length === 0) {
-      toastify.warn("Please select a system");
-      return;
-    }
-
-    if (selectedSystems.includes("FMS") && systemRoleSelections.FMS === "") {
-      toastify.warn("Please select a role for FMS");
-      return;
-    }
-
-    if (selectedSystems.includes("WMS") && systemRoleSelections.WMS === "") {
-      toastify.warn("Please select a role for WMS");
-      return;
-    }
-
-    if (selectedSystems.includes("CRM") && systemRoleSelections.CRM === "") {
-      toastify.warn("Please select a role for CRM");
-      return;
-    }
-
-    if (selectedSystems.includes("TMS") && systemRoleSelections.TMS === "") {
-      toastify.warn("Please select a role for TMS");
-      return;
-    }
-
-    if (selectedSystems.includes("FMS") && selectedBranches.length === 0) {
-      toastify.warn("Please select at least one branch");
-      return;
-    }
-
-    if (
-      selectedSystems.includes("TMS") &&
-      selectedAccess === "0" &&
-      formData.teams.filter((team) => team !== "").length === 0
-    ) {
-      toastify.warn("Please select teams in TMS setting");
-      return;
-    }
-
-    if (selectedSystems.includes("TMS") && selectedAccess === "") {
-      toastify.warn("Please select access");
-      return;
-    }
-
-    setIsSending(true); // Set to true at the start of async operations
-
-    console.log("selectedSystems before saving into system ", selectedSystems);
-
-    console.log(" 🍀 ::::: addUserToKeycloak ::::: 🍀 ");
-    console.log("formData.username : ", formData.username);
-    console.log("formData.email : ", formData.email);
-    console.log("formData.password : ", formData.password);
-    console.log("selectedSystems : ", selectedSystems);
-
-
-    const keycloakResponse = await addUserToKeycloak(
-      formData.username,
-      formData.email,
-      formData.password,
-      selectedSystems
-    );
-
-    if (keycloakResponse.error) {
-      throw new Error(keycloakResponse.message);
-    }
-
-    console.log(" 🍀::::: addUserToSystemsAndUMS ::::: 🍀 ");
-    console.log("formData : ", formData);
-    console.log("selectedSystems : ", selectedSystems);
-    console.log("access_token : ", access_token);
-    console.log("selectedAccess : ", selectedAccess);
-    console.log("selectedBranches : ", selectedBranches);
-
-    const updatedFormData = {...formData, tenantId: loggedUser?.tenantId}
-
-    console.log("*** updatedFormData *** ", updatedFormData);
-
-    const result = await addUserToPortals(
-      updatedFormData,
-      selectedSystems,
-      systemRoleSelections,
-      access_token,
-      selectedAccess,
-      selectedBranches
-    );
-
-    if (result.success) {
-      addNewUser(result.data);
-      toastify.success("Registered new user into UMS!", { autoClose: 3000 });
-
-      if (result.warning) {
-        toastify.warn(result.warning, { autoClose: 3000 });
+  const handleSubmit = async () => {
+    try {
+      if (formData.username === "") {
+        toastify.warn("Please input username");
+        return;
       }
 
-      // Reset form states
-      resetForm();
-    } else {
-      throw new Error(result.error || "Failed to register user");
+      if (formData.email === "") {
+        toastify.warn("Please input email");
+        return;
+      }
+
+      if (formData.password === "") {
+        toastify.warn("Please input password");
+        return;
+      }
+
+      if (formData.mobile === "") {
+        toastify.warn("Please input mobile number");
+        return;
+      }
+
+      if (formData.phone === "") {
+        toastify.warn("Please input phone number");
+        return;
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        toastify.warn("Passwords do not match");
+        return;
+      }
+
+      if (selectedSystems.length === 0) {
+        toastify.warn("Please select a system");
+        return;
+      }
+
+      if (selectedSystems.includes("FMS") && systemRoleSelections.FMS === "") {
+        toastify.warn("Please select a role for FMS");
+        return;
+      }
+
+      if (selectedSystems.includes("WMS") && systemRoleSelections.WMS === "") {
+        toastify.warn("Please select a role for WMS");
+        return;
+      }
+
+      if (selectedSystems.includes("CRM") && systemRoleSelections.CRM === "") {
+        toastify.warn("Please select a role for CRM");
+        return;
+      }
+
+      if (selectedSystems.includes("TMS") && systemRoleSelections.TMS === "") {
+        toastify.warn("Please select a role for TMS");
+        return;
+      }
+
+      if (selectedSystems.includes("FMS") && selectedBranches.length === 0) {
+        toastify.warn("Please select at least one branch");
+        return;
+      }
+
+      if (
+        selectedSystems.includes("TMS") &&
+        selectedAccess === "0" &&
+        formData.teams.filter((team) => team !== "").length === 0
+      ) {
+        toastify.warn("Please select teams in TMS setting");
+        return;
+      }
+
+      if (selectedSystems.includes("TMS") && selectedAccess === "") {
+        toastify.warn("Please select access");
+        return;
+      }
+
+      if (selectedSystems.includes("AMS") && systemRoleSelections.AMS === "") {
+        toastify.warn("Please select a role for AMS");
+        return;
+      }
+
+      setIsSending(true); // Set to true at the start of async operations
+
+      console.log(
+        "selectedSystems before saving into system ",
+        selectedSystems
+      );
+
+      console.log(" 🍀 ::::: addUserToKeycloak ::::: 🍀 ");
+      console.log("formData.username : ", formData.username);
+      console.log("formData.email : ", formData.email);
+      console.log("formData.password : ", formData.password);
+      console.log("selectedSystems : ", selectedSystems);
+
+      const keycloakResponse = await addUserToKeycloak(
+        formData.username,
+        formData.email,
+        formData.password,
+        selectedSystems
+      );
+
+      if (keycloakResponse.error) {
+        throw new Error(keycloakResponse.message);
+      }
+
+      console.log(" 🍀::::: addUserToSystemsAndUMS ::::: 🍀 ");
+      console.log("formData : ", formData);
+      console.log("selectedSystems : ", selectedSystems);
+      console.log("access_token : ", access_token);
+      console.log("selectedAccess : ", selectedAccess);
+      console.log("selectedBranches : ", selectedBranches);
+
+      const updatedFormData = { ...formData, tenantId: loggedUser?.tenantId };
+
+      console.log("*** updatedFormData *** ", updatedFormData);
+
+      const result = await addUserToPortals(
+        updatedFormData,
+        selectedSystems,
+        systemRoleSelections,
+        access_token,
+        selectedAccess,
+        selectedBranches
+      );
+
+      if (result.success) {
+        addNewUser(result.data);
+        toastify.success("Registered new user into UMS!", { autoClose: 3000 });
+
+        if (result.warning) {
+          toastify.warn(result.warning, { autoClose: 3000 });
+        }
+
+        // Reset form states
+        resetForm();
+      } else {
+        throw new Error(result.error || "Failed to register user");
+      }
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      hotToast.error(errorMessage, {
+        duration: 5000,
+      });
+    } finally {
+      setIsSending(false); // Always reset isSending in the end
     }
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
-    hotToast.error(errorMessage, {
-      duration: 5000,
-    });
-  } finally {
-    setIsSending(false); // Always reset isSending in the end
-  }
-};
+  };
   const resetForm = () => {
     setFormData({
       name: "",
@@ -295,6 +306,8 @@ const handleSubmit = async () => {
       crm_user_role_id: -1,
       tms_user_id: -1,
       tms_user_role_id: -1,
+      ams_user_id: -1,
+      ams_user_role_id: "",
       access: "",
       teams: [],
       selected_systems: [],
@@ -307,6 +320,7 @@ const handleSubmit = async () => {
       WMS: "",
       CRM: "",
       TMS: "",
+      AMS: "",
     });
     setSelectedAccess("");
   };
@@ -331,6 +345,7 @@ const handleSubmit = async () => {
       WMS: "",
       CRM: "",
       TMS: "",
+      AMS: "",
     });
     setSelectedAccess("");
     setSelectedTeams([]);
@@ -352,6 +367,8 @@ const handleSubmit = async () => {
       crm_user_role_id: -1,
       tms_user_id: -1,
       tms_user_role_id: -1,
+      ams_user_id: -1,
+      ams_user_role_id: "",
       access: "",
       teams: [],
       selected_systems: [],

@@ -1,5 +1,6 @@
 // app/lib/systemHandlers/delete/handler.ts
 import {
+  AMS_API_PATH,
     CRM_API_PATH,
     FMS_API_PATH,
     TMS_API_PATH,
@@ -117,5 +118,28 @@ import {
     } catch (error) {
       console.error("TMS deletion error:", error);
       return { success: false, error: "Failed to delete from TMS" };
+    }
+  }
+
+  export async function deleteUserFromAMS({ user, accessToken }: DeleteParams) {
+    try {
+      console.log("user.ams_user_id ==> ", user.ams_user_id)
+
+      const response = await fetch(
+        `${AMS_API_PATH}/api/auth/user?id=${user.ams_user_id}`,
+        {
+          method: "DELETE",
+        }
+      );
+      console.log("AMS delete response ===> ", response);
+      if (!response.ok) {
+        const error = await response.json();
+        return { success: false, error: error.message };
+      }
+  
+      return { success: true };
+    } catch (error) {
+      console.error("AMS deletion error:", error);
+      return { success: false, error: "Failed to delete from AMS" };
     }
   }

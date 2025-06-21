@@ -16,6 +16,9 @@ export const updateUserToPortals = async (
   let crm_user_role_id = -1;
   let wms_user_role_id = -1;
   let tms_user_role_id = -1;
+  let ams_user_role_id = -1;
+
+  console.log("formData in updateUserToPortals => ", formData)
 
   try {
     const results = await Promise.allSettled(
@@ -45,6 +48,9 @@ export const updateUserToPortals = async (
     results.forEach((result) => {
       if (result.status === "fulfilled") {
         updated_systems.push(result.value.system);
+
+        console.log("result => ", result);
+
         if (result.value.system === "FMS") {
           fms_user_role_id = result.value?.data?.roleId;
         }
@@ -60,7 +66,11 @@ export const updateUserToPortals = async (
         const role = result.value.data.data?.role;
 
         if (result.value.system === "TMS" && role) {
-          tms_user_role_id = getIdByRoleType(role, "TMS");
+          tms_user_role_id = getIdByRoleType(role, "TMS") as number;
+        }
+
+        if (result.value.system === "AMS") {
+          ams_user_role_id = result.value.data.user.role;
         }
 
         countsOfUpdatedSystem++;
@@ -109,6 +119,10 @@ export const updateUserToPortals = async (
       tms_user_role_id: updated_systems.includes("TMS")
         ? tms_user_role_id
         : userToBeUpdated.tms_user_role_id, //
+      ams_user_id: userToBeUpdated.ams_user_id,
+      ams_user_role_id: updated_systems.includes("AMS")
+        ? ams_user_role_id
+        : userToBeUpdated.ams_user_role_id,
       selected_systems: userToBeUpdated.selected_systems, //
       systems_with_permission: updated_systems, //
       access: selectedAccessForTMS, //

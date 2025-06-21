@@ -72,6 +72,8 @@ export function AddMoreUserDialog({
     crm_user_role_id: -1,
     tms_user_id: -1,
     tms_user_role_id: -1,
+    ams_user_id: -1,
+    ams_user_role_id: "",
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -91,6 +93,7 @@ export function AddMoreUserDialog({
     WMS: "",
     CRM: "",
     TMS: "",
+    AMS: "",
   });
 
   const { access_token, updateUserInKeycloak } = useAuth();
@@ -117,7 +120,7 @@ export function AddMoreUserDialog({
         crm_user_id: user.crm_user_id || -1,
         crm_user_role_id: user.crm_user_role_id || -1,
         tms_user_id: user.tms_user_id || -1,
-        tms_user_role_id: user.tms_user_role_id || -1,
+        tms_user_role_id: user.tms_user_role_id || "",
         selected_systems: user.selected_systems || [],
         systems_with_permission: user.systems_with_permission || [],
         access: user.access || "",

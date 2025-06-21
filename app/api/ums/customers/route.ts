@@ -37,15 +37,16 @@ export async function GET() {
         console.error("Error connecting to the database:", error);
       });
 
+      console.log("user:", user);
+
       const [users] = await pool.query(
         `SELECT id, name, username, email, password, tenant_id, phone, mobile, fms_user_id, fms_branch,
          fms_user_role_id, wms_user_id, wms_user_role_id, crm_user_id, crm_user_role_id, tms_user_id, 
-         tms_user_role_id, teams, access, selected_systems, systems_with_permission, status
+         tms_user_role_id, ams_user_id, ams_user_role_id, teams, access, selected_systems, systems_with_permission, status
          FROM customers WHERE status = 1 AND adminId = ?`,
         [user.id]
       );
       
-    console.log("Fetched users:", users);
     return NextResponse.json(users);
   } catch (error) {
     return NextResponse.json({ error: "❌ Data Fetching Error", status: 500 });
@@ -106,8 +107,8 @@ export async function POST(request: Request) {
     const query =
       "INSERT INTO customers (" +
       "name, email, username, password, phone, tenant_id, mobile, fms_user_id, fms_branch, " +
-      "fms_user_role_id, wms_user_id, wms_user_role_id, crm_user_id, crm_user_role_id, tms_user_id, tms_user_role_id, teams, access, selected_systems, systems_with_permission, status, adminId" +
-      ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+      "fms_user_role_id, wms_user_id, wms_user_role_id, crm_user_id, crm_user_role_id, tms_user_id, tms_user_role_id, ams_user_id, ams_user_role_id, teams, access, selected_systems, systems_with_permission, status, adminId" +
+      ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     console.log("**** customerData.tenantId *** ", customerData.tenantId);
 
@@ -121,17 +122,19 @@ export async function POST(request: Request) {
       customerData.mobile,
       customerData.fms_user_id,
       JSON.stringify(customerData.fms_branch),
-      customerData.fms_user_role_id,
-      customerData.wms_user_id,
-      customerData.wms_user_role_id,
-      customerData.crm_user_id,
-      customerData.crm_user_role_id,
-      customerData.tms_user_id,
+      customerData.fms_user_role_id || null,
+      customerData.wms_user_id || null,
+      customerData.wms_user_role_id || null,
+      customerData.crm_user_id || null,
+      customerData.crm_user_role_id || null,
+      customerData.tms_user_id || null,
       customerData.tms_user_role_id,
-      JSON.stringify(customerData.teams),
-      customerData.access,
-      JSON.stringify(customerData.selected_systems),
-      JSON.stringify(customerData.systems_with_permission),
+      customerData.ams_user_id || null, // Optional field
+      customerData.ams_user_role_id || null, // Optional field
+      JSON.stringify(customerData.teams) || null,
+      customerData.access || null,
+      JSON.stringify(customerData.selected_systems) || null,
+      JSON.stringify(customerData.systems_with_permission) || null,
       1, // 👈 Set status to active
       user.id
     ];

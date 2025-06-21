@@ -73,6 +73,8 @@ export function EditUserDialog({
     crm_user_role_id: -1,
     tms_user_id: 0,
     tms_user_role_id: -1,
+    ams_user_id: 0,
+    ams_user_role_id: "",
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -101,6 +103,10 @@ export function EditUserDialog({
         user.tms_user_id === -1
           ? ""
           : getRoleName("TMS", user.tms_user_role_id) || "",
+      AMS:
+        user.ams_user_role_id === -1
+          ? ""
+          : getRoleName("AMS", user.ams_user_role_id) || "",
     });
 
   const { access_token, updateUserInKeycloak } = useAuth();
@@ -111,6 +117,8 @@ export function EditUserDialog({
   // Initialize form data when user changes
   useEffect(() => {
     if (user) {
+
+      console.log("user in edit dialog => ", user);
       setFormData({
         name: user.name || "",
         email: user.email || "",
@@ -129,6 +137,8 @@ export function EditUserDialog({
         crm_user_role_id: user.crm_user_role_id || -1,
         tms_user_id: user.tms_user_id || 0,
         tms_user_role_id: user.tms_user_role_id || -1,
+        ams_user_id: user.ams_user_id || 0,
+        ams_user_role_id: user.ams_user_role_id || -1,
         selected_systems: user.selected_systems || [],
         systems_with_permission: user.systems_with_permission || [],
         access: user.access || "",
@@ -144,6 +154,7 @@ export function EditUserDialog({
         WMS: getRoleName("WMS", user.wms_user_role_id) || "",
         CRM: getRoleName("CRM", user.crm_user_role_id) || "",
         TMS: getRoleName("TMS", user.tms_user_role_id) || "",
+        AMS: getRoleName("AMS", user.ams_user_role_id) || "",
       });
     }
   }, [user]);
@@ -187,6 +198,7 @@ export function EditUserDialog({
   };
 
   const handleRoleChange = (system: string, roleId: string) => {
+    console.log("system & roleId in handleRoleChage => ", roleId)
     setSystemRoleSelections((prev) => ({
       ...prev,
       [system]: roleId,
@@ -194,6 +206,8 @@ export function EditUserDialog({
   };
 
   const handleSubmit = async () => {
+
+    console.log("systemRoleSelections in handleSubmit => ", systemRoleSelections);
     if (formData.username == "") {
       toastify.warn("Please input username");
       return;
@@ -275,10 +289,10 @@ export function EditUserDialog({
       formData.username,
       formData.password,
       deselectedSystemsToUpdateRole,
-      selectedSystems
+      selectedSystemsToUpdateRole
     );
 
-    if (selectedSystems.length === 0) {
+    if (selectedSystemsToUpdateRole.length === 0) {
       toastify.info("You just updated the permission of users in keycloak", {
         autoClose: 4000,
       });
@@ -290,7 +304,7 @@ export function EditUserDialog({
     if (!keycloakUpdateResponse.error) {
       setIsUpdating(false);
 
-      console.log("updateUserToPortal calling")
+      console.log("systemRoleSelections calling => ", systemRoleSelections)
 
       const portalUpdateResponse: any = await updateUserToPortals(
         formData,
@@ -525,7 +539,7 @@ export function EditUserDialog({
                         // value={systemRoleSelections[system] || ""}
                         value={
                           systemRoleSelections[
-                            system as keyof typeof systemRoleSelections
+                          system as keyof typeof systemRoleSelections
                           ]
                         }
                         onValueChange={(value) =>
