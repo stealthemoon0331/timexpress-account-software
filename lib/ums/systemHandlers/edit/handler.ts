@@ -2,6 +2,7 @@ import {
   AMS_API_PATH,
   CRM_API_PATH,
   FMS_API_PATH,
+  QCMS_API_PATH,
   TMS_API_PATH,
   WMS_API_PATH,
 } from "@/app/config/setting";
@@ -309,9 +310,6 @@ export async function updateUserInTMS({
       data: null,
     };
   }
-
-
-
 }
 
 export async function updateUserInAMS({
@@ -337,13 +335,7 @@ export async function updateUserInAMS({
     }
 
     if (formData.name) {
-      if (formData.name.includes(" ")) {
-        const firstName = formData.name.split(" ")[0];
-        const lastName = formData.name.split(" ")[1];
-        updateBody = { ...updateBody, firstName: firstName, lastName: lastName };
-      } else {
-        updateBody = { ...updateBody, firstName: formData.name };
-      }
+      updateBody = { ...updateBody, name: formData.name };
     }
 
     if(roleId) {
@@ -398,6 +390,86 @@ export async function updateUserInAMS({
     };
   } catch (error) {
     console.error("AMS update error:", error, " : ", typeof error);
+
+    return {
+      isError: true,
+      message: error instanceof Error ? error.message : String(error),
+      data: null,
+    };
+  }
+}
+
+export async function updateUserInQCMS({
+  formData,
+  roleId,
+  accessToken,
+  user,
+  system,
+}: UpdateParams) {
+  // CRM update implementation
+  try {
+
+    console.log("formData from updateUserInQCMS => ", formData)
+
+    if(!user.qcms_user_id) {
+      throw new Error("Update field. Your data was not initialized");
+    } 
+
+    let updateBody = {}
+
+    if (formData.email) {
+      updateBody = { ...updateBody, email: formData.email };
+    }
+
+    if (formData.name) {
+      updateBody = { ...updateBody, name: formData.name };
+    }
+
+    if(roleId) {
+      updateBody = {...updateBody, role: roleId}
+    }
+
+    console.log("updateBody from edit handler => ", updateBody);
+
+    const response = await fetch(
+      `${QCMS_API_PATH}/api/auth/user?id=${user.qcms_user_id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updateBody)
+      }
+    );
+    let responseData: any = null;
+
+    console.log("QCMS response => ", response);
+
+    try {
+      // Try to parse response only if there is content
+      const text = await response.text();
+      responseData = text ? JSON.parse(text) : {};
+    } catch (jsonErr) {
+      console.warn("Failed to parse response JSON:", jsonErr);
+    }
+
+    if (!response.ok) {
+      
+      return {
+        isError: true,
+        message: responseData.msg || `Failed to update user in QCMS`,
+        data: null,
+      };
+    }
+
+    return {
+      isError: false,
+      message: "QCMS user updated successfully",
+      system: system,
+      data: responseData.user,
+    };
+  } catch (error) {
+    console.error("QCMS update error:", error, " : ", typeof error);
 
     return {
       isError: true,

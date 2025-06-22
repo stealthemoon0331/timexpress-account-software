@@ -283,7 +283,23 @@ export async function registerUserToAMS({
     body: JSON.stringify(payload),
   });
 
-  return await handleAPIResponse(system, response, "Failed to register user");
+  const responseData = await safeParseJSON(response);
+
+  
+  if (!response.ok) {
+    return {
+      isError: true,
+      message:
+        responseData?.data.msg || "Failed to register user",
+      data: null,
+    };
+  }
+
+  return {
+    isError: false,
+    message: responseData?.data.msg || "User registered successfully",
+    data: responseData?.user,
+  };
 }
 
 export async function registerUserToQCMS({
@@ -312,5 +328,23 @@ export async function registerUserToQCMS({
     body: JSON.stringify(payload),
   });
 
-  return await handleAPIResponse(system, response, "Failed to register user");
+  const responseData = await safeParseJSON(response);
+
+  console.log("QCMS responseData ==> ", responseData);
+
+  if (!response.ok) {
+    return {
+      isError: true,
+      message:
+        responseData?.msg,
+      data: null,
+    };
+  }
+
+  return {
+    isError: false,
+    message: "User registered successfully",
+    data: responseData?.user,
+  };
+
 }

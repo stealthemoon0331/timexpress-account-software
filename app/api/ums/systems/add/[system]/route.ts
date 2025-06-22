@@ -89,7 +89,7 @@ export async function POST(
         return NextResponse.json({
           error: amsResponse.isError,
           message: amsResponse.message,
-          data: { system: system, userid: amsResponse.data?.user.id },
+          data: { system: system, userid: amsResponse.data?.id },
         });
       
       case "QCMS":
@@ -99,12 +99,12 @@ export async function POST(
           system,
         });
 
-        console.log("amsResponse => ", qcmsResponse);
+        console.log("qcmsResponse => ", qcmsResponse);
 
         return NextResponse.json({
           error: qcmsResponse.isError,
           message: qcmsResponse.message,
-          data: { system: system, userid: qcmsResponse.data?.user.id },
+          data: { system: system, userid: qcmsResponse.data?.id },
         });
 
       default:

@@ -438,6 +438,8 @@ export default function SystemRegistration() {
 
           handleCancelEdit();
 
+          console.log("portalUpdateResponse.data => ", portalUpdateResponse.data);
+
           setRegisteredUser(portalUpdateResponse.data);
         } else {
           throw new Error(portalUpdateResponse.error);

@@ -142,122 +142,80 @@ export function CreateUserDialog({
     }));
   };
 
-  const handleSubmit = async () => {
-    try {
-      if (formData.username === "") {
-        toastify.warn("Please input username");
-        return;
-      }
+  const validateForm = () => {
+    const requiredFields = [
+      { field: formData.username, message: "Please input username" },
+      { field: formData.email, message: "Please input email" },
+      { field: formData.password, message: "Please input password" },
+      { field: formData.mobile, message: "Please input mobile number" },
+      { field: formData.phone, message: "Please input phone number" },
+    ];
 
-      if (formData.email === "") {
-        toastify.warn("Please input email");
-        return;
+    for (const { field, message } of requiredFields) {
+      if (!field || field.trim() === "") {
+        toastify.warn(message);
+        return false;
       }
+    }
 
-      if (formData.password === "") {
-        toastify.warn("Please input password");
-        return;
+    if (formData.password !== formData.confirmPassword) {
+      toastify.warn("Passwords do not match");
+      return false;
+    }
+
+    if (selectedSystems.length === 0) {
+      toastify.warn("Please select a system");
+      return false;
+    }
+
+    const systemRolesRequired: system[] = ["FMS", "WMS", "CRM", "TMS", "AMS", "QCMS"];
+    
+    for (const system of systemRolesRequired) {
+      if (selectedSystems.includes(system) && !systemRoleSelections[system]) {
+        toastify.warn(`Please select a role for ${system}`);
+        return false;
       }
+    }
 
-      if (formData.mobile === "") {
-        toastify.warn("Please input mobile number");
-        return;
-      }
+    if (selectedSystems.includes("FMS") && selectedBranches.length === 0) {
+      toastify.warn("Please select at least one branch");
+      return false;
+    }
 
-      if (formData.phone === "") {
-        toastify.warn("Please input phone number");
-        return;
-      }
-
-      if (formData.password !== formData.confirmPassword) {
-        toastify.warn("Passwords do not match");
-        return;
-      }
-
-      if (selectedSystems.length === 0) {
-        toastify.warn("Please select a system");
-        return;
-      }
-
-      if (selectedSystems.includes("FMS") && systemRoleSelections.FMS === "") {
-        toastify.warn("Please select a role for FMS");
-        return;
-      }
-
-      if (selectedSystems.includes("WMS") && systemRoleSelections.WMS === "") {
-        toastify.warn("Please select a role for WMS");
-        return;
-      }
-
-      if (selectedSystems.includes("CRM") && systemRoleSelections.CRM === "") {
-        toastify.warn("Please select a role for CRM");
-        return;
-      }
-
-      if (selectedSystems.includes("TMS") && systemRoleSelections.TMS === "") {
-        toastify.warn("Please select a role for TMS");
-        return;
-      }
-
-      if (selectedSystems.includes("FMS") && selectedBranches.length === 0) {
-        toastify.warn("Please select at least one branch");
-        return;
-      }
-
-      if (
-        selectedSystems.includes("TMS") &&
-        selectedAccess === "0" &&
-        formData.teams.filter((team) => team !== "").length === 0
-      ) {
-        toastify.warn("Please select teams in TMS setting");
-        return;
-      }
-
-      if (selectedSystems.includes("TMS") && selectedAccess === "") {
+    if (selectedSystems.includes("TMS")) {
+      if (!selectedAccess) {
         toastify.warn("Please select access");
-        return;
+        return false;
       }
 
-      if (selectedSystems.includes("AMS") && systemRoleSelections.AMS === "") {
-        toastify.warn("Please select a role for AMS");
-        return;
+      const validTeams = formData.teams.filter((team) => team.trim() !== "");
+      if (selectedAccess === "0" && validTeams.length === 0) {
+        toastify.warn("Please select teams in TMS setting");
+        return false;
       }
+    }
 
-      if (selectedSystems.includes("QCMS") && systemRoleSelections.QCMS === "") {
-        toastify.warn("Please select a role for QCMS");
-        return;
-      }
+    return true;
+  };
 
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    try {
       setIsSending(true); // Set to true at the start of async operations
 
-      console.log(
-        "selectedSystems before saving into system ",
-        selectedSystems
-      );
-
-      console.log(" 🍀 ::::: addUserToKeycloak ::::: 🍀 ");
-      console.log("formData.username : ", formData.username);
-      console.log("formData.email : ", formData.email);
-      console.log("formData.password : ", formData.password);
-      console.log("selectedSystems : ", selectedSystems);
+      const { username, email, password } = formData;
 
       const keycloakResponse = await addUserToKeycloak(
-        formData.username,
-        formData.email,
-        formData.password,
+        username,
+        email,
+        password,
         selectedSystems
       );
 
       if (keycloakResponse.error) {
         throw new Error(keycloakResponse.message);
       }
-
-      console.log(" 🍀::::: addUserToSystemsAndUMS ::::: 🍀 ");
-      console.log("formData : ", formData);
-      console.log("selectedSystems : ", selectedSystems);
-      console.log("access_token : ", access_token);
-      console.log("selectedAccess : ", selectedAccess);
-      console.log("selectedBranches : ", selectedBranches);
 
       const updatedFormData = { ...formData, tenantId: loggedUser?.tenantId };
 
@@ -295,6 +253,7 @@ export function CreateUserDialog({
       setIsSending(false); // Always reset isSending in the end
     }
   };
+
   const resetForm = () => {
     setFormData({
       name: "",

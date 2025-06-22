@@ -2,6 +2,7 @@ import {
   updateUserInAMS,
   updateUserInCRM,
   updateUserInFMS,
+  updateUserInQCMS,
   updateUserInTMS,
   updateUserInWMS,
 } from "@/lib/ums/systemHandlers/edit/handler";
@@ -69,12 +70,6 @@ export async function POST(
         return NextResponse.json(tmsResponse);
 
       case "AMS":
-        console.log("AMS formData => ", formData);
-        console.log("AMS roleId => ", roleId);
-        console.log("AMS user => ", user);
-        console.log("AMS system => ", system);
-
-
         const amsResponse = await updateUserInAMS({
           formData,
           roleId,
@@ -82,6 +77,16 @@ export async function POST(
           system,
         });
         return NextResponse.json(amsResponse);
+      
+      case "QCMS":
+        const qcmsResponse = await updateUserInQCMS({
+          formData,
+          roleId,
+          user,
+          system,
+        });
+        
+        return NextResponse.json(qcmsResponse);
 
       default:
         return NextResponse.json(
