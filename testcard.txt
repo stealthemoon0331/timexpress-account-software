@@ -1,0 +1,6 @@
+Success test card :
+Card number: 4508750015741019 - VISA Expiry date: 01/39 CVV: 100
+Card number: 5123450000000008 - Mastercard Expiry date: 01/39 CVV: 100
+Failed test card :
+Card number: 4000000000001018 - VISA Expiry date: 01/39 CVV: 100
+Card number: 5506900140100503 - Mastercard Expiry date: 01/39 CVV: 

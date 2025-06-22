@@ -106,12 +106,12 @@ const PayFortForm = ({ amount, email }: PayFortFormProps) => {
       });
 
       const data = await res.json();
-
       console.log("* params => ", data.params);
-      // return;
+
       const form = document.createElement("form");
       form.method = "POST";
       form.action = PAYFORT_PAYMENT_PAGE_URL;
+      form.setAttribute("accept-charset", "utf-8");
 
       Object.entries(data.params).forEach(([key, value]) => {
         const input = document.createElement("input");
@@ -124,7 +124,7 @@ const PayFortForm = ({ amount, email }: PayFortFormProps) => {
       document.body.appendChild(form);
       form.submit();
     } catch (error) {
-      console.log("error => ", error);
+      console.error("PayFort payment initiation failed:", error);
     }
   };
 
