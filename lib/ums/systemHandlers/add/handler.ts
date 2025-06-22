@@ -266,8 +266,7 @@ export async function registerUserToAMS({
 }: RegistrationParams) {
   const payload = {
     email: ssoUser.email,
-    firstName: ssoUser.name.split(" ")[0],
-    lastName: ssoUser.name.split(" ")[1],
+    name: ssoUser.name,
     password: ssoUser.password,
     role: roleId,
     tenantId: ssoUser.tenantId,
@@ -287,19 +286,20 @@ export async function registerUserToAMS({
 
   const responseData = await safeParseJSON(response);
 
+  console.log("AMS responseData ==> ", responseData);
   
   if (!response.ok) {
     return {
       isError: true,
       message:
-        responseData?.data.msg || "Failed to register user",
+        responseData?.msg || "Failed to register user",
       data: null,
     };
   }
 
   return {
     isError: false,
-    message: responseData?.data.msg || "User registered successfully",
+    message: responseData?.msg || "User registered successfully",
     data: responseData?.user,
   };
 }

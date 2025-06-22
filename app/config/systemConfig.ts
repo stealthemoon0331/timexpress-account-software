@@ -4,7 +4,7 @@ export const systemConfig: Record< string, { clientId: string; roleName: string 
   WMS: { clientId: "wms-id", roleName: "wms-access" },
   TMS: { clientId: "tms-id", roleName: "tms-access" },
   FMS: { clientId: "fms-id", roleName: "fms-access" },
-  AMS: { clientId: "ams-id", roleName: "ams-access" },
+  AMS: { clientId: "accounting-id", roleName: "ams-access" },
   QCMS: { clientId: "quote-id", roleName: "qcms-access" },
   TDMS: { clientId: "todo-id", roleName: "tdms-access" },
   TSMS: { clientId: "timesheet-id", roleName: "tsms-access" },
