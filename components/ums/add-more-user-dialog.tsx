@@ -76,6 +76,10 @@ export function AddMoreUserDialog({
     ams_user_role_id: "",
     qcms_user_id: -1,
     qcms_user_role_id: -1,
+    tsms_user_id: -1,
+    tsms_user_role_id: -1,
+    tdms_user_id: -1,
+    tdms_user_role_id: -1,
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -98,6 +102,7 @@ export function AddMoreUserDialog({
     AMS: "",
     QCMS: "",
     TSMS: "",
+    TDMS: "",
   });
 
   const { access_token, updateUserInKeycloak } = useAuth();
@@ -130,9 +135,11 @@ export function AddMoreUserDialog({
         ams_user_id: user.ams_user_id || -1,
         ams_user_role_id: user.ams_user_role_id || "",
         qcms_user_id: user.qcms_user_id || -1,
-        qcms_user_role_id: user.qcms_user_role_id || -1,
+        qcms_user_role_id: user.qcms_user_role_id || "",
         tsms_user_id: user.tsms_user_id || -1,
-        tsms_user_role_id: user.tsms_user_role_id || -1,
+        tsms_user_role_id: user.tsms_user_role_id || "",
+        tdms_user_id: user.tdms_user_id || -1,
+        tdms_user_role_id: user.tdms_user_role_id || "",
         selected_systems: user.selected_systems || [],
         systems_with_permission: user.systems_with_permission || [],
         access: user.access || "",
@@ -147,6 +154,7 @@ export function AddMoreUserDialog({
         AMS: getRoleName("AMS", user.ams_user_role_id) || "",
         QCMS: getRoleName("QCMS", user.qcms_user_role_id) || "",
         TSMS: getRoleName("TSMS", user.tsms_user_role_id) || "",
+        TDMS: getRoleName("TDMS", user.tdms_user_role_id) || "",
       });
     }
   }, [user]);
@@ -197,6 +205,7 @@ export function AddMoreUserDialog({
       "AMS",
       "QCMS",
       "TSMS",
+      "TDMS",
     ];
 
     for (const system of systemRolesRequired) {
@@ -240,6 +249,7 @@ export function AddMoreUserDialog({
     let ams_user_id = 0;
     let qcms_user_id = 0;
     let tsms_user_id = 0;
+    let tdms_user_id = 0;
 
     let registered_system: system[] = user.selected_systems;
 
@@ -355,6 +365,14 @@ export function AddMoreUserDialog({
             tsms_user_role_id: getRoleId(systemRoleSelections["TSMS"], "TSMS"),
             systems_with_permission: [...user.systems_with_permission, "TSMS"],
           };
+        } else if (system === "TDMS") {
+          tsms_user_id = responseData.data.userid;
+          updatedUser = {
+            ...user,
+            tdms_user_id: tdms_user_id,
+            tdms_user_role_id: getRoleId(systemRoleSelections["TDMS"], "TDMS"),
+            systems_with_permission: [...user.systems_with_permission, "TDMS"],
+          };
         }
 
         registered_system.push(system);
@@ -383,6 +401,7 @@ export function AddMoreUserDialog({
               AMS: "",
               QCMS: "",
               TSMS: "",
+              TDMS: "",
             });
             setSelectedAccess(null);
             onOpenChange(false);

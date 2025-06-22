@@ -3,6 +3,7 @@ import {
   registerUserToCRM,
   registerUserToFMS,
   registerUserToQCMS,
+  registerUserToTDMS,
   registerUserToTMS,
   registerUserToTSMS,
   registerUserToWMS,
@@ -117,6 +118,21 @@ export async function POST(
           error: tsmsResponse.isError,
           message: tsmsResponse.message,
           data: { system: system, userid: tsmsResponse.data?.id },
+        });
+      
+      case "TDMS":
+        const tdmsResponse = await registerUserToTDMS({
+          ssoUser,
+          roleId,
+          system,
+        });
+
+        console.log("tdmsResponse => ", tdmsResponse);
+
+        return NextResponse.json({
+          error: tdmsResponse.isError,
+          message: tdmsResponse.message,
+          data: { system: system, userid: tdmsResponse.data?.id },
         });
 
       default:

@@ -11,7 +11,7 @@ export type Team = {
   createdBy: number;
 };
 
-export type system = "CRM" | "WMS" | "FMS" | "TMS" | "AMS" | "QCMS" | "TSMS";
+export type system = "CRM" | "WMS" | "FMS" | "TMS" | "AMS" | "QCMS" | "TSMS" | "TDMS";
 
 export interface FailedSystem {
   userId: number;
@@ -31,6 +31,7 @@ export interface SelectedSystemRoles {
   AMS: string;
   QCMS: string;
   TSMS: string;
+  TDMS: string;
 }
 
 export interface DecodedToken {
@@ -66,6 +67,8 @@ export type user = {
   qcms_user_role_id: number | string;
   tsms_user_id: number;
   tsms_user_role_id: number | string;
+  tdms_user_id: number;
+  tdms_user_role_id: number | string;
   selected_systems: system[];
   systems_with_permission: system[];
   access: string;
@@ -96,6 +99,8 @@ export type FormUser = {
   qcms_user_role_id?: number | string;
   tsms_user_id?: number;
   tsms_user_role_id?: number | string;
+  tdms_user_id?: number;
+  tdms_user_role_id?: number | string;
   selected_systems: system[];
   systems_with_permission: system[];
   access: string;
@@ -124,6 +129,8 @@ export type FormDataType = {
   ams_user_role_id?: string;
   tsms_user_id?: number;
   tsms_user_role_id?: string;
+  tdms_user_id?: number;
+  tdms_user_role_id?: string;
   selected_systems: string[];
   access: string;
   teams: string[];

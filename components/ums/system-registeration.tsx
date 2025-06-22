@@ -117,6 +117,7 @@ export default function SystemRegistration() {
     AMS: "Admin",
     QCMS: "Admin",
     TSMS: "Admin",
+    TDMS: "Admin",
   };
 
   const tmsAdminAccess = "1";

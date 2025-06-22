@@ -112,6 +112,8 @@ export default function UserManagement() {
     qcms_user_role_id: -1,
     tsms_user_id: -1,
     tsms_user_role_id: -1,
+    tdms_user_id: -1,
+    tdms_user_role_id: -1,
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -133,6 +135,7 @@ export default function UserManagement() {
     AMS: false,
     QCMS: false,
     TSMS: false,
+    TDMS: false,
     count: 0,
   });
 
@@ -556,6 +559,7 @@ export default function UserManagement() {
           AMS: false,
           QCMS: false,
           TSMS: false,
+          TDMS: false,
           count: 0,
         });
       }
@@ -700,6 +704,8 @@ export default function UserManagement() {
                               roleId = user.qcms_user_role_id;
                             else if (system === "TSMS")
                               roleId = user.tsms_user_role_id;
+                            else if (system === "TDMS")
+                              roleId = user.tdms_user_role_id;
                             return (
                               <Tooltip.Root key={system}>
                                 <Tooltip.Trigger

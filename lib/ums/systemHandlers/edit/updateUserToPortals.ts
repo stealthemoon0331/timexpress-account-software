@@ -19,6 +19,7 @@ export const updateUserToPortals = async (
   let ams_user_role_id = -1;
   let qcms_user_role_id = -1;
   let tsms_user_role_id = -1;
+  let tdms_user_role_id = -1;
 
   console.log("formData in updateUserToPortals => ", formData);
 
@@ -83,6 +84,10 @@ export const updateUserToPortals = async (
           tsms_user_role_id = result.value.data.role;
         }
 
+        if (result.value.system === "TDMS") {
+          tdms_user_role_id = result.value.data.role;
+        }
+
         countsOfUpdatedSystem++;
       } else {
         // hotToast.error(result.reason.message);
@@ -138,6 +143,10 @@ export const updateUserToPortals = async (
       tsms_user_role_id: updated_systems.includes("TSMS")
         ? tsms_user_role_id
         : userToBeUpdated.tsms_user_role_id,
+      tdms_user_id: userToBeUpdated.tdms_user_id,
+      tdms_user_role_id: updated_systems.includes("TDMS")
+        ? tdms_user_role_id
+        : userToBeUpdated.tdms_user_role_id,
       selected_systems: userToBeUpdated.selected_systems, //
       systems_with_permission: updated_systems, //
       access: selectedAccessForTMS, //

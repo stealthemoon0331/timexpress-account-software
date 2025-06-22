@@ -42,6 +42,11 @@ export const systemRoles = {
         { id: "2", name: "User", roleId: "User" },
         { id: "3", name: "Manager", roleId: "Manager" },
     ],
+    TDMS: [
+        { id: "1", name: "Admin", roleId: "Admin" },
+        { id: "2", name: "User", roleId: "User" },
+        { id: "3", name: "Manager", roleId: "Manager" },
+    ],
     
 } as const;
 

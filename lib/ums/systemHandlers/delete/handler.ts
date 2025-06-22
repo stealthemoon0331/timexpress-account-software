@@ -4,6 +4,7 @@ import {
   CRM_API_PATH,
   FMS_API_PATH,
   QCMS_API_PATH,
+  TDMS_API_PATH,
   TMS_API_PATH,
   TSMS_API_PATH,
   WMS_API_PATH,
@@ -195,5 +196,28 @@ export async function deleteUserFromTSMS({ user }: DeleteParams) {
   } catch (error) {
     console.error("TSMS deletion error:", error);
     return { success: false, error: "Failed to delete from TSMS" };
+  }
+}
+
+export async function deleteUserFromTDMS({ user }: DeleteParams) {
+  try {
+    console.log("user.tdms_user_id ==> ", user.tdms_user_id);
+
+    const response = await fetch(
+      `${TDMS_API_PATH}/api/auth/user?id=${user.tdms_user_id}`,
+      {
+        method: "DELETE",
+      }
+    );
+    console.log("TDMS delete response ===> ", response);
+    if (!response.ok) {
+      const error = await response.json();
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("TDMS deletion error:", error);
+    return { success: false, error: "Failed to delete from TDMS" };
   }
 }

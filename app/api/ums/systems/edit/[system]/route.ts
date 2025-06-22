@@ -3,6 +3,7 @@ import {
   updateUserInCRM,
   updateUserInFMS,
   updateUserInQCMS,
+  updateUserInTDMS,
   updateUserInTMS,
   updateUserInTSMS,
   updateUserInWMS,
@@ -27,7 +28,7 @@ export async function POST(
   const roleId = getRoleId(systemRoleSelections[system], system as system);
 
   console.log("Form Data from edit endpoint => ", formData);
-  
+
   try {
     switch (system) {
       case "FMS":
@@ -78,7 +79,7 @@ export async function POST(
           system,
         });
         return NextResponse.json(amsResponse);
-      
+
       case "QCMS":
         const qcmsResponse = await updateUserInQCMS({
           formData,
@@ -86,9 +87,9 @@ export async function POST(
           user,
           system,
         });
-        
+
         return NextResponse.json(qcmsResponse);
-      
+
       case "TSMS":
         const tsmsResponse = await updateUserInTSMS({
           formData,
@@ -96,9 +97,20 @@ export async function POST(
           user,
           system,
         });
-        
+
         return NextResponse.json(tsmsResponse);
 
+      case "TDMS":
+        const tdmsResponse = await updateUserInTDMS({
+          formData,
+          roleId,
+          user,
+          system,
+        });
+        
+        console.log("tdmsResponse => ", tdmsResponse);
+
+        return NextResponse.json(tdmsResponse);
       default:
         return NextResponse.json(
           { isError: true, message: "Invalid system" },
