@@ -75,6 +75,22 @@ export default function SystemRegistration() {
   const [editMode, setEditMode] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [availableSystems, setAvailableSystems] = useState<system[]>([]);
+
+  const [systemOptions, setSystemOptions] = useState<
+    {
+      value: system;
+      label: string;
+    }[]
+  >([
+    // { value: "FMS" as system, label: "FMS" },
+    // // { value: "TMS" as system, label: "TMS" },
+    // { value: "CRM" as system, label: "CRM" },
+    // { value: "WMS" as system, label: "WMS" },
+    // { value: "AMS" as system, label: "AMS" },
+    // { value: "QCMS" as system, label: "QCMS" },
+    // { value: "TSMS" as system, label: "TSMS" },
+  ]);
 
   const { user: loggedUser, loading } = useUser();
 
@@ -93,15 +109,6 @@ export default function SystemRegistration() {
     { field: "selected_systems", label: "Selected Systems" },
   ];
 
-  const systemOptions = [
-    { value: "FMS" as system, label: "FMS" },
-    // { value: "TMS" as system, label: "TMS" },
-    { value: "CRM" as system, label: "CRM" },
-    { value: "WMS" as system, label: "WMS" },
-    { value: "AMS" as system, label: "AMS" },
-    { value: "QCMS" as system, label: "QCMS" },
-  ];
-
   const systemAdminRoles = {
     CRM: "Admin",
     WMS: "Admin",
@@ -109,6 +116,7 @@ export default function SystemRegistration() {
     TMS: "2",
     AMS: "Admin",
     QCMS: "Admin",
+    TSMS: "Admin",
   };
 
   const tmsAdminAccess = "1";
@@ -118,7 +126,17 @@ export default function SystemRegistration() {
   useEffect(() => {
     checkTenant();
     fetchUsers();
+    fetchAvailableSystems();
   }, []);
+
+  useEffect(() => {
+    setSystemOptions(
+      availableSystems.map((system) => ({
+        value: system,
+        label: system,
+      }))
+    );
+  }, [availableSystems]);
 
   useEffect(() => {
     //Get registered data
@@ -255,6 +273,31 @@ export default function SystemRegistration() {
         theme: "light",
       });
       return false;
+    }
+  };
+
+  const fetchAvailableSystems = async () => {
+    try {
+      const response = await fetch("/api/payment/plans", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const fetchPlans = await response.json();
+      console.log("fetchPlans => ", fetchPlans);
+      // Check if fetchData is an array
+      if (Array.isArray(fetchPlans)) {
+        setAvailableSystems(
+          fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
+        );
+      } else {
+        console.log("fetch plans error");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error fetching available systems:", error);
     }
   };
 
@@ -438,7 +481,10 @@ export default function SystemRegistration() {
 
           handleCancelEdit();
 
-          console.log("portalUpdateResponse.data => ", portalUpdateResponse.data);
+          console.log(
+            "portalUpdateResponse.data => ",
+            portalUpdateResponse.data
+          );
 
           setRegisteredUser(portalUpdateResponse.data);
         } else {
@@ -579,7 +625,7 @@ export default function SystemRegistration() {
               isMulti
               options={systemOptions}
               value={systemOptions.filter((option) =>
-                formData.selected_systems.includes(option.value)
+                formData?.selected_systems.includes(option.value)
               )}
               onChange={(selected) =>
                 handleChange(
@@ -589,6 +635,16 @@ export default function SystemRegistration() {
               }
               className="basic-multi-select"
               classNamePrefix="select"
+              menuPlacement="auto" // <-- auto opens up if there's no space below
+              menuPosition="absolute" // <-- default; works well with auto
+              styles={{
+                menu: (provided) => ({
+                  ...provided,
+                  maxHeight: 100,
+                  overflowY: "auto",
+                  zIndex: 9999,
+                }),
+              }}
               required
             />
           </div>
@@ -706,7 +762,7 @@ export default function SystemRegistration() {
                     }}
                   />
                 </ListItem>
-                <ListItem>
+                <ListItem className="relative overflow-visible">
                   <Select
                     isMulti
                     options={systemOptions}
@@ -721,6 +777,16 @@ export default function SystemRegistration() {
                     }
                     className="basic-multi-select"
                     classNamePrefix="select"
+                    menuPlacement="auto" // <-- auto opens up if there's no space below
+                    menuPosition="absolute" // <-- default; works well with auto
+                    styles={{
+                      menu: (provided) => ({
+                        ...provided,
+                        maxHeight: 100,
+                        overflowY: "auto",
+                        zIndex: 9999,
+                      }),
+                    }}
                     required
                   />
                 </ListItem>

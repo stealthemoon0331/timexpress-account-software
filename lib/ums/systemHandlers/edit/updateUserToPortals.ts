@@ -18,9 +18,9 @@ export const updateUserToPortals = async (
   let tms_user_role_id = -1;
   let ams_user_role_id = -1;
   let qcms_user_role_id = -1;
-  
+  let tsms_user_role_id = -1;
 
-  console.log("formData in updateUserToPortals => ", formData)
+  console.log("formData in updateUserToPortals => ", formData);
 
   try {
     const results = await Promise.allSettled(
@@ -79,8 +79,11 @@ export const updateUserToPortals = async (
           qcms_user_role_id = result.value.data.role;
         }
 
+        if (result.value.system === "TSMS") {
+          tsms_user_role_id = result.value.data.role;
+        }
+
         countsOfUpdatedSystem++;
-        
       } else {
         // hotToast.error(result.reason.message);
         throw new Error(
@@ -129,8 +132,12 @@ export const updateUserToPortals = async (
         : userToBeUpdated.ams_user_role_id,
       qcms_user_id: userToBeUpdated.qcms_user_id,
       qcms_user_role_id: updated_systems.includes("QCMS")
-      ? qcms_user_role_id
-      : userToBeUpdated.qcms_user_role_id,
+        ? qcms_user_role_id
+        : userToBeUpdated.qcms_user_role_id,
+      tsms_user_id: userToBeUpdated.tsms_user_id,
+      tsms_user_role_id: updated_systems.includes("TSMS")
+        ? tsms_user_role_id
+        : userToBeUpdated.tsms_user_role_id,
       selected_systems: userToBeUpdated.selected_systems, //
       systems_with_permission: updated_systems, //
       access: selectedAccessForTMS, //

@@ -4,6 +4,7 @@ import {
   updateUserInFMS,
   updateUserInQCMS,
   updateUserInTMS,
+  updateUserInTSMS,
   updateUserInWMS,
 } from "@/lib/ums/systemHandlers/edit/handler";
 import { system } from "@/lib/ums/type";
@@ -87,6 +88,16 @@ export async function POST(
         });
         
         return NextResponse.json(qcmsResponse);
+      
+      case "TSMS":
+        const tsmsResponse = await updateUserInTSMS({
+          formData,
+          roleId,
+          user,
+          system,
+        });
+        
+        return NextResponse.json(tsmsResponse);
 
       default:
         return NextResponse.json(

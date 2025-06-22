@@ -77,6 +77,8 @@ export function EditUserDialog({
     ams_user_role_id: "",
     qcms_user_id: 0,
     qcms_user_role_id: "",
+    tsms_user_id: 0,
+    tsms_user_role_id: "",
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -113,6 +115,10 @@ export function EditUserDialog({
         user.qcms_user_role_id === -1
           ? ""
           : getRoleName("QCMS", user.qcms_user_role_id) || "",
+      TSMS:
+        user.tsms_user_role_id === -1
+          ? ""
+          : getRoleName("TSMS", user.tsms_user_role_id) || "",
     });
 
   const { access_token, updateUserInKeycloak } = useAuth();
@@ -146,6 +152,8 @@ export function EditUserDialog({
         ams_user_role_id: user.ams_user_role_id || -1,
         qcms_user_id: user.qcms_user_id || 0,
         qcms_user_role_id: user.qcms_user_role_id || -1,
+        tsms_user_id: user.tsms_user_id || 0,
+        tsms_user_role_id: user.tsms_user_role_id || -1,
         selected_systems: user.selected_systems || [],
         systems_with_permission: user.systems_with_permission || [],
         access: user.access || "",
@@ -154,7 +162,11 @@ export function EditUserDialog({
 
       setSelectedAccess(user.access || "");
 
+      setSelectedBranches(user.fms_branch || []);
+
       setSelectedSystems(user.systems_with_permission || []);
+
+
 
       setSystemRoleSelections({
         FMS: getRoleName("FMS", user.fms_user_role_id) || "",
@@ -163,6 +175,8 @@ export function EditUserDialog({
         TMS: getRoleName("TMS", user.tms_user_role_id) || "",
         AMS: getRoleName("AMS", user.ams_user_role_id) || "",
         QCMS: getRoleName("QCMS", user.qcms_user_role_id) || "",
+        TSMS: getRoleName("TSMS", user.tms_user_role_id) || "",
+
       });
     }
   }, [user]);
@@ -246,6 +260,7 @@ export function EditUserDialog({
       "TMS",
       "AMS",
       "QCMS",
+      "TSMS",
     ];
 
     for (const system of systemRolesRequired) {
@@ -256,6 +271,7 @@ export function EditUserDialog({
     }
 
     if (selectedSystems.includes("FMS") && selectedBranches.length === 0) {
+      console.log("the number of selectedBranches ? ", selectedBranches.length);
       toastify.warn("Please select at least one branch");
       return false;
     }

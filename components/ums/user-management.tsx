@@ -110,6 +110,8 @@ export default function UserManagement() {
     ams_user_role_id: -1,
     qcms_user_id: -1,
     qcms_user_role_id: -1,
+    tsms_user_id: -1,
+    tsms_user_role_id: -1,
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -130,6 +132,7 @@ export default function UserManagement() {
     TMS: false,
     AMS: false,
     QCMS: false,
+    TSMS: false,
     count: 0,
   });
 
@@ -193,118 +196,6 @@ export default function UserManagement() {
 
   useEffect(() => {
     setIsLoading(true);
-    // Fetch users from the API
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch("/api/ums/customers", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        const fetchData = await response.json();
-
-        // Check if fetchData is an array
-        if (Array.isArray(fetchData)) {
-          if (fetchData.length > 0) {
-            fetchData.map((data: any) => {
-              if (data.fms_branch) {
-                try {
-                  data.fms_branch = JSON.parse(data.fms_branch);
-                } catch (error) {
-                  console.error("Error parsing fms_branch:", error);
-                  data.fms_branch = [];
-                }
-              }
-
-              if (data.selected_systems) {
-                const selected_systems: string[] = [];
-                JSON.parse(data.selected_systems).map((system: system) => {
-                  selected_systems.push(system);
-                });
-                data.selected_systems = selected_systems;
-              }
-
-              if (data.teams) {
-                if (typeof data.teams === "string") {
-                  try {
-                    const parsed = JSON.parse(data.teams.replace(/'/g, '"'));
-                    data.teams = Array.isArray(parsed) ? parsed : [];
-                  } catch (e) {
-                    console.error("Error parsing teams:", e);
-                    data.teams = [];
-                  }
-                } else if (!Array.isArray(data.teams)) {
-                  data.teams = [];
-                }
-              }
-
-              if (data.systems_with_permission) {
-                const systems_with_permission: string[] = [];
-                JSON.parse(data.systems_with_permission).map(
-                  (system: system) => {
-                    systems_with_permission.push(system);
-                  }
-                );
-                data.systems_with_permission = systems_with_permission;
-                setPermissionedSystems((prev) => {
-                  return [
-                    ...prev,
-                    { userId: data.id, systems: data.systems_with_permission },
-                  ];
-                });
-              }
-            });
-
-            console.log("fetchData => ", fetchData);
-
-            setIsLoading(false);
-            setUsers(fetchData);
-            return true;
-          } else {
-            toastify.warning("Currently there is no data!", {
-              position: "top-right",
-              autoClose: 3000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "light",
-            });
-            setIsLoading(false);
-            setUsers([]);
-            return false;
-          }
-        } else {
-          setIsLoading(false);
-          toastify.error("Server Error: can not load data!", {
-            position: "bottom-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
-          return false;
-        }
-      } catch (error) {
-        setIsLoading(false);
-        toastify.error("Server Error: can not load data!", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        return false;
-      }
-    };
 
     const init = async () => {
       await checkAndUpdateAccessToken();
@@ -323,36 +214,147 @@ export default function UserManagement() {
   }, []);
 
   useEffect(() => {
-    const fetchAvailableSystems = async () => {
-      try {
-        const response = await fetch("/api/payment/plans", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        const fetchPlans = await response.json();
-        console.log("fetchPlans => ", fetchPlans);
-        // Check if fetchData is an array
-        if (Array.isArray(fetchPlans)) {
-          setAvailableSystems(
-            fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
-          );
-          setSearchSystemQueryList(
-            fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
-          );
-        } else {
-          console.log("fetch plans error");
-          return false;
-        }
-      } catch (error) {
-        console.error("Error fetching available systems:", error);
-      }
-    };
-
     fetchAvailableSystems();
   }, [loggedUser]);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch("/api/ums/customers", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const fetchData = await response.json();
+
+      // Check if fetchData is an array
+      if (Array.isArray(fetchData)) {
+        if (fetchData.length > 0) {
+          fetchData.map((data: any) => {
+            if (data.fms_branch) {
+              try {
+                data.fms_branch = JSON.parse(data.fms_branch);
+              } catch (error) {
+                console.error("Error parsing fms_branch:", error);
+                data.fms_branch = [];
+              }
+            }
+
+            if (data.selected_systems) {
+              const selected_systems: string[] = [];
+              JSON.parse(data.selected_systems).map((system: system) => {
+                selected_systems.push(system);
+              });
+              data.selected_systems = selected_systems;
+            }
+
+            if (data.teams) {
+              if (typeof data.teams === "string") {
+                try {
+                  const parsed = JSON.parse(data.teams.replace(/'/g, '"'));
+                  data.teams = Array.isArray(parsed) ? parsed : [];
+                } catch (e) {
+                  console.error("Error parsing teams:", e);
+                  data.teams = [];
+                }
+              } else if (!Array.isArray(data.teams)) {
+                data.teams = [];
+              }
+            }
+
+            if (data.systems_with_permission) {
+              const systems_with_permission: string[] = [];
+              JSON.parse(data.systems_with_permission).map((system: system) => {
+                systems_with_permission.push(system);
+              });
+              data.systems_with_permission = systems_with_permission;
+              setPermissionedSystems((prev) => {
+                return [
+                  ...prev,
+                  { userId: data.id, systems: data.systems_with_permission },
+                ];
+              });
+            }
+          });
+
+          console.log("fetchData => ", fetchData);
+
+          setIsLoading(false);
+          setUsers(fetchData);
+          return true;
+        } else {
+          toastify.warning("Currently there is no data!", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+          setIsLoading(false);
+          setUsers([]);
+          return false;
+        }
+      } else {
+        setIsLoading(false);
+        toastify.error("Server Error: can not load data!", {
+          position: "bottom-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        return false;
+      }
+    } catch (error) {
+      setIsLoading(false);
+      toastify.error("Server Error: can not load data!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      return false;
+    }
+  };
+
+  const fetchAvailableSystems = async () => {
+    try {
+      const response = await fetch("/api/payment/plans", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const fetchPlans = await response.json();
+      console.log("fetchPlans => ", fetchPlans);
+      // Check if fetchData is an array
+      if (Array.isArray(fetchPlans)) {
+        setAvailableSystems(
+          fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
+        );
+        setSearchSystemQueryList(
+          fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
+        );
+      } else {
+        console.log("fetch plans error");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error fetching available systems:", error);
+    }
+  };
+
   const handleEditUser = (user: user) => {
     setSelectedUser(user);
     setIsEditDialogOpen(true);
@@ -553,14 +555,16 @@ export default function UserManagement() {
           TMS: false,
           AMS: false,
           QCMS: false,
+          TSMS: false,
           count: 0,
         });
       }
-      setIsDeleteDialogOpen(false);
     } catch (error: any) {
       hotToast.error(error.message || "Unexpected error during user deletion");
     } finally {
       setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+
     }
   };
 
@@ -694,6 +698,8 @@ export default function UserManagement() {
                               roleId = user.ams_user_role_id;
                             else if (system === "QCMS")
                               roleId = user.qcms_user_role_id;
+                            else if (system === "TSMS")
+                              roleId = user.tsms_user_role_id;
                             return (
                               <Tooltip.Root key={system}>
                                 <Tooltip.Trigger

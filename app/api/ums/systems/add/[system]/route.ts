@@ -4,6 +4,7 @@ import {
   registerUserToFMS,
   registerUserToQCMS,
   registerUserToTMS,
+  registerUserToTSMS,
   registerUserToWMS,
 } from "@/lib/ums/systemHandlers/add/handler";
 import { system } from "@/lib/ums/type";
@@ -99,12 +100,23 @@ export async function POST(
           system,
         });
 
-        console.log("qcmsResponse => ", qcmsResponse);
-
         return NextResponse.json({
           error: qcmsResponse.isError,
           message: qcmsResponse.message,
           data: { system: system, userid: qcmsResponse.data?.id },
+        });
+      
+      case "TSMS":
+        const tsmsResponse = await registerUserToTSMS({
+          ssoUser,
+          roleId,
+          system,
+        });
+
+        return NextResponse.json({
+          error: tsmsResponse.isError,
+          message: tsmsResponse.message,
+          data: { system: system, userid: tsmsResponse.data?.id },
         });
 
       default:

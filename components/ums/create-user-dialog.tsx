@@ -84,6 +84,8 @@ export function CreateUserDialog({
     ams_user_role_id: "",
     qcms_user_id: -1,
     qcms_user_role_id: -1,
+    tsms_user_id: -1,
+    tsms_user_role_id: -1,
     selected_systems: [],
     access: "",
     teams: [""],
@@ -115,6 +117,7 @@ export function CreateUserDialog({
       TMS: "",
       AMS: "",
       QCMS: "",
+      TSMS: "",
     });
 
   const getTeamName = (teamId: string): string => {
@@ -168,8 +171,8 @@ export function CreateUserDialog({
       return false;
     }
 
-    const systemRolesRequired: system[] = ["FMS", "WMS", "CRM", "TMS", "AMS", "QCMS"];
-    
+    const systemRolesRequired: system[] = ["FMS", "WMS", "CRM", "TMS", "AMS", "QCMS", "TSMS"];
+
     for (const system of systemRolesRequired) {
       if (selectedSystems.includes(system) && !systemRoleSelections[system]) {
         toastify.warn(`Please select a role for ${system}`);
@@ -289,6 +292,7 @@ export function CreateUserDialog({
       TMS: "",
       AMS: "",
       QCMS: "",
+      TSMS: "",
     });
     setSelectedAccess("");
   };
@@ -315,6 +319,7 @@ export function CreateUserDialog({
       TMS: "",
       AMS: "",
       QCMS: "",
+      TSMS: "",
     });
     setSelectedAccess("");
     setSelectedTeams([]);

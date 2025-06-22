@@ -25,6 +25,8 @@ export const createUserTableQuery = `
         ams_user_role_id VARCHAR(255),
         qcms_user_id INT,
         qcms_user_role_id VARCHAR(255),
+        tsms_user_id INT,
+        tsms_user_role_id VARCHAR(255),
         access VARCHAR(255),
         teams VARCHAR(255),
         systems_with_permission VARCHAR(255),

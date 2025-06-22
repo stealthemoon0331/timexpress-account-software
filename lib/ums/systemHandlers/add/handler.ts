@@ -5,6 +5,7 @@ import {
   WMS_API_PATH,
   AMS_API_PATH,
   QCMS_API_PATH,
+  TSMS_API_PATH,
 } from "@/app/config/setting";
 import { systemRoles } from "@/lib/ums/data";
 import { system } from "@/lib/ums/type";
@@ -331,6 +332,52 @@ export async function registerUserToQCMS({
   const responseData = await safeParseJSON(response);
 
   console.log("QCMS responseData ==> ", responseData);
+
+  if (!response.ok) {
+    return {
+      isError: true,
+      message:
+        responseData?.msg,
+      data: null,
+    };
+  }
+
+  return {
+    isError: false,
+    message: "User registered successfully",
+    data: responseData?.user,
+  };
+
+}
+
+export async function registerUserToTSMS({
+  ssoUser,
+  roleId,
+  system,
+}: RegistrationParams) {
+  const payload = {
+    email: ssoUser.email,
+    name: ssoUser.name,
+    password: ssoUser.password,
+    role: roleId,
+    tenantId: ssoUser.tenantId,
+    status: 1,
+  };
+
+  console.log(" Payload Admin => ", payload);
+  console.log(" QCMS_API_PATH => ", TSMS_API_PATH);
+
+  const response = await fetch(`${TSMS_API_PATH}/api/auth/signup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const responseData = await safeParseJSON(response);
+
+  console.log("TSMS responseData ==> ", responseData);
 
   if (!response.ok) {
     return {

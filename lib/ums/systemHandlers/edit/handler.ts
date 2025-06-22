@@ -4,6 +4,7 @@ import {
   FMS_API_PATH,
   QCMS_API_PATH,
   TMS_API_PATH,
+  TSMS_API_PATH,
   WMS_API_PATH,
 } from "@/app/config/setting";
 import { systemRoles } from "@/lib/ums/data";
@@ -470,6 +471,86 @@ export async function updateUserInQCMS({
     };
   } catch (error) {
     console.error("QCMS update error:", error, " : ", typeof error);
+
+    return {
+      isError: true,
+      message: error instanceof Error ? error.message : String(error),
+      data: null,
+    };
+  }
+}
+
+export async function updateUserInTSMS({
+  formData,
+  roleId,
+  accessToken,
+  user,
+  system,
+}: UpdateParams) {
+  // CRM update implementation
+  try {
+
+    console.log("formData from updateUserInTSMS => ", formData)
+
+    if(!user.tsms_user_id) {
+      throw new Error("Update field. Your data was not initialized");
+    } 
+
+    let updateBody = {}
+
+    if (formData.email) {
+      updateBody = { ...updateBody, email: formData.email };
+    }
+
+    if (formData.name) {
+      updateBody = { ...updateBody, name: formData.name };
+    }
+
+    if(roleId) {
+      updateBody = {...updateBody, role: roleId}
+    }
+
+    console.log("updateBody from edit handler => ", updateBody);
+
+    const response = await fetch(
+      `${TSMS_API_PATH}/api/auth/user?id=${user.tsms_user_id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updateBody)
+      }
+    );
+    let responseData: any = null;
+
+    console.log("QCMS response => ", response);
+
+    try {
+      // Try to parse response only if there is content
+      const text = await response.text();
+      responseData = text ? JSON.parse(text) : {};
+    } catch (jsonErr) {
+      console.warn("Failed to parse response JSON:", jsonErr);
+    }
+
+    if (!response.ok) {
+      
+      return {
+        isError: true,
+        message: responseData.msg || `Failed to update user in QCMS`,
+        data: null,
+      };
+    }
+
+    return {
+      isError: false,
+      message: "TSMS user updated successfully",
+      system: system,
+      data: responseData.user,
+    };
+  } catch (error) {
+    console.error("TSMS update error:", error, " : ", typeof error);
 
     return {
       isError: true,
