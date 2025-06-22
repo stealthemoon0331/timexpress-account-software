@@ -430,12 +430,6 @@ export default function UserManagement() {
   };
 
   const confirmSendUserCredential = async () => {
-    consoleLog("selectedUser", selectedUser);
-    consoleLog("user email", selectedUser?.email);
-    consoleLog("user password", selectedUser?.password);
-    consoleLog("user selected systems", selectedUser?.selected_systems);
-    consoleLog("admin email", loggedUser?.email);
-
     setIsSending(true);
 
     const email = selectedUser?.email;
@@ -482,72 +476,92 @@ export default function UserManagement() {
   };
 
   const confirmDeleteUser = async () => {
+    if (!selectedUser || !selectedUser.email) {
+      hotToast.error("User data is missing");
+      return;
+    }
+
     deletedSystemCount = 0;
 
     setIsDeleting(true);
 
-    const keycloakResponse = await removeUserFromKeycloak(selectedUser.email);
+    try {
+      const keycloakResponse = await removeUserFromKeycloak(selectedUser.email);
 
-    if (keycloakResponse.error) {
-      hotToast.error(`keycloak : ${keycloakResponse.message}`);
-    } else {
-      toastify.success("User was deleted from keycloak successfully", {
-        autoClose: 2000,
+      if (keycloakResponse.error) {
+        hotToast.error(`keycloak : ${keycloakResponse.message}`);
+      } else {
+        toastify.success("User was deleted from keycloak successfully", {
+          autoClose: 2000,
+        });
+      }
+
+      const systemDeletePromises = selectedUser.selected_systems.map((system) =>
+        deleteUserFromSystem(system)
+      );
+
+      const systemDeleteResults = await Promise.allSettled(
+        systemDeletePromises
+      );
+
+      const failedSystems = systemDeleteResults
+        .map((result, index) =>
+          result.status === "rejected"
+            ? selectedUser.selected_systems[index]
+            : null
+        )
+        .filter(Boolean);
+
+      if (failedSystems.length > 0) {
+        hotToast.error(
+          `Failed to delete user from: ${failedSystems.join(", ")}`,
+          { duration: 4000 }
+        );
+      }
+
+      if (typeof selectedUser.id !== "number") {
+        hotToast.error("User info is not correct!", {
+          duration: 3000,
+        });
+      }
+
+      const umsResponse = await fetch(`/api/ums/customers`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${access_token}`,
+        },
+        body: JSON.stringify({ id: selectedUser.id }),
       });
+
+      if (!umsResponse.ok) {
+        throw new Error("Failed to delete user from UMS");
+      }
+
+      const contentType = umsResponse.headers.get("Content-Type");
+      if (contentType && contentType.includes("application/json")) {
+        toastify.success("User was deleted from UMS successfully");
+
+        setUsers((prevUsers) =>
+          prevUsers.filter((user) => user.id !== selectedUser.id)
+        );
+
+        setDeletedSystem({
+          FMS: false,
+          CRM: false,
+          WMS: false,
+          TMS: false,
+          AMS: false,
+          QCMS: false,
+          count: 0,
+        });
+      }
+      setIsDeleteDialogOpen(false);
+    } catch (error: any) {
+      hotToast.error(error.message || "Unexpected error during user deletion");
+    } finally {
+      setIsDeleting(false);
     }
-
-    const systemDeletePromises = selectedUser.selected_systems.map((system) =>
-      deleteUserFromSystem(system)
-    );
-
-    await Promise.allSettled(systemDeletePromises);
-
-    if (typeof selectedUser.id !== "number") {
-      hotToast.error("User info is not correct!", {
-        duration: 3000,
-      });
-    }
-
-    await fetch(`/api/ums/customers`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + access_token,
-      },
-      body: JSON.stringify({
-        id: selectedUser.id,
-      }),
-    })
-      .then(async (response) => {
-        if (response.ok) {
-          const contentType = response.headers.get("Content-Type");
-          if (contentType && contentType.includes("application/json")) {
-            toastify.success("User was deleted from UMS successfully");
-
-            setUsers((prevUsers) =>
-              prevUsers.filter((user) => user.id !== selectedUser.id)
-            );
-            setDeletedSystem({
-              FMS: false,
-              CRM: false,
-              WMS: false,
-              TMS: false,
-              AMS: false,
-              QCMS: false,
-              count: 0,
-            });
-          } else {
-            console.warn("Response is empty or not JSON");
-          }
-        }
-      })
-      .catch((error) => {
-        hotToast.error("Server Error: can not delete user");
-      });
-
-    setIsDeleting(false);
-
-    setIsDeleteDialogOpen(false);
   };
 
   const addMoreSystem = (user: user, system: system) => {

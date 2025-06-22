@@ -3,6 +3,7 @@ import {
     AMS_API_PATH,
     CRM_API_PATH,
     FMS_API_PATH,
+    QCMS_API_PATH,
     TMS_API_PATH,
     WMS_API_PATH,
   } from "@/app/config/setting";
@@ -121,7 +122,7 @@ import {
     }
   }
 
-  export async function deleteUserFromAMS({ user, accessToken }: DeleteParams) {
+  export async function deleteUserFromAMS({ user }: DeleteParams) {
     try {
       console.log("user.ams_user_id ==> ", user.ams_user_id)
 
@@ -141,5 +142,28 @@ import {
     } catch (error) {
       console.error("AMS deletion error:", error);
       return { success: false, error: "Failed to delete from AMS" };
+    }
+  }
+
+    export async function deleteUserFromQCMS({ user }: DeleteParams) {
+    try {
+      console.log("user.qcms_user_id ==> ", user.qcms_user_id)
+
+      const response = await fetch(
+        `${QCMS_API_PATH}/api/auth/user?id=${user.qcms_user_id}`,
+        {
+          method: "DELETE",
+        }
+      );
+      console.log("QCMS delete response ===> ", response);
+      if (!response.ok) {
+        const error = await response.json();
+        return { success: false, error: error.message };
+      }
+  
+      return { success: true };
+    } catch (error) {
+      console.error("QCMS deletion error:", error);
+      return { success: false, error: "Failed to delete from QCMS" };
     }
   }
