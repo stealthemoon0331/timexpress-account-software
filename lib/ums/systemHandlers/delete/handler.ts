@@ -1,6 +1,6 @@
 // app/lib/systemHandlers/delete/handler.ts
 import {
-  AMS_API_PATH,
+    AMS_API_PATH,
     CRM_API_PATH,
     FMS_API_PATH,
     TMS_API_PATH,

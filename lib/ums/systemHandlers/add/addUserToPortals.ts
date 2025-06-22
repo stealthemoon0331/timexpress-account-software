@@ -30,6 +30,8 @@ export const addUserToPortals = async (
     let wms_user_id = -1;
     let tms_user_id = -1;
     let ams_user_id = -1;
+    let qcms_user_id = -1;
+    
     let registered_system: any[] = [];
     let countsOfRegisteredSystem = 0;
 
@@ -77,6 +79,7 @@ export const addUserToPortals = async (
         else if (val.system === "CRM") crm_user_id = val.userid;          
         else if (val.system === "TMS") tms_user_id = val.userid;
         else if (val.system === "AMS") ams_user_id = val.userid;
+        else if (val.system === "QCMS") qcms_user_id = val.userid;
           
         registered_system.push(val.system);
         countsOfRegisteredSystem++;
@@ -120,6 +123,9 @@ export const addUserToPortals = async (
           : -1,
         ams_user_id: registered_system.includes("AMS") ? ams_user_id : -1,
         ams_user_role_id: registered_system.includes("AMS") ? getRoleId(seletectedSystemRoles["AMS"], "AMS")
+        : -1,
+        qcms_user_id: registered_system.includes("QCMS") ? qcms_user_id : -1,
+        qcms_user_role_id: registered_system.includes("QCMS") ? getRoleId(seletectedSystemRoles["QCMS"], "QCMS")
         : -1,
         selected_systems: registered_system,
         systems_with_permission: registered_system,

@@ -42,10 +42,12 @@ export async function GET() {
       const [users] = await pool.query(
         `SELECT id, name, username, email, password, tenant_id, phone, mobile, fms_user_id, fms_branch,
          fms_user_role_id, wms_user_id, wms_user_role_id, crm_user_id, crm_user_role_id, tms_user_id, 
-         tms_user_role_id, ams_user_id, ams_user_role_id, teams, access, selected_systems, systems_with_permission, status
+         tms_user_role_id, ams_user_id, ams_user_role_id, qcms_user_id, qcms_user_role_id, teams, access, selected_systems, systems_with_permission, status
          FROM customers WHERE status = 1 AND adminId = ?`,
         [user.id]
       );
+
+      console.log("users:", users);
       
     return NextResponse.json(users);
   } catch (error) {
@@ -107,8 +109,8 @@ export async function POST(request: Request) {
     const query =
       "INSERT INTO customers (" +
       "name, email, username, password, phone, tenant_id, mobile, fms_user_id, fms_branch, " +
-      "fms_user_role_id, wms_user_id, wms_user_role_id, crm_user_id, crm_user_role_id, tms_user_id, tms_user_role_id, ams_user_id, ams_user_role_id, teams, access, selected_systems, systems_with_permission, status, adminId" +
-      ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+      "fms_user_role_id, wms_user_id, wms_user_role_id, crm_user_id, crm_user_role_id, tms_user_id, tms_user_role_id, ams_user_id, ams_user_role_id, qcms_user_id, qcms_user_role_id, teams, access, selected_systems, systems_with_permission, status, adminId" +
+      ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     console.log("**** customerData.tenantId *** ", customerData.tenantId);
 
@@ -129,13 +131,15 @@ export async function POST(request: Request) {
       customerData.crm_user_role_id || null,
       customerData.tms_user_id || null,
       customerData.tms_user_role_id,
-      customerData.ams_user_id || null, // Optional field
-      customerData.ams_user_role_id || null, // Optional field
+      customerData.ams_user_id || null,  
+      customerData.ams_user_role_id || null,  
+      customerData.qcms_user_id || null,  
+      customerData.qcms_user_role_id || null,  
       JSON.stringify(customerData.teams) || null,
       customerData.access || null,
       JSON.stringify(customerData.selected_systems) || null,
       JSON.stringify(customerData.systems_with_permission) || null,
-      1, // 👈 Set status to active
+      1,
       user.id
     ];
 

@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/table";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
@@ -73,6 +74,7 @@ import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
 import { useUser } from "@/app/contexts/UserContext";
 import { consoleLog } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 export default function UserManagement() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -106,6 +108,8 @@ export default function UserManagement() {
     tms_user_role_id: -1,
     ams_user_id: -1,
     ams_user_role_id: -1,
+    qcms_user_id: -1,
+    qcms_user_role_id: -1,
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -125,6 +129,7 @@ export default function UserManagement() {
     WMS: false,
     TMS: false,
     AMS: false,
+    QCMS: false,
     count: 0,
   });
 
@@ -328,6 +333,7 @@ export default function UserManagement() {
         });
 
         const fetchPlans = await response.json();
+        console.log("fetchPlans => ", fetchPlans);
         // Check if fetchData is an array
         if (Array.isArray(fetchPlans)) {
           setAvailableSystems(
@@ -340,7 +346,9 @@ export default function UserManagement() {
           console.log("fetch plans error");
           return false;
         }
-      } catch (error) {}
+      } catch (error) {
+        console.error("Error fetching available systems:", error);
+      }
     };
 
     fetchAvailableSystems();
@@ -525,6 +533,7 @@ export default function UserManagement() {
               WMS: false,
               TMS: false,
               AMS: false,
+              QCMS: false,
               count: 0,
             });
           } else {
@@ -593,24 +602,26 @@ export default function UserManagement() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full sm:w-[300px]"
           />
-          <Button variant="outline" size="icon">
-            <Filter className="h-4 w-4" />
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm">
+                Filter Systems
+              </Button>
+            </PopoverTrigger>
 
-          {availableSystems?.map((system: system) => (
-            <div key={system} className="flex flex-wrap gap-4 pt-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id={system}
-                  checked={searchSystemQueryList?.includes(system)}
-                  onCheckedChange={() => handleSystemSearchQuery(system)}
-                />
-                <Label htmlFor={system} className="font-normal">
-                  {system}
-                </Label>
-              </div>
-            </div>
-          ))}
+            <PopoverContent className="w-64 max-h-64 overflow-y-auto space-y-2">
+              {availableSystems?.map((system: system) => (
+                <div key={system} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={system}
+                    checked={searchSystemQueryList?.includes(system)}
+                    onCheckedChange={() => handleSystemSearchQuery(system)}
+                  />
+                  <Label htmlFor={system}>{system}</Label>
+                </div>
+              ))}
+            </PopoverContent>
+          </Popover>
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)}>
           <GroupAddIcon className="h-8 w-8" />
@@ -667,6 +678,8 @@ export default function UserManagement() {
                               roleId = user.tms_user_role_id;
                             else if (system === "AMS")
                               roleId = user.ams_user_role_id;
+                            else if (system === "QCMS")
+                              roleId = user.qcms_user_role_id;
                             return (
                               <Tooltip.Root key={system}>
                                 <Tooltip.Trigger

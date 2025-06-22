@@ -2,6 +2,7 @@ import {
   registerUserToAMS,
   registerUserToCRM,
   registerUserToFMS,
+  registerUserToQCMS,
   registerUserToTMS,
   registerUserToWMS,
 } from "@/lib/ums/systemHandlers/add/handler";
@@ -89,6 +90,21 @@ export async function POST(
           error: amsResponse.isError,
           message: amsResponse.message,
           data: { system: system, userid: amsResponse.data?.user.id },
+        });
+      
+      case "QCMS":
+        const qcmsResponse = await registerUserToQCMS({
+          ssoUser,
+          roleId,
+          system,
+        });
+
+        console.log("amsResponse => ", qcmsResponse);
+
+        return NextResponse.json({
+          error: qcmsResponse.isError,
+          message: qcmsResponse.message,
+          data: { system: system, userid: qcmsResponse.data?.user.id },
         });
 
       default:

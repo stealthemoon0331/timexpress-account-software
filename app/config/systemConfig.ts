@@ -5,4 +5,5 @@ export const systemConfig: Record< string, { clientId: string; roleName: string 
   TMS: { clientId: "tms-id", roleName: "tms-access" },
   FMS: { clientId: "fms-id", roleName: "fms-access" },
   AMS: { clientId: "ams-id", roleName: "ams-access" },
+  QCMS: { clientId: "quote-id", roleName: "qcms-access" }
 };

@@ -6,6 +6,8 @@ export const CRM_API_PATH = process.env.NEXT_PUBLIC_CRM_API_PATH || "http://loca
 export const WMS_API_PATH = process.env.NEXT_PUBLIC_WMS_API_PATH || "http://localhost:4011";
 export const TMS_API_PATH = process.env.NEXT_PUBLIC_TMS_API_PATH || "http://localhost:5566";
 export const AMS_API_PATH = process.env.NEXT_PUBLIC_AMS_API_PATH || "http://localhost:4000";
+export const QCMS_API_PATH = process.env.NEXT_PUBLIC_QCMS_API_PATH || "http://localhost:4100";
+
 
 /**
  * Keycloak Config

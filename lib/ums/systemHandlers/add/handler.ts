@@ -4,6 +4,7 @@ import {
   TMS_API_PATH,
   WMS_API_PATH,
   AMS_API_PATH,
+  QCMS_API_PATH,
 } from "@/app/config/setting";
 import { systemRoles } from "@/lib/ums/data";
 import { system } from "@/lib/ums/type";
@@ -275,6 +276,35 @@ export async function registerUserToAMS({
   console.log(" AMS_API_PATH => ", AMS_API_PATH);
 
   const response = await fetch(`${AMS_API_PATH}/api/auth/signup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return await handleAPIResponse(system, response, "Failed to register user");
+}
+
+export async function registerUserToQCMS({
+  ssoUser,
+  roleId,
+  system,
+}: RegistrationParams) {
+  const payload = {
+    email: ssoUser.email,
+    firstName: ssoUser.name.split(" ")[0],
+    lastName: ssoUser.name.split(" ")[1],
+    password: ssoUser.password,
+    role: roleId,
+    tenantId: ssoUser.tenantId,
+    status: 1,
+  };
+
+  console.log(" Payload Admin => ", payload);
+  console.log(" QCMS_API_PATH => ", QCMS_API_PATH);
+
+  const response = await fetch(`${QCMS_API_PATH}/api/auth/signup`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

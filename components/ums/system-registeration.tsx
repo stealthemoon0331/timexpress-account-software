@@ -99,6 +99,7 @@ export default function SystemRegistration() {
     { value: "CRM" as system, label: "CRM" },
     { value: "WMS" as system, label: "WMS" },
     { value: "AMS" as system, label: "AMS" },
+    { value: "QCMS" as system, label: "QCMS" },
   ];
 
   const systemAdminRoles = {
@@ -107,6 +108,7 @@ export default function SystemRegistration() {
     FMS: "Admin",
     TMS: "2",
     AMS: "Admin",
+    QCMS: "Admin",
   };
 
   const tmsAdminAccess = "1";
