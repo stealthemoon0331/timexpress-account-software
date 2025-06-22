@@ -4,4 +4,5 @@ export const systemConfig: Record< string, { clientId: string; roleName: string 
   WMS: { clientId: "wms-id", roleName: "wms-access" },
   TMS: { clientId: "tms-id", roleName: "tms-access" },
   FMS: { clientId: "fms-id", roleName: "fms-access" },
+  AMS: { clientId: "ams-id", roleName: "ams-access" },
 };

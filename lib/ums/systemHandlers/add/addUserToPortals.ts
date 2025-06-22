@@ -90,17 +90,6 @@ export const addUserToPortals = async (
       };
     }
     
-    if (countsOfRegisteredSystem < systemsToRegister.length) {
-    //   toastify.warn("Failed to register user for all systems.", {
-    //     autoClose: 3000,
-    //   });
-
-      return {
-        success: false,
-        error: "User was not registered at selected all systems.",
-      };
-    }
-
     // After register user into portal and then register into ums database...
       const newUser = {
         name: ssoUser.name,

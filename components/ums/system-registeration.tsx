@@ -37,6 +37,7 @@ import { useData } from "@/app/contexts/dataContext";
 import { checkIfHasTenant, registerTenantId } from "@/lib/tenant";
 import { updateUserToPortals } from "@/lib/ums/systemHandlers/edit/updateUserToPortals";
 import { getRoleName } from "@/lib/ums/utils";
+import { useFormStore } from "@/lib/store/user-form";
 
 interface FormData {
   name: string;
@@ -55,19 +56,19 @@ interface FormData {
 export default function SystemRegistration() {
   const [registeredUser, setRegisteredUser] = useState<FormUser | null>(null);
   const [hasTenant, setHasTenant] = useState<boolean>(false);
-  const [formData, setFormData] = useState<FormData>({
-    name: "",
-    email: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
-    phone: "",
-    mobile: "",
-    fms_branch: [],
-    tenantId: "",
-    teams: [],
-    selected_systems: [],
-  });
+  // const [formData, setFormData] = useState<FormData>({
+  //   name: "",
+  //   email: "",
+  //   username: "",
+  //   password: "",
+  //   confirmPassword: "",
+  //   phone: "",
+  //   mobile: "",
+  //   fms_branch: [],
+  //   tenantId: "",
+  //   teams: [],
+  //   selected_systems: [],
+  // });
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -76,8 +77,12 @@ export default function SystemRegistration() {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const { user: loggedUser, loading } = useUser();
+
   const { access_token, addUserToKeycloak, updateUserInKeycloak } = useAuth();
+
   const { teams } = useData();
+
+  const { formData, setFormData } = useFormStore();
 
   const requiredFields: { field: keyof FormData; label: string }[] = [
     { field: "name", label: "Name" },
@@ -94,7 +99,6 @@ export default function SystemRegistration() {
     { value: "CRM" as system, label: "CRM" },
     { value: "WMS" as system, label: "WMS" },
     { value: "AMS" as system, label: "AMS" },
-
   ];
 
   const systemAdminRoles = {
@@ -119,19 +123,21 @@ export default function SystemRegistration() {
 
     console.log("teams => ", teams);
 
-    setFormData({
-      name: loggedUser?.name || "",
-      email: loggedUser?.email || "",
-      username: "",
-      password: "",
-      confirmPassword: "",
-      phone: "",
-      mobile: "",
-      tenantId: "",
-      fms_branch: fmsBranches,
-      teams: teams?.map((team) => team.teamId.toString()),
-      selected_systems: [],
-    });
+    if (!formData.username && !formData.phone && !formData.mobile && !formData.selected_systems) {
+      setFormData({
+        name: loggedUser?.name || "",
+        email: loggedUser?.email || "",
+        username: "",
+        password: "",
+        confirmPassword: "",
+        phone: "",
+        mobile: "",
+        tenantId: "",
+        fms_branch: fmsBranches,
+        teams: teams?.map((team) => team.teamId.toString()),
+        selected_systems: [],
+      });
+    }
   }, [loggedUser, teams]);
 
   const checkTenant = async () => {
@@ -246,8 +252,11 @@ export default function SystemRegistration() {
     }
   };
 
-  const handleChange = (field: keyof FormData, value: string | string[]) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const handleChange = <K extends keyof FormData>(
+    field: K,
+    value: FormData[K]
+  ) => {
+    setFormData({ [field]: value });
   };
 
   const handleRegistration = async () => {
@@ -326,17 +335,16 @@ export default function SystemRegistration() {
       );
 
       if (result.success) {
-        
         setRegisteredUser(result.data);
-        
+
         setHasTenant(true);
-        
+
         toastify.success("Registered new user into UMS!", { autoClose: 3000 });
-        
+
         if (result.warning) {
           toastify.warn(result.warning, { autoClose: 3000 });
         }
-        
+
         // Reset form states
       } else {
         throw new Error(result.error || "Failed to register user");
@@ -422,8 +430,8 @@ export default function SystemRegistration() {
           toastify.success("Successfully updated!");
 
           handleCancelEdit();
-          
-          setRegisteredUser(portalUpdateResponse.data)
+
+          setRegisteredUser(portalUpdateResponse.data);
         } else {
           throw new Error(portalUpdateResponse.error);
         }
@@ -431,7 +439,9 @@ export default function SystemRegistration() {
         hotToast.error(`Keycloak Error : ${keycloakUpdateResponse.message}`);
       }
     } catch (error: any) {
-      hotToast.error(`Failed update error ${error.message ? ": " + error.message : ""}`);
+      hotToast.error(
+        `Failed update error ${error.message ? ": " + error.message : ""}`
+      );
     } finally {
       setIsUpdating(false);
     }
@@ -701,8 +711,7 @@ export default function SystemRegistration() {
                 </ListItem>
               </List>
             ) : (
-              <>
-              </>
+              <></>
             )}
             <List>
               <ListItem>

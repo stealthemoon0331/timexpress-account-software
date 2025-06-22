@@ -115,7 +115,6 @@ export default function UserManagement() {
 
   const [searchedUsers, setSearchedUsers] = useState<user[]>([]);
 
-
   const [permissionedSystems, setPermissionedSystems] = useState<
     PermissionedSystem[]
   >([]);
@@ -252,7 +251,7 @@ export default function UserManagement() {
               }
             });
 
-            console.log("fetchData => ", fetchData)
+            console.log("fetchData => ", fetchData);
 
             setIsLoading(false);
             setUsers(fetchData);
@@ -347,7 +346,6 @@ export default function UserManagement() {
     fetchAvailableSystems();
   }, [loggedUser]);
   const handleEditUser = (user: user) => {
-
     setSelectedUser(user);
     setIsEditDialogOpen(true);
   };
@@ -554,8 +552,6 @@ export default function UserManagement() {
     setSelectedUser(user);
   };
 
- 
-
   const handleResetPassword = (user: any) => {
     setSelectedUser(user);
     setIsPasswordResetDialogOpen(true);
@@ -649,7 +645,10 @@ export default function UserManagement() {
                     <TableCell>
                       {index + (currentPage - 1) * itemsPerPage + 1}
                     </TableCell>
-                    <TableCell className="font-medium">{user.name} {loggedUser?.email === user.email ? "( me )" : ""}</TableCell>
+                    <TableCell className="font-medium">
+                      {user.name}{" "}
+                      {loggedUser?.email === user.email ? "( me )" : ""}
+                    </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{user.password}</TableCell>
                     <TableCell>{user.phone}</TableCell>
@@ -666,7 +665,7 @@ export default function UserManagement() {
                               roleId = user.crm_user_role_id;
                             else if (system === "TMS")
                               roleId = user.tms_user_role_id;
-                              else if (system === "AMS")
+                            else if (system === "AMS")
                               roleId = user.ams_user_role_id;
                             return (
                               <Tooltip.Root key={system}>
