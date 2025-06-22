@@ -123,7 +123,12 @@ export default function SystemRegistration() {
 
     console.log("teams => ", teams);
 
-    if (!formData.username && !formData.phone && !formData.mobile && !formData.selected_systems) {
+    if (
+      !formData.username &&
+      !formData.phone &&
+      !formData.mobile &&
+      !formData.selected_systems
+    ) {
       setFormData({
         name: loggedUser?.name || "",
         email: loggedUser?.email || "",
@@ -145,7 +150,6 @@ export default function SystemRegistration() {
       const checkingResponse = await checkIfHasTenant(loggedUser.email);
       if (!checkingResponse.error) {
         const tenantId = checkingResponse.data;
-        console.log("*** tenantId *** ", tenantId);
         if (tenantId) {
           setHasTenant(true);
         } else {
@@ -428,6 +432,7 @@ export default function SystemRegistration() {
         if (portalUpdateResponse.success) {
           // addUpdatedUser(portalUpdateResponse.data);
           toastify.success("Successfully updated!");
+          // notifySuccess("Successfully updated!")
 
           handleCancelEdit();
 
@@ -695,6 +700,24 @@ export default function SystemRegistration() {
                         </InputAdornment>
                       ),
                     }}
+                  />
+                </ListItem>
+                <ListItem>
+                  <Select
+                    isMulti
+                    options={systemOptions}
+                    value={systemOptions.filter((option) =>
+                      formData?.selected_systems.includes(option.value)
+                    )}
+                    onChange={(selected) =>
+                      handleChange(
+                        "selected_systems",
+                        selected.map((option) => option.value)
+                      )
+                    }
+                    className="basic-multi-select"
+                    classNamePrefix="select"
+                    required
                   />
                 </ListItem>
 

@@ -26,7 +26,6 @@ export default function page() {
       const checkingResponse = await checkIfHasTenant(loggedUser.email);
       if (!checkingResponse.error) {
         const tenantId = checkingResponse.data;
-        console.log("*** tenantId *** ", tenantId);
         if (tenantId) {
           setHasTenant(true);
         } else {
