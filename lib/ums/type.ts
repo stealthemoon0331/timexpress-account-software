@@ -11,7 +11,7 @@ export type Team = {
   createdBy: number;
 };
 
-export type system = "CRM" | "WMS" | "FMS" | "TMS";
+export type system = "CRM" | "WMS" | "FMS" | "TMS" | "AMS" | "QCMS" | "TSMS" | "TDMS";
 
 export interface FailedSystem {
   userId: number;
@@ -28,6 +28,10 @@ export interface SelectedSystemRoles {
   WMS: string;
   FMS: string;
   TMS: string;
+  AMS: string;
+  QCMS: string;
+  TSMS: string;
+  TDMS: string;
 }
 
 export interface DecodedToken {
@@ -50,13 +54,21 @@ export type user = {
   mobile: string;
   fms_user_id: number;
   fms_branch: string[];
-  fms_user_role_id: number;
+  fms_user_role_id: number | string;
   wms_user_id: number;
-  wms_user_role_id: number;
+  wms_user_role_id: number | string;
   crm_user_id: number;
-  crm_user_role_id: number;
+  crm_user_role_id: number | string;
   tms_user_id: number;
-  tms_user_role_id: number;
+  tms_user_role_id: number | string;
+  ams_user_id: number;
+  ams_user_role_id: number | string;
+  qcms_user_id: number;
+  qcms_user_role_id: number | string;
+  tsms_user_id: number;
+  tsms_user_role_id: number | string;
+  tdms_user_id: number;
+  tdms_user_role_id: number | string;
   selected_systems: system[];
   systems_with_permission: system[];
   access: string;
@@ -74,13 +86,21 @@ export type FormUser = {
   mobile: string;
   fms_user_id: number;
   fms_branch: string[];
-  fms_user_role_id: number;
+  fms_user_role_id: number | string;
   wms_user_id: number;
-  wms_user_role_id: number;
+  wms_user_role_id: number | string;
   crm_user_id: number;
-  crm_user_role_id: number;
+  crm_user_role_id: number | string;
   tms_user_id: number;
-  tms_user_role_id: number;
+  tms_user_role_id: number | string;
+  ams_user_id?: number;
+  ams_user_role_id?: number | string;
+  qcms_user_id?: number;
+  qcms_user_role_id?: number | string;
+  tsms_user_id?: number;
+  tsms_user_role_id?: number | string;
+  tdms_user_id?: number;
+  tdms_user_role_id?: number | string;
   selected_systems: system[];
   systems_with_permission: system[];
   access: string;
@@ -105,6 +125,12 @@ export type FormDataType = {
   crm_user_role_id: number;
   tms_user_id: number;
   tms_user_role_id: number;
+  ams_user_id?: number;
+  ams_user_role_id?: string;
+  tsms_user_id?: number;
+  tsms_user_role_id?: string;
+  tdms_user_id?: number;
+  tdms_user_role_id?: string;
   selected_systems: string[];
   access: string;
   teams: string[];

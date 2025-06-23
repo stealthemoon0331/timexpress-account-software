@@ -1,7 +1,11 @@
 import {
+  AMS_API_PATH,
   CRM_API_PATH,
   FMS_API_PATH,
+  QCMS_API_PATH,
+  TDMS_API_PATH,
   TMS_API_PATH,
+  TSMS_API_PATH,
   WMS_API_PATH,
 } from "@/app/config/setting";
 import { systemRoles } from "@/lib/ums/data";
@@ -10,7 +14,7 @@ import { getRoleName } from "@/lib/ums/utils";
 
 interface UpdateParams {
   formData: any;
-  roleId: number;
+  roleId: number | string;
   accessToken?: string;
   selectedAccess?: any;
   user: any;
@@ -47,22 +51,22 @@ export async function updateUserInFMS({
 
     let responseData: any = null;
 
-     try {
+    try {
       // Try to parse response only if there is content
       const text = await response.text();
       responseData = text ? JSON.parse(text) : {};
-      
+
     } catch (jsonErr) {
       console.warn("Failed to parse response JSON:", jsonErr);
-     }
+    }
 
     // const responseData = await response.json();
-    
-    if(Number(responseData?.status) === 200) {
+
+    if (Number(responseData?.status) === 200) {
       responseData.roleId = roleId;
-     }
-    
-    if(Number(responseData?.status) === 404) {
+    }
+
+    if (Number(responseData?.status) === 404) {
       return {
         isError: true,
         message: "FMS : " + responseData.message || "Failed to update user in FMS",
@@ -106,12 +110,12 @@ export async function updateUserInWMS({
     console.log("roleId : ", roleId);
 
     console.log("updateParam : ", {
-          ...formData,
-          role: {
-                id: roleId,
-                role: getRoleName(system, roleId),
-              },
-        })
+      ...formData,
+      role: {
+        id: roleId,
+        role: getRoleName(system, roleId),
+      },
+    })
 
     const response = await fetch(
       `${WMS_API_PATH}/api/users/${user.wms_user_id}`,
@@ -125,9 +129,9 @@ export async function updateUserInWMS({
           ...formData,
           tenant_id: user.tenantId,
           role: {
-                id: roleId,
-                role: getRoleName(system, roleId),
-              },
+            id: roleId,
+            role: getRoleName(system, roleId),
+          },
         }),
       }
     );
@@ -247,7 +251,7 @@ export async function updateUserInTMS({
       access: selectedAccess,
       updated_by: 2, // Assuming "2" is the ID of the current user making the request
     };
-    
+
     const response = await fetch(
       `${TMS_API_PATH}/shypvdriverapp/personnel/updatePersonnel`,
       {
@@ -268,24 +272,24 @@ export async function updateUserInTMS({
     } catch (jsonErr) {
       console.warn("Failed to parse response JSON:", jsonErr);
     }
-  
-    if (!response.ok ) {
-      if(Number(response?.status) == 500) {
+
+    if (!response.ok) {
+      if (Number(response?.status) == 500) {
         return {
           isError: true,
           message: responseData.message || "TMS Server Error : Failed to update user",
           data: null,
         };
       }
-      
-      if(Number(response?.status) == 404) {
+
+      if (Number(response?.status) == 404) {
         return {
           isError: true,
           message: "TMS : User not found",
           data: null,
         };
       }
-      if(Number(response?.status) == 403) {
+      if (Number(response?.status) == 403) {
         return {
           isError: true,
           message: responseData.message || "TMS : You dont have permission to update user",
@@ -305,6 +309,333 @@ export async function updateUserInTMS({
     return {
       isError: true,
       message: "Failed to update user in TMS",
+      data: null,
+    };
+  }
+}
+
+export async function updateUserInAMS({
+  formData,
+  roleId,
+  accessToken,
+  user,
+  system,
+}: UpdateParams) {
+  // CRM update implementation
+  try {
+
+    console.log("formData from updateUserAMS => ", formData)
+
+    if(!user.ams_user_id) {
+      throw new Error("Update field. Your data was not initialized");
+    } 
+
+    let updateBody = {}
+
+    if (formData.email) {
+      updateBody = { ...updateBody, email: formData.email };
+    }
+
+    if (formData.name) {
+      updateBody = { ...updateBody, name: formData.name };
+    }
+
+    if(roleId) {
+      updateBody = {...updateBody, role: roleId}
+    }
+
+    console.log("updateBody from edit handler => ", updateBody);
+
+    const response = await fetch(
+      `${AMS_API_PATH}/api/auth/user?id=${user.ams_user_id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updateBody)
+      }
+    );
+    let responseData: any = null;
+    try {
+      // Try to parse response only if there is content
+      const text = await response.text();
+      responseData = text ? JSON.parse(text) : {};
+
+      console.log("responseData => ", responseData);
+    } catch (jsonErr) {
+      console.warn("Failed to parse response JSON:", jsonErr);
+    }
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        return {
+          isError: true,
+          message:
+            responseData?.message ||
+            `You dont have permission to update user in AMS`,
+          data: null,
+        };
+      }
+      return {
+        isError: true,
+        message: responseData || `Failed to update user in AMS`,
+        data: null,
+      };
+    }
+
+    return {
+      isError: false,
+      message: "AMS user updated successfully",
+      system: system,
+      data: responseData,
+    };
+  } catch (error) {
+    console.error("AMS update error:", error, " : ", typeof error);
+
+    return {
+      isError: true,
+      message: error instanceof Error ? error.message : String(error),
+      data: null,
+    };
+  }
+}
+
+export async function updateUserInQCMS({
+  formData,
+  roleId,
+  accessToken,
+  user,
+  system,
+}: UpdateParams) {
+  // CRM update implementation
+  try {
+
+    console.log("formData from updateUserInQCMS => ", formData)
+
+    if(!user.qcms_user_id) {
+      throw new Error("Update field. Your data was not initialized");
+    } 
+
+    let updateBody = {}
+
+    if (formData.email) {
+      updateBody = { ...updateBody, email: formData.email };
+    }
+
+    if (formData.name) {
+      updateBody = { ...updateBody, name: formData.name };
+    }
+
+    if(roleId) {
+      updateBody = {...updateBody, role: roleId}
+    }
+
+    console.log("updateBody from edit handler => ", updateBody);
+
+    const response = await fetch(
+      `${QCMS_API_PATH}/api/auth/user?id=${user.qcms_user_id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updateBody)
+      }
+    );
+    let responseData: any = null;
+
+    console.log("QCMS response => ", response);
+
+    try {
+      // Try to parse response only if there is content
+      const text = await response.text();
+      responseData = text ? JSON.parse(text) : {};
+    } catch (jsonErr) {
+      console.warn("Failed to parse response JSON:", jsonErr);
+    }
+
+    if (!response.ok) {
+      
+      return {
+        isError: true,
+        message: responseData.msg || `Failed to update user in QCMS`,
+        data: null,
+      };
+    }
+
+    return {
+      isError: false,
+      message: "QCMS user updated successfully",
+      system: system,
+      data: responseData.user,
+    };
+  } catch (error) {
+    console.error("QCMS update error:", error, " : ", typeof error);
+
+    return {
+      isError: true,
+      message: error instanceof Error ? error.message : String(error),
+      data: null,
+    };
+  }
+}
+
+export async function updateUserInTSMS({
+  formData,
+  roleId,
+  accessToken,
+  user,
+  system,
+}: UpdateParams) {
+  // CRM update implementation
+  try {
+
+    console.log("formData from updateUserInTSMS => ", formData)
+
+    if(!user.tsms_user_id) {
+      throw new Error("Update field. Your data was not initialized");
+    } 
+
+    let updateBody = {}
+
+    if (formData.email) {
+      updateBody = { ...updateBody, email: formData.email };
+    }
+
+    if (formData.name) {
+      updateBody = { ...updateBody, name: formData.name };
+    }
+
+    if(roleId) {
+      updateBody = {...updateBody, role: roleId}
+    }
+
+    console.log("updateBody from edit handler => ", updateBody);
+
+    const response = await fetch(
+      `${TSMS_API_PATH}/api/auth/user?id=${user.tsms_user_id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updateBody)
+      }
+    );
+    let responseData: any = null;
+
+    console.log("QCMS response => ", response);
+
+    try {
+      // Try to parse response only if there is content
+      const text = await response.text();
+      responseData = text ? JSON.parse(text) : {};
+    } catch (jsonErr) {
+      console.warn("Failed to parse response JSON:", jsonErr);
+    }
+
+    if (!response.ok) {
+      
+      return {
+        isError: true,
+        message: responseData.msg || `Failed to update user in QCMS`,
+        data: null,
+      };
+    }
+
+    return {
+      isError: false,
+      message: "TSMS user updated successfully",
+      system: system,
+      data: responseData.user,
+    };
+  } catch (error) {
+    console.error("TSMS update error:", error, " : ", typeof error);
+
+    return {
+      isError: true,
+      message: error instanceof Error ? error.message : String(error),
+      data: null,
+    };
+  }
+}
+
+export async function updateUserInTDMS({
+  formData,
+  roleId,
+  accessToken,
+  user,
+  system,
+}: UpdateParams) {
+  // CRM update implementation
+  try {
+
+    console.log("formData from updateUserInTDMS => ", formData)
+
+    if(!user.tdms_user_id) {
+      throw new Error("Update field. Your data was not initialized");
+    } 
+
+    let updateBody = {}
+
+    if (formData.email) {
+      updateBody = { ...updateBody, email: formData.email };
+    }
+
+    if (formData.name) {
+      updateBody = { ...updateBody, name: formData.name };
+    }
+
+    if(roleId) {
+      updateBody = {...updateBody, role: roleId}
+    }
+
+    console.log("updateBody from edit handler => ", updateBody);
+
+    const response = await fetch(
+      `${TDMS_API_PATH}/api/auth/user?id=${user.tdms_user_id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updateBody)
+      }
+    );
+    let responseData: any = null;
+
+    console.log("TDMS response => ", response);
+
+    try {
+      // Try to parse response only if there is content
+      const text = await response.text();
+      responseData = text ? JSON.parse(text) : {};
+    } catch (jsonErr) {
+      console.warn("Failed to parse response JSON:", jsonErr);
+    }
+
+    if (!response.ok) {
+      
+      return {
+        isError: true,
+        message: responseData.msg || `Failed to update user in TDMS`,
+        data: null,
+      };
+    }
+
+    return {
+      isError: false,
+      message: "TDMS user updated successfully",
+      system: system,
+      data: responseData.user,
+    };
+  } catch (error) {
+    console.error("TDMS update error:", error, " : ", typeof error);
+
+    return {
+      isError: true,
+      message: error instanceof Error ? error.message : String(error),
       data: null,
     };
   }

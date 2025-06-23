@@ -80,6 +80,14 @@ export function CreateUserDialog({
     crm_user_role_id: -1,
     tms_user_id: -1,
     tms_user_role_id: -1,
+    ams_user_id: -1,
+    ams_user_role_id: "",
+    qcms_user_id: -1,
+    qcms_user_role_id: "",
+    tsms_user_id: -1,
+    tsms_user_role_id: "",
+    tdms_user_id: -1,
+    tdms_user_role_id: "",
     selected_systems: [],
     access: "",
     teams: [""],
@@ -109,6 +117,10 @@ export function CreateUserDialog({
       WMS: "",
       FMS: "",
       TMS: "",
+      AMS: "",
+      QCMS: "",
+      TSMS: "",
+      TDMS: "",
     });
 
   const getTeamName = (teamId: string): string => {
@@ -136,146 +148,118 @@ export function CreateUserDialog({
     }));
   };
 
-const handleSubmit = async () => {
-  try {
-    if (formData.username === "") {
-      toastify.warn("Please input username");
-      return;
-    }
+  const validateForm = () => {
+    const requiredFields = [
+      { field: formData.username, message: "Please input username" },
+      { field: formData.email, message: "Please input email" },
+      { field: formData.password, message: "Please input password" },
+      { field: formData.mobile, message: "Please input mobile number" },
+      { field: formData.phone, message: "Please input phone number" },
+    ];
 
-    if (formData.email === "") {
-      toastify.warn("Please input email");
-      return;
-    }
-
-    if (formData.password === "") {
-      toastify.warn("Please input password");
-      return;
-    }
-
-    if (formData.mobile === "") {
-      toastify.warn("Please input mobile number");
-      return;
-    }
-
-    if (formData.phone === "") {
-      toastify.warn("Please input phone number");
-      return;
+    for (const { field, message } of requiredFields) {
+      if (!field || field.trim() === "") {
+        toastify.warn(message);
+        return false;
+      }
     }
 
     if (formData.password !== formData.confirmPassword) {
       toastify.warn("Passwords do not match");
-      return;
+      return false;
     }
 
     if (selectedSystems.length === 0) {
       toastify.warn("Please select a system");
-      return;
+      return false;
     }
 
-    if (selectedSystems.includes("FMS") && systemRoleSelections.FMS === "") {
-      toastify.warn("Please select a role for FMS");
-      return;
-    }
+    const systemRolesRequired: system[] = ["FMS", "WMS", "CRM", "TMS", "AMS", "QCMS", "TSMS", "TDMS"];
 
-    if (selectedSystems.includes("WMS") && systemRoleSelections.WMS === "") {
-      toastify.warn("Please select a role for WMS");
-      return;
-    }
-
-    if (selectedSystems.includes("CRM") && systemRoleSelections.CRM === "") {
-      toastify.warn("Please select a role for CRM");
-      return;
-    }
-
-    if (selectedSystems.includes("TMS") && systemRoleSelections.TMS === "") {
-      toastify.warn("Please select a role for TMS");
-      return;
+    for (const system of systemRolesRequired) {
+      if (selectedSystems.includes(system) && !systemRoleSelections[system]) {
+        toastify.warn(`Please select a role for ${system}`);
+        return false;
+      }
     }
 
     if (selectedSystems.includes("FMS") && selectedBranches.length === 0) {
       toastify.warn("Please select at least one branch");
-      return;
+      return false;
     }
 
-    if (
-      selectedSystems.includes("TMS") &&
-      selectedAccess === "0" &&
-      formData.teams.filter((team) => team !== "").length === 0
-    ) {
-      toastify.warn("Please select teams in TMS setting");
-      return;
-    }
-
-    if (selectedSystems.includes("TMS") && selectedAccess === "") {
-      toastify.warn("Please select access");
-      return;
-    }
-
-    setIsSending(true); // Set to true at the start of async operations
-
-    console.log("selectedSystems before saving into system ", selectedSystems);
-
-    console.log(" 🍀 ::::: addUserToKeycloak ::::: 🍀 ");
-    console.log("formData.username : ", formData.username);
-    console.log("formData.email : ", formData.email);
-    console.log("formData.password : ", formData.password);
-    console.log("selectedSystems : ", selectedSystems);
-
-
-    const keycloakResponse = await addUserToKeycloak(
-      formData.username,
-      formData.email,
-      formData.password,
-      selectedSystems
-    );
-
-    if (keycloakResponse.error) {
-      throw new Error(keycloakResponse.message);
-    }
-
-    console.log(" 🍀::::: addUserToSystemsAndUMS ::::: 🍀 ");
-    console.log("formData : ", formData);
-    console.log("selectedSystems : ", selectedSystems);
-    console.log("access_token : ", access_token);
-    console.log("selectedAccess : ", selectedAccess);
-    console.log("selectedBranches : ", selectedBranches);
-
-    const updatedFormData = {...formData, tenantId: loggedUser?.tenantId}
-
-    console.log("*** updatedFormData *** ", updatedFormData);
-
-    const result = await addUserToPortals(
-      updatedFormData,
-      selectedSystems,
-      systemRoleSelections,
-      access_token,
-      selectedAccess,
-      selectedBranches
-    );
-
-    if (result.success) {
-      addNewUser(result.data);
-      toastify.success("Registered new user into UMS!", { autoClose: 3000 });
-
-      if (result.warning) {
-        toastify.warn(result.warning, { autoClose: 3000 });
+    if (selectedSystems.includes("TMS")) {
+      if (!selectedAccess) {
+        toastify.warn("Please select access");
+        return false;
       }
 
-      // Reset form states
-      resetForm();
-    } else {
-      throw new Error(result.error || "Failed to register user");
+      const validTeams = formData.teams.filter((team) => team.trim() !== "");
+      if (selectedAccess === "0" && validTeams.length === 0) {
+        toastify.warn("Please select teams in TMS setting");
+        return false;
+      }
     }
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
-    hotToast.error(errorMessage, {
-      duration: 5000,
-    });
-  } finally {
-    setIsSending(false); // Always reset isSending in the end
-  }
-};
+
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    try {
+      setIsSending(true); // Set to true at the start of async operations
+
+      const { username, email, password } = formData;
+
+      const keycloakResponse = await addUserToKeycloak(
+        username,
+        email,
+        password,
+        selectedSystems
+      );
+
+      if (keycloakResponse.error) {
+        throw new Error(keycloakResponse.message);
+      }
+
+      const updatedFormData = { ...formData, tenantId: loggedUser?.tenantId };
+
+      console.log("*** updatedFormData *** ", updatedFormData);
+
+      const result = await addUserToPortals(
+        updatedFormData,
+        selectedSystems,
+        systemRoleSelections,
+        access_token,
+        selectedAccess,
+        selectedBranches
+      );
+
+      if (result.success) {
+        addNewUser(result.data);
+        toastify.success("Registered new user into UMS!", { autoClose: 3000 });
+
+        if (result.warning) {
+          toastify.warn(result.warning, { autoClose: 3000 });
+        }
+
+        // Reset form states
+        resetForm();
+      } else {
+        throw new Error(result.error || "Failed to register user");
+      }
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      hotToast.error(errorMessage, {
+        duration: 5000,
+      });
+    } finally {
+      setIsSending(false); // Always reset isSending in the end
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       name: "",
@@ -295,6 +279,14 @@ const handleSubmit = async () => {
       crm_user_role_id: -1,
       tms_user_id: -1,
       tms_user_role_id: -1,
+      ams_user_id: -1,
+      ams_user_role_id: "",
+      qcms_user_id: -1,
+      qcms_user_role_id: "",
+      tsms_user_id: -1,
+      tsms_user_role_id: "",
+      tdms_user_id: -1,
+      tdms_user_role_id: "",
       access: "",
       teams: [],
       selected_systems: [],
@@ -307,6 +299,10 @@ const handleSubmit = async () => {
       WMS: "",
       CRM: "",
       TMS: "",
+      AMS: "",
+      QCMS: "",
+      TSMS: "",
+      TDMS: "",
     });
     setSelectedAccess("");
   };
@@ -331,6 +327,10 @@ const handleSubmit = async () => {
       WMS: "",
       CRM: "",
       TMS: "",
+      AMS: "",
+      QCMS: "",
+      TSMS: "",
+      TDMS: "",
     });
     setSelectedAccess("");
     setSelectedTeams([]);
@@ -352,6 +352,14 @@ const handleSubmit = async () => {
       crm_user_role_id: -1,
       tms_user_id: -1,
       tms_user_role_id: -1,
+      ams_user_id: -1,
+      ams_user_role_id: "",
+      qcms_user_id: -1,
+      qcms_user_role_id: "",
+      tsms_user_id: -1,
+      tsms_user_role_id: "",
+      tdms_user_id: -1,
+      tdms_user_role_id: "",
       access: "",
       teams: [],
       selected_systems: [],

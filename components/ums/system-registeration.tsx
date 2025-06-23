@@ -37,6 +37,7 @@ import { useData } from "@/app/contexts/dataContext";
 import { checkIfHasTenant, registerTenantId } from "@/lib/tenant";
 import { updateUserToPortals } from "@/lib/ums/systemHandlers/edit/updateUserToPortals";
 import { getRoleName } from "@/lib/ums/utils";
+import { useFormStore } from "@/lib/store/user-form";
 
 interface FormData {
   name: string;
@@ -55,29 +56,49 @@ interface FormData {
 export default function SystemRegistration() {
   const [registeredUser, setRegisteredUser] = useState<FormUser | null>(null);
   const [hasTenant, setHasTenant] = useState<boolean>(false);
-  const [formData, setFormData] = useState<FormData>({
-    name: "",
-    email: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
-    phone: "",
-    mobile: "",
-    fms_branch: [],
-    tenantId: "",
-    teams: [],
-    selected_systems: [],
-  });
+  // const [formData, setFormData] = useState<FormData>({
+  //   name: "",
+  //   email: "",
+  //   username: "",
+  //   password: "",
+  //   confirmPassword: "",
+  //   phone: "",
+  //   mobile: "",
+  //   fms_branch: [],
+  //   tenantId: "",
+  //   teams: [],
+  //   selected_systems: [],
+  // });
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [availableSystems, setAvailableSystems] = useState<system[]>([]);
+
+  const [systemOptions, setSystemOptions] = useState<
+    {
+      value: system;
+      label: string;
+    }[]
+  >([
+    // { value: "FMS" as system, label: "FMS" },
+    // // { value: "TMS" as system, label: "TMS" },
+    // { value: "CRM" as system, label: "CRM" },
+    // { value: "WMS" as system, label: "WMS" },
+    // { value: "AMS" as system, label: "AMS" },
+    // { value: "QCMS" as system, label: "QCMS" },
+    // { value: "TSMS" as system, label: "TSMS" },
+  ]);
 
   const { user: loggedUser, loading } = useUser();
+
   const { access_token, addUserToKeycloak, updateUserInKeycloak } = useAuth();
+
   const { teams } = useData();
+
+  const { formData, setFormData } = useFormStore();
 
   const requiredFields: { field: keyof FormData; label: string }[] = [
     { field: "name", label: "Name" },
@@ -88,18 +109,15 @@ export default function SystemRegistration() {
     { field: "selected_systems", label: "Selected Systems" },
   ];
 
-  const systemOptions = [
-    { value: "FMS" as system, label: "FMS" },
-    // { value: "TMS" as system, label: "TMS" },
-    { value: "CRM" as system, label: "CRM" },
-    { value: "WMS" as system, label: "WMS" },
-  ];
-
   const systemAdminRoles = {
     CRM: "Admin",
     WMS: "Admin",
     FMS: "Admin",
     TMS: "2",
+    AMS: "Admin",
+    QCMS: "Admin",
+    TSMS: "Admin",
+    TDMS: "Admin",
   };
 
   const tmsAdminAccess = "1";
@@ -109,26 +127,43 @@ export default function SystemRegistration() {
   useEffect(() => {
     checkTenant();
     fetchUsers();
+    fetchAvailableSystems();
   }, []);
+
+  useEffect(() => {
+    setSystemOptions(
+      availableSystems.map((system) => ({
+        value: system,
+        label: system,
+      }))
+    );
+  }, [availableSystems]);
 
   useEffect(() => {
     //Get registered data
 
     console.log("teams => ", teams);
 
-    setFormData({
-      name: loggedUser?.name || "",
-      email: loggedUser?.email || "",
-      username: "",
-      password: "",
-      confirmPassword: "",
-      phone: "",
-      mobile: "",
-      tenantId: "",
-      fms_branch: fmsBranches,
-      teams: teams?.map((team) => team.teamId.toString()),
-      selected_systems: [],
-    });
+    if (
+      !formData.username &&
+      !formData.phone &&
+      !formData.mobile &&
+      !formData.selected_systems
+    ) {
+      setFormData({
+        name: loggedUser?.name || "",
+        email: loggedUser?.email || "",
+        username: "",
+        password: "",
+        confirmPassword: "",
+        phone: "",
+        mobile: "",
+        tenantId: "",
+        fms_branch: fmsBranches,
+        teams: teams?.map((team) => team.teamId.toString()),
+        selected_systems: [],
+      });
+    }
   }, [loggedUser, teams]);
 
   const checkTenant = async () => {
@@ -136,7 +171,6 @@ export default function SystemRegistration() {
       const checkingResponse = await checkIfHasTenant(loggedUser.email);
       if (!checkingResponse.error) {
         const tenantId = checkingResponse.data;
-        console.log("*** tenantId *** ", tenantId);
         if (tenantId) {
           setHasTenant(true);
         } else {
@@ -157,6 +191,8 @@ export default function SystemRegistration() {
         },
       });
       const fetchData = await response.json();
+
+      console.log("fetchData from ums/customers => ", fetchData);
 
       // Check if fetchData is an array
       if (Array.isArray(fetchData)) {
@@ -241,8 +277,36 @@ export default function SystemRegistration() {
     }
   };
 
-  const handleChange = (field: keyof FormData, value: string | string[]) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const fetchAvailableSystems = async () => {
+    try {
+      const response = await fetch("/api/payment/plans", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const fetchPlans = await response.json();
+      console.log("fetchPlans => ", fetchPlans);
+      // Check if fetchData is an array
+      if (Array.isArray(fetchPlans)) {
+        setAvailableSystems(
+          fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
+        );
+      } else {
+        console.log("fetch plans error");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error fetching available systems:", error);
+    }
+  };
+
+  const handleChange = <K extends keyof FormData>(
+    field: K,
+    value: FormData[K]
+  ) => {
+    setFormData({ [field]: value });
   };
 
   const handleRegistration = async () => {
@@ -321,17 +385,16 @@ export default function SystemRegistration() {
       );
 
       if (result.success) {
-        
         setRegisteredUser(result.data);
-        
+
         setHasTenant(true);
-        
+
         toastify.success("Registered new user into UMS!", { autoClose: 3000 });
-        
+
         if (result.warning) {
           toastify.warn(result.warning, { autoClose: 3000 });
         }
-        
+
         // Reset form states
       } else {
         throw new Error(result.error || "Failed to register user");
@@ -415,10 +478,16 @@ export default function SystemRegistration() {
         if (portalUpdateResponse.success) {
           // addUpdatedUser(portalUpdateResponse.data);
           toastify.success("Successfully updated!");
+          // notifySuccess("Successfully updated!")
 
           handleCancelEdit();
-          
-          setRegisteredUser(portalUpdateResponse.data)
+
+          console.log(
+            "portalUpdateResponse.data => ",
+            portalUpdateResponse.data
+          );
+
+          setRegisteredUser(portalUpdateResponse.data);
         } else {
           throw new Error(portalUpdateResponse.error);
         }
@@ -426,7 +495,9 @@ export default function SystemRegistration() {
         hotToast.error(`Keycloak Error : ${keycloakUpdateResponse.message}`);
       }
     } catch (error: any) {
-      hotToast.error(`Failed update error ${error.message ? ": " + error.message : ""}`);
+      hotToast.error(
+        `Failed update error ${error.message ? ": " + error.message : ""}`
+      );
     } finally {
       setIsUpdating(false);
     }
@@ -555,7 +626,7 @@ export default function SystemRegistration() {
               isMulti
               options={systemOptions}
               value={systemOptions.filter((option) =>
-                formData.selected_systems.includes(option.value)
+                formData?.selected_systems.includes(option.value)
               )}
               onChange={(selected) =>
                 handleChange(
@@ -565,6 +636,16 @@ export default function SystemRegistration() {
               }
               className="basic-multi-select"
               classNamePrefix="select"
+              menuPlacement="auto" // <-- auto opens up if there's no space below
+              menuPosition="absolute" // <-- default; works well with auto
+              styles={{
+                menu: (provided) => ({
+                  ...provided,
+                  maxHeight: 100,
+                  overflowY: "auto",
+                  zIndex: 9999,
+                }),
+              }}
               required
             />
           </div>
@@ -583,6 +664,15 @@ export default function SystemRegistration() {
             </Typography>
             {editMode ? (
               <List>
+                <ListItem>
+                  <TextField
+                    fullWidth
+                    label="name"
+                    variant="outlined"
+                    value={formData?.name}
+                    onChange={(e) => handleChange("name", e.target.value)}
+                  />
+                </ListItem>
                 <ListItem>
                   <TextField
                     fullWidth
@@ -673,6 +763,34 @@ export default function SystemRegistration() {
                     }}
                   />
                 </ListItem>
+                <ListItem className="relative overflow-visible">
+                  <Select
+                    isMulti
+                    options={systemOptions}
+                    value={systemOptions.filter((option) =>
+                      formData?.selected_systems.includes(option.value)
+                    )}
+                    onChange={(selected) =>
+                      handleChange(
+                        "selected_systems",
+                        selected.map((option) => option.value)
+                      )
+                    }
+                    className="basic-multi-select"
+                    classNamePrefix="select"
+                    menuPlacement="auto" // <-- auto opens up if there's no space below
+                    menuPosition="absolute" // <-- default; works well with auto
+                    styles={{
+                      menu: (provided) => ({
+                        ...provided,
+                        maxHeight: 100,
+                        overflowY: "auto",
+                        zIndex: 9999,
+                      }),
+                    }}
+                    required
+                  />
+                </ListItem>
 
                 <ListItem>
                   <div className="flex gap-2">
@@ -687,8 +805,7 @@ export default function SystemRegistration() {
                 </ListItem>
               </List>
             ) : (
-              <>
-              </>
+              <></>
             )}
             <List>
               <ListItem>

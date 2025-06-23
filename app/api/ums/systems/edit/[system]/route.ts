@@ -1,7 +1,11 @@
 import {
+  updateUserInAMS,
   updateUserInCRM,
   updateUserInFMS,
+  updateUserInQCMS,
+  updateUserInTDMS,
   updateUserInTMS,
+  updateUserInTSMS,
   updateUserInWMS,
 } from "@/lib/ums/systemHandlers/edit/handler";
 import { system } from "@/lib/ums/type";
@@ -20,7 +24,11 @@ export async function POST(
     selectedTmsAccess,
     user,
   } = await req.json();
+
   const roleId = getRoleId(systemRoleSelections[system], system as system);
+
+  console.log("Form Data from edit endpoint => ", formData);
+
   try {
     switch (system) {
       case "FMS":
@@ -63,6 +71,46 @@ export async function POST(
         });
         return NextResponse.json(tmsResponse);
 
+      case "AMS":
+        const amsResponse = await updateUserInAMS({
+          formData,
+          roleId,
+          user,
+          system,
+        });
+        return NextResponse.json(amsResponse);
+
+      case "QCMS":
+        const qcmsResponse = await updateUserInQCMS({
+          formData,
+          roleId,
+          user,
+          system,
+        });
+
+        return NextResponse.json(qcmsResponse);
+
+      case "TSMS":
+        const tsmsResponse = await updateUserInTSMS({
+          formData,
+          roleId,
+          user,
+          system,
+        });
+
+        return NextResponse.json(tsmsResponse);
+
+      case "TDMS":
+        const tdmsResponse = await updateUserInTDMS({
+          formData,
+          roleId,
+          user,
+          system,
+        });
+        
+        console.log("tdmsResponse => ", tdmsResponse);
+
+        return NextResponse.json(tdmsResponse);
       default:
         return NextResponse.json(
           { isError: true, message: "Invalid system" },

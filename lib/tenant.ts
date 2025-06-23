@@ -46,7 +46,7 @@ export const checkIfHasTenant = async (email: string) => {
 
     if (response.ok) {
       const tenantId = (await response.json()).data;
-      console.log("*** tenantId *** ", tenantId);
+     
       return {
         error: false,
         data: tenantId

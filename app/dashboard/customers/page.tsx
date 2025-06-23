@@ -26,7 +26,6 @@ export default function page() {
       const checkingResponse = await checkIfHasTenant(loggedUser.email);
       if (!checkingResponse.error) {
         const tenantId = checkingResponse.data;
-        console.log("*** tenantId *** ", tenantId);
         if (tenantId) {
           setHasTenant(true);
         } else {
@@ -69,7 +68,7 @@ export default function page() {
               {hasTenant ? (
                 <UserManagement />
               ) : (
-                <p> You didnt register tenant yet. Please register</p>
+                <p className="text-red-500 text-xl"> Sorry, You didnt register tenant yet. Please register</p>
               )}
             </TabsContent>
             {/* <TabsContent value="roles" className="mt-6">

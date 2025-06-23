@@ -69,6 +69,9 @@ export async function PUT(req: Request) {
       );
     }
 
+    console.log("username ==>> ", username);
+    console.log("newPassword ==>> ", newPassword);
+
     const kcResponse = await fetch(
       `${KEYCLOAK_AUTH_ENDPOINT}/admin/realms/${KEYCLOAK_REALM}/users/${userId}`,
       {
@@ -87,6 +90,7 @@ export async function PUT(req: Request) {
 
     if (!kcResponse.ok) {
       const errorText = await kcResponse.text();
+      console.log("kcResponse ==>> ", kcResponse)
       return new Response(
         JSON.stringify({
           error: true,

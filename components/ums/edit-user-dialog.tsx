@@ -73,6 +73,14 @@ export function EditUserDialog({
     crm_user_role_id: -1,
     tms_user_id: 0,
     tms_user_role_id: -1,
+    ams_user_id: 0,
+    ams_user_role_id: "",
+    qcms_user_id: 0,
+    qcms_user_role_id: "",
+    tsms_user_id: 0,
+    tsms_user_role_id: "",
+    tdms_user_id: 0,
+    tdms_user_role_id: "",
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -101,6 +109,22 @@ export function EditUserDialog({
         user.tms_user_id === -1
           ? ""
           : getRoleName("TMS", user.tms_user_role_id) || "",
+      AMS:
+        user.ams_user_role_id === -1
+          ? ""
+          : getRoleName("AMS", user.ams_user_role_id) || "",
+      QCMS:
+        user.qcms_user_role_id === -1
+          ? ""
+          : getRoleName("QCMS", user.qcms_user_role_id) || "",
+      TSMS:
+        user.tsms_user_role_id === -1
+          ? ""
+          : getRoleName("TSMS", user.tsms_user_role_id) || "",
+      TDMS:
+        user.tdms_user_role_id === -1
+          ? ""
+          : getRoleName("TSMS", user.tdms_user_role_id) || "",
     });
 
   const { access_token, updateUserInKeycloak } = useAuth();
@@ -111,6 +135,7 @@ export function EditUserDialog({
   // Initialize form data when user changes
   useEffect(() => {
     if (user) {
+      console.log("user in edit dialog => ", user);
       setFormData({
         name: user.name || "",
         email: user.email || "",
@@ -129,6 +154,14 @@ export function EditUserDialog({
         crm_user_role_id: user.crm_user_role_id || -1,
         tms_user_id: user.tms_user_id || 0,
         tms_user_role_id: user.tms_user_role_id || -1,
+        ams_user_id: user.ams_user_id || 0,
+        ams_user_role_id: user.ams_user_role_id || -1,
+        qcms_user_id: user.qcms_user_id || 0,
+        qcms_user_role_id: user.qcms_user_role_id || -1,
+        tsms_user_id: user.tsms_user_id || 0,
+        tsms_user_role_id: user.tsms_user_role_id || -1,
+        tdms_user_id: user.tdms_user_id || 0,
+        tdms_user_role_id: user.tdms_user_role_id || -1,
         selected_systems: user.selected_systems || [],
         systems_with_permission: user.systems_with_permission || [],
         access: user.access || "",
@@ -137,13 +170,21 @@ export function EditUserDialog({
 
       setSelectedAccess(user.access || "");
 
+      setSelectedBranches(user.fms_branch || []);
+
       setSelectedSystems(user.systems_with_permission || []);
+
+
 
       setSystemRoleSelections({
         FMS: getRoleName("FMS", user.fms_user_role_id) || "",
         WMS: getRoleName("WMS", user.wms_user_role_id) || "",
         CRM: getRoleName("CRM", user.crm_user_role_id) || "",
         TMS: getRoleName("TMS", user.tms_user_role_id) || "",
+        AMS: getRoleName("AMS", user.ams_user_role_id) || "",
+        QCMS: getRoleName("QCMS", user.qcms_user_role_id) || "",
+        TSMS: getRoleName("TSMS", user.tms_user_role_id) || "",
+        TDMS: getRoleName("TDMS", user.tms_user_role_id) || "",
       });
     }
   }, [user]);
@@ -187,133 +228,144 @@ export function EditUserDialog({
   };
 
   const handleRoleChange = (system: string, roleId: string) => {
+    console.log("system & roleId in handleRoleChage => ", roleId);
     setSystemRoleSelections((prev) => ({
       ...prev,
       [system]: roleId,
     }));
   };
 
-  const handleSubmit = async () => {
-    if (formData.username == "") {
-      toastify.warn("Please input username");
-      return;
-    }
+  const validateForm = () => {
+    const requiredFields = [
+      { field: formData.username, message: "Please input username" },
+      { field: formData.email, message: "Please input email" },
+      { field: formData.password, message: "Please input password" },
+      { field: formData.mobile, message: "Please input mobile number" },
+      { field: formData.phone, message: "Please input phone number" },
+    ];
 
-    if (formData.email == "") {
-      toastify.warn("Please input email");
-      return;
-    }
-
-    if (formData.password == "") {
-      toastify.warn("Please input password");
-      return;
-    }
-
-    if (formData.mobile == "") {
-      toastify.warn("Please input mobile number");
-      return;
-    }
-
-    if (formData.phone == "") {
-      toastify.warn("Please input phone number");
-      return;
-    }
-
-    if (showPasswordFields) {
-      if (!formData.password) {
-        toastify.warn("Please enter a new password");
-        return;
-      }
-      if (formData.password !== formData.confirmPassword) {
-        toastify.warn("Please confirm new password");
-        return;
-      }
-    }
-
-    if (selectedSystems.includes("FMS") && formData.fms_branch.length === 0) {
-      toastify.warn("Please select at least one branch");
-      return;
-    }
-
-    const teams = Array.isArray(formData.teams) ? formData.teams : [];
-
-    if (
-      selectedSystems.includes("TMS") &&
-      selectedAccess === "0" &&
-      teams.filter((team) => team !== "").length === 0
-    ) {
-      toastify.warn("Please select teams in TMS setting");
-      return;
-    }
-
-    const hasEmptyRole = Object.entries(systemRoleSelections).some(
-      ([system, roleName]) => {
-        if (roleName == null) {
-          toastify.warn(`Please select a role for ${system}`);
-          return true; // stops at the first invalid role
-        }
+    for (const { field, message } of requiredFields) {
+      if (!field || field.trim() === "") {
+        toastify.warn(message);
         return false;
       }
-    );
-
-    if (hasEmptyRole) {
-      return;
     }
 
-    setIsUpdating(true);
+    // if (formData.password !== formData.confirmPassword) {
+    //   toastify.warn("Passwords do not match");
+    //   return false;
+    // }
+
+    if (selectedSystems.length === 0) {
+      toastify.warn("Please select a system");
+      return false;
+    }
+
+    const systemRolesRequired: system[] = [
+      "FMS",
+      "WMS",
+      "CRM",
+      "TMS",
+      "AMS",
+      "QCMS",
+      "TSMS",
+      "TDMS",
+    ];
+
+    for (const system of systemRolesRequired) {
+      if (selectedSystems.includes(system) && !systemRoleSelections[system]) {
+        toastify.warn(`Please select a role for ${system}`);
+        return false;
+      }
+    }
+
+    if (selectedSystems.includes("FMS") && selectedBranches.length === 0) {
+      console.log("the number of selectedBranches ? ", selectedBranches.length);
+      toastify.warn("Please select at least one branch");
+      return false;
+    }
+
+    if (selectedSystems.includes("TMS")) {
+      if (!selectedAccess) {
+        toastify.warn("Please select access");
+        return false;
+      }
+
+      const validTeams = formData.teams.filter((team) => team.trim() !== "");
+      if (selectedAccess === "0" && validTeams.length === 0) {
+        toastify.warn("Please select teams in TMS setting");
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async () => {
+  if (!validateForm()) {
+    return;
+  }
+
+  setIsUpdating(true);
+
+  try {
     console.log("formData selected systems", formData.selected_systems);
+
     const deselectedSystemsToUpdateRole = user.selected_systems.filter(
       (system) => !selectedSystems.includes(system)
     );
+
     const selectedSystemsToUpdateRole = user.selected_systems.filter((system) =>
       selectedSystems.includes(system)
     );
 
     const keycloakUpdateResponse = await updateUserInKeycloak(
       user.email,
-      // formData.email,
       formData.username,
       formData.password,
       deselectedSystemsToUpdateRole,
-      selectedSystems
+      selectedSystemsToUpdateRole
     );
 
-    if (selectedSystems.length === 0) {
+    if (selectedSystemsToUpdateRole.length === 0) {
       toastify.info("You just updated the permission of users in keycloak", {
         autoClose: 4000,
       });
-
-      setIsUpdating(false);
       return;
     }
 
-    if (!keycloakUpdateResponse.error) {
-      setIsUpdating(false);
-
-      console.log("updateUserToPortal calling")
-
-      const portalUpdateResponse: any = await updateUserToPortals(
-        formData,
-        selectedSystems,
-        systemRoleSelections,
-        access_token,
-        selectedAccess,
-        user
-      );
-
-      if (portalUpdateResponse.success) {
-        addUpdatedUser(portalUpdateResponse.data);
-        toastify.success("Successfully updated!")
-        onOpenChange(false);
-      } else {
-        hotToast.error(portalUpdateResponse.error);
-      }
-    } else {
-      hotToast.error(`Keycloak Error : ${keycloakUpdateResponse.message}`);
+    if (keycloakUpdateResponse.error) {
+      throw new Error(`Keycloak Error: ${keycloakUpdateResponse.message}`);
     }
 
+    console.log("systemRoleSelections calling => ", systemRoleSelections);
+
+    const portalUpdateResponse = await updateUserToPortals(
+      formData,
+      selectedSystems,
+      systemRoleSelections,
+      access_token,
+      selectedAccess,
+      user
+    );
+
+    if (portalUpdateResponse.success) {
+      
+      addUpdatedUser(portalUpdateResponse.data as user);
+      toastify.success("Successfully updated!");
+      onOpenChange(false);
+    } else {
+      throw new Error(portalUpdateResponse.error || "Failed to update user in portals");
+    }
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : "An unexpected error occurred during update";
+    hotToast.error(errorMessage);
+  } finally {
     setIsUpdating(false);
-  };
+  }
+};
+
 
   const cancelBranchSelection = (branch: string) => {
     setSelectedBranches((prev) => prev.filter((b) => b !== branch));

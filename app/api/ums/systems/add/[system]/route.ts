@@ -1,7 +1,11 @@
 import {
+  registerUserToAMS,
   registerUserToCRM,
   registerUserToFMS,
+  registerUserToQCMS,
+  registerUserToTDMS,
   registerUserToTMS,
+  registerUserToTSMS,
   registerUserToWMS,
 } from "@/lib/ums/systemHandlers/add/handler";
 import { system } from "@/lib/ums/type";
@@ -75,6 +79,62 @@ export async function POST(
           message: tmsResponse.message,
           data: { system: system, userid: tmsResponse.data?.personnel_id },
         });
+      case "AMS":
+        const amsResponse = await registerUserToAMS({
+          ssoUser,
+          roleId,
+          system,
+        });
+
+        console.log("amsResponse => ", amsResponse);
+
+        return NextResponse.json({
+          error: amsResponse.isError,
+          message: amsResponse.message,
+          data: { system: system, userid: amsResponse.data?.id },
+        });
+      
+      case "QCMS":
+        const qcmsResponse = await registerUserToQCMS({
+          ssoUser,
+          roleId,
+          system,
+        });
+
+        return NextResponse.json({
+          error: qcmsResponse.isError,
+          message: qcmsResponse.message,
+          data: { system: system, userid: qcmsResponse.data?.id },
+        });
+      
+      case "TSMS":
+        const tsmsResponse = await registerUserToTSMS({
+          ssoUser,
+          roleId,
+          system,
+        });
+
+        return NextResponse.json({
+          error: tsmsResponse.isError,
+          message: tsmsResponse.message,
+          data: { system: system, userid: tsmsResponse.data?.id },
+        });
+      
+      case "TDMS":
+        const tdmsResponse = await registerUserToTDMS({
+          ssoUser,
+          roleId,
+          system,
+        });
+
+        console.log("tdmsResponse => ", tdmsResponse);
+
+        return NextResponse.json({
+          error: tdmsResponse.isError,
+          message: tdmsResponse.message,
+          data: { system: system, userid: tdmsResponse.data?.id },
+        });
+
       default:
         return NextResponse.json({ error: "Invalid system" }, { status: 400 });
     }

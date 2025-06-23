@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/table";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
@@ -45,12 +46,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { PasswordResetDialog } from "@/components/ums/password-reset-dialog";
-import {
-  CRM_API_PATH,
-  FMS_API_PATH,
-  TMS_API_PATH,
-  WMS_API_PATH,
-} from "@/app/config/setting";
+
 import { getBranchName, getRoleName } from "@/lib/ums/utils";
 import {
   FailedSystem,
@@ -78,6 +74,7 @@ import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
 import { useUser } from "@/app/contexts/UserContext";
 import { consoleLog } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 export default function UserManagement() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -109,6 +106,14 @@ export default function UserManagement() {
     crm_user_role_id: -1,
     tms_user_id: -1,
     tms_user_role_id: -1,
+    ams_user_id: -1,
+    ams_user_role_id: -1,
+    qcms_user_id: -1,
+    qcms_user_role_id: -1,
+    tsms_user_id: -1,
+    tsms_user_role_id: -1,
+    tdms_user_id: -1,
+    tdms_user_role_id: -1,
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -117,7 +122,6 @@ export default function UserManagement() {
   const [users, setUsers] = useState<user[]>([]);
 
   const [searchedUsers, setSearchedUsers] = useState<user[]>([]);
-
 
   const [permissionedSystems, setPermissionedSystems] = useState<
     PermissionedSystem[]
@@ -128,6 +132,10 @@ export default function UserManagement() {
     CRM: false,
     WMS: false,
     TMS: false,
+    AMS: false,
+    QCMS: false,
+    TSMS: false,
+    TDMS: false,
     count: 0,
   });
 
@@ -191,114 +199,6 @@ export default function UserManagement() {
 
   useEffect(() => {
     setIsLoading(true);
-    // Fetch users from the API
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch("/api/ums/customers", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        const fetchData = await response.json();
-        // Check if fetchData is an array
-        if (Array.isArray(fetchData)) {
-          if (fetchData.length > 0) {
-            fetchData.map((data: any) => {
-              if (data.fms_branch) {
-                try {
-                  data.fms_branch = JSON.parse(data.fms_branch);
-                } catch (error) {
-                  console.error("Error parsing fms_branch:", error);
-                  data.fms_branch = [];
-                }
-              }
-
-              if (data.selected_systems) {
-                const selected_systems: string[] = [];
-                JSON.parse(data.selected_systems).map((system: system) => {
-                  selected_systems.push(system);
-                });
-                data.selected_systems = selected_systems;
-              }
-
-              if (data.teams) {
-                if (typeof data.teams === "string") {
-                  try {
-                    const parsed = JSON.parse(data.teams.replace(/'/g, '"'));
-                    data.teams = Array.isArray(parsed) ? parsed : [];
-                  } catch (e) {
-                    console.error("Error parsing teams:", e);
-                    data.teams = [];
-                  }
-                } else if (!Array.isArray(data.teams)) {
-                  data.teams = [];
-                }
-              }
-
-              if (data.systems_with_permission) {
-                const systems_with_permission: string[] = [];
-                JSON.parse(data.systems_with_permission).map(
-                  (system: system) => {
-                    systems_with_permission.push(system);
-                  }
-                );
-                data.systems_with_permission = systems_with_permission;
-                setPermissionedSystems((prev) => {
-                  return [
-                    ...prev,
-                    { userId: data.id, systems: data.systems_with_permission },
-                  ];
-                });
-              }
-            });
-            setIsLoading(false);
-            setUsers(fetchData);
-            return true;
-          } else {
-            toastify.warning("Currently there is no data!", {
-              position: "top-right",
-              autoClose: 3000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "light",
-            });
-            setIsLoading(false);
-            setUsers([]);
-            return false;
-          }
-        } else {
-          setIsLoading(false);
-          toastify.error("Server Error: can not load data!", {
-            position: "bottom-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
-          return false;
-        }
-      } catch (error) {
-        setIsLoading(false);
-        toastify.error("Server Error: can not load data!", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        return false;
-      }
-    };
 
     const init = async () => {
       await checkAndUpdateAccessToken();
@@ -317,33 +217,147 @@ export default function UserManagement() {
   }, []);
 
   useEffect(() => {
-    const fetchAvailableSystems = async () => {
-      try {
-        const response = await fetch("/api/payment/plans", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        const fetchPlans = await response.json();
-        // Check if fetchData is an array
-        if (Array.isArray(fetchPlans)) {
-          setAvailableSystems(
-            fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
-          );
-          setSearchSystemQueryList(
-            fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
-          );
-        } else {
-          console.log("fetch plans error");
-          return false;
-        }
-      } catch (error) {}
-    };
-
     fetchAvailableSystems();
   }, [loggedUser]);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch("/api/ums/customers", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const fetchData = await response.json();
+
+      // Check if fetchData is an array
+      if (Array.isArray(fetchData)) {
+        if (fetchData.length > 0) {
+          fetchData.map((data: any) => {
+            if (data.fms_branch) {
+              try {
+                data.fms_branch = JSON.parse(data.fms_branch);
+              } catch (error) {
+                console.error("Error parsing fms_branch:", error);
+                data.fms_branch = [];
+              }
+            }
+
+            if (data.selected_systems) {
+              const selected_systems: string[] = [];
+              JSON.parse(data.selected_systems).map((system: system) => {
+                selected_systems.push(system);
+              });
+              data.selected_systems = selected_systems;
+            }
+
+            if (data.teams) {
+              if (typeof data.teams === "string") {
+                try {
+                  const parsed = JSON.parse(data.teams.replace(/'/g, '"'));
+                  data.teams = Array.isArray(parsed) ? parsed : [];
+                } catch (e) {
+                  console.error("Error parsing teams:", e);
+                  data.teams = [];
+                }
+              } else if (!Array.isArray(data.teams)) {
+                data.teams = [];
+              }
+            }
+
+            if (data.systems_with_permission) {
+              const systems_with_permission: string[] = [];
+              JSON.parse(data.systems_with_permission).map((system: system) => {
+                systems_with_permission.push(system);
+              });
+              data.systems_with_permission = systems_with_permission;
+              setPermissionedSystems((prev) => {
+                return [
+                  ...prev,
+                  { userId: data.id, systems: data.systems_with_permission },
+                ];
+              });
+            }
+          });
+
+          console.log("fetchData => ", fetchData);
+
+          setIsLoading(false);
+          setUsers(fetchData);
+          return true;
+        } else {
+          toastify.warning("Currently there is no data!", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+          setIsLoading(false);
+          setUsers([]);
+          return false;
+        }
+      } else {
+        setIsLoading(false);
+        toastify.error("Server Error: can not load data!", {
+          position: "bottom-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        return false;
+      }
+    } catch (error) {
+      setIsLoading(false);
+      toastify.error("Server Error: can not load data!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      return false;
+    }
+  };
+
+  const fetchAvailableSystems = async () => {
+    try {
+      const response = await fetch("/api/payment/plans", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const fetchPlans = await response.json();
+      console.log("fetchPlans => ", fetchPlans);
+      // Check if fetchData is an array
+      if (Array.isArray(fetchPlans)) {
+        setAvailableSystems(
+          fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
+        );
+        setSearchSystemQueryList(
+          fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
+        );
+      } else {
+        console.log("fetch plans error");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error fetching available systems:", error);
+    }
+  };
+
   const handleEditUser = (user: user) => {
     setSelectedUser(user);
     setIsEditDialogOpen(true);
@@ -421,12 +435,6 @@ export default function UserManagement() {
   };
 
   const confirmSendUserCredential = async () => {
-    consoleLog("selectedUser", selectedUser);
-    consoleLog("user email", selectedUser?.email);
-    consoleLog("user password", selectedUser?.password);
-    consoleLog("user selected systems", selectedUser?.selected_systems);
-    consoleLog("admin email", loggedUser?.email);
-
     setIsSending(true);
 
     const email = selectedUser?.email;
@@ -473,70 +481,95 @@ export default function UserManagement() {
   };
 
   const confirmDeleteUser = async () => {
+    if (!selectedUser || !selectedUser.email) {
+      hotToast.error("User data is missing");
+      return;
+    }
+
     deletedSystemCount = 0;
 
     setIsDeleting(true);
 
-    const keycloakResponse = await removeUserFromKeycloak(selectedUser.email);
+    try {
+      const keycloakResponse = await removeUserFromKeycloak(selectedUser.email);
 
-    if (keycloakResponse.error) {
-      hotToast.error(`keycloak : ${keycloakResponse.message}`);
-    } else {
-      toastify.success("User was deleted from keycloak successfully", {
-        autoClose: 2000,
+      if (keycloakResponse.error) {
+        hotToast.error(`keycloak : ${keycloakResponse.message}`);
+      } else {
+        toastify.success("User was deleted from keycloak successfully", {
+          autoClose: 2000,
+        });
+      }
+
+      const systemDeletePromises = selectedUser.selected_systems.map((system) =>
+        deleteUserFromSystem(system)
+      );
+
+      const systemDeleteResults = await Promise.allSettled(
+        systemDeletePromises
+      );
+
+      const failedSystems = systemDeleteResults
+        .map((result, index) =>
+          result.status === "rejected"
+            ? selectedUser.selected_systems[index]
+            : null
+        )
+        .filter(Boolean);
+
+      if (failedSystems.length > 0) {
+        hotToast.error(
+          `Failed to delete user from: ${failedSystems.join(", ")}`,
+          { duration: 4000 }
+        );
+      }
+
+      if (typeof selectedUser.id !== "number") {
+        hotToast.error("User info is not correct!", {
+          duration: 3000,
+        });
+      }
+
+      const umsResponse = await fetch(`/api/ums/customers`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${access_token}`,
+        },
+        body: JSON.stringify({ id: selectedUser.id }),
       });
+
+      if (!umsResponse.ok) {
+        throw new Error("Failed to delete user from UMS");
+      }
+
+      const contentType = umsResponse.headers.get("Content-Type");
+      if (contentType && contentType.includes("application/json")) {
+        toastify.success("User was deleted from UMS successfully");
+
+        setUsers((prevUsers) =>
+          prevUsers.filter((user) => user.id !== selectedUser.id)
+        );
+
+        setDeletedSystem({
+          FMS: false,
+          CRM: false,
+          WMS: false,
+          TMS: false,
+          AMS: false,
+          QCMS: false,
+          TSMS: false,
+          TDMS: false,
+          count: 0,
+        });
+      }
+    } catch (error: any) {
+      hotToast.error(error.message || "Unexpected error during user deletion");
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+
     }
-
-    const systemDeletePromises = selectedUser.selected_systems.map((system) =>
-      deleteUserFromSystem(system)
-    );
-
-    await Promise.allSettled(systemDeletePromises);
-
-    if (typeof selectedUser.id !== "number") {
-      hotToast.error("User info is not correct!", {
-        duration: 3000,
-      });
-    }
-
-    await fetch(`/api/ums/customers`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + access_token,
-      },
-      body: JSON.stringify({
-        id: selectedUser.id,
-      }),
-    })
-      .then(async (response) => {
-        if (response.ok) {
-          const contentType = response.headers.get("Content-Type");
-          if (contentType && contentType.includes("application/json")) {
-            toastify.success("User was deleted from UMS successfully");
-
-            setUsers((prevUsers) =>
-              prevUsers.filter((user) => user.id !== selectedUser.id)
-            );
-            setDeletedSystem({
-              FMS: false,
-              CRM: false,
-              WMS: false,
-              TMS: false,
-              count: 0,
-            });
-          } else {
-            console.warn("Response is empty or not JSON");
-          }
-        }
-      })
-      .catch((error) => {
-        hotToast.error("Server Error: can not delete user");
-      });
-
-    setIsDeleting(false);
-
-    setIsDeleteDialogOpen(false);
   };
 
   const addMoreSystem = (user: user, system: system) => {
@@ -549,8 +582,6 @@ export default function UserManagement() {
     setIsCreateAddDialogOpen(true);
     setSelectedUser(user);
   };
-
- 
 
   const handleResetPassword = (user: any) => {
     setSelectedUser(user);
@@ -593,24 +624,26 @@ export default function UserManagement() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full sm:w-[300px]"
           />
-          <Button variant="outline" size="icon">
-            <Filter className="h-4 w-4" />
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm">
+                Filter Systems
+              </Button>
+            </PopoverTrigger>
 
-          {availableSystems?.map((system: system) => (
-            <div key={system} className="flex flex-wrap gap-4 pt-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id={system}
-                  checked={searchSystemQueryList?.includes(system)}
-                  onCheckedChange={() => handleSystemSearchQuery(system)}
-                />
-                <Label htmlFor={system} className="font-normal">
-                  {system}
-                </Label>
-              </div>
-            </div>
-          ))}
+            <PopoverContent className="w-64 max-h-64 overflow-y-auto space-y-2">
+              {availableSystems?.map((system: system) => (
+                <div key={system} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={system}
+                    checked={searchSystemQueryList?.includes(system)}
+                    onCheckedChange={() => handleSystemSearchQuery(system)}
+                  />
+                  <Label htmlFor={system}>{system}</Label>
+                </div>
+              ))}
+            </PopoverContent>
+          </Popover>
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)}>
           <GroupAddIcon className="h-8 w-8" />
@@ -645,7 +678,10 @@ export default function UserManagement() {
                     <TableCell>
                       {index + (currentPage - 1) * itemsPerPage + 1}
                     </TableCell>
-                    <TableCell className="font-medium">{user.name} {loggedUser?.email === user.email ? "( me )" : ""}</TableCell>
+                    <TableCell className="font-medium">
+                      {user.name}{" "}
+                      {loggedUser?.email === user.email ? "( me )" : ""}
+                    </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{user.password}</TableCell>
                     <TableCell>{user.phone}</TableCell>
@@ -653,7 +689,7 @@ export default function UserManagement() {
                       <div className="flex flex-wrap gap-1">
                         <Tooltip.Provider>
                           {user.selected_systems?.map((system: system) => {
-                            let roleId = -1;
+                            let roleId: string | number = -1;
                             if (system === "FMS")
                               roleId = user.fms_user_role_id;
                             else if (system === "WMS")
@@ -662,6 +698,14 @@ export default function UserManagement() {
                               roleId = user.crm_user_role_id;
                             else if (system === "TMS")
                               roleId = user.tms_user_role_id;
+                            else if (system === "AMS")
+                              roleId = user.ams_user_role_id;
+                            else if (system === "QCMS")
+                              roleId = user.qcms_user_role_id;
+                            else if (system === "TSMS")
+                              roleId = user.tsms_user_role_id;
+                            else if (system === "TDMS")
+                              roleId = user.tdms_user_role_id;
                             return (
                               <Tooltip.Root key={system}>
                                 <Tooltip.Trigger

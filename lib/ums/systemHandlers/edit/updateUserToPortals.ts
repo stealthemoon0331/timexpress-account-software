@@ -1,4 +1,4 @@
-import { FormUser, SelectedSystemRoles, system } from "../../type";
+import { FormUser, SelectedSystemRoles, system, user } from "../../type";
 import { getIdByRoleType, getRoleId } from "../../utils";
 
 export const updateUserToPortals = async (
@@ -16,6 +16,12 @@ export const updateUserToPortals = async (
   let crm_user_role_id = -1;
   let wms_user_role_id = -1;
   let tms_user_role_id = -1;
+  let ams_user_role_id = -1;
+  let qcms_user_role_id = -1;
+  let tsms_user_role_id = -1;
+  let tdms_user_role_id = -1;
+
+  console.log("formData in updateUserToPortals => ", formData);
 
   try {
     const results = await Promise.allSettled(
@@ -45,6 +51,9 @@ export const updateUserToPortals = async (
     results.forEach((result) => {
       if (result.status === "fulfilled") {
         updated_systems.push(result.value.system);
+
+        console.log("result => ", result);
+
         if (result.value.system === "FMS") {
           fms_user_role_id = result.value?.data?.roleId;
         }
@@ -60,13 +69,26 @@ export const updateUserToPortals = async (
         const role = result.value.data.data?.role;
 
         if (result.value.system === "TMS" && role) {
-          tms_user_role_id = getIdByRoleType(role, "TMS");
+          tms_user_role_id = getIdByRoleType(role, "TMS") as number;
+        }
+
+        if (result.value.system === "AMS") {
+          ams_user_role_id = result.value.data.role;
+        }
+
+        if (result.value.system === "QCMS") {
+          qcms_user_role_id = result.value.data.role;
+        }
+
+        if (result.value.system === "TSMS") {
+          tsms_user_role_id = result.value.data.role;
+        }
+
+        if (result.value.system === "TDMS") {
+          tdms_user_role_id = result.value.data.role;
         }
 
         countsOfUpdatedSystem++;
-        // toastify.success(`${result.value.system} user updated`, {
-        //   autoClose: 3000,
-        // });
       } else {
         // hotToast.error(result.reason.message);
         throw new Error(
@@ -109,6 +131,22 @@ export const updateUserToPortals = async (
       tms_user_role_id: updated_systems.includes("TMS")
         ? tms_user_role_id
         : userToBeUpdated.tms_user_role_id, //
+      ams_user_id: userToBeUpdated.ams_user_id,
+      ams_user_role_id: updated_systems.includes("AMS")
+        ? ams_user_role_id
+        : userToBeUpdated.ams_user_role_id,
+      qcms_user_id: userToBeUpdated.qcms_user_id,
+      qcms_user_role_id: updated_systems.includes("QCMS")
+        ? qcms_user_role_id
+        : userToBeUpdated.qcms_user_role_id,
+      tsms_user_id: userToBeUpdated.tsms_user_id,
+      tsms_user_role_id: updated_systems.includes("TSMS")
+        ? tsms_user_role_id
+        : userToBeUpdated.tsms_user_role_id,
+      tdms_user_id: userToBeUpdated.tdms_user_id,
+      tdms_user_role_id: updated_systems.includes("TDMS")
+        ? tdms_user_role_id
+        : userToBeUpdated.tdms_user_role_id,
       selected_systems: userToBeUpdated.selected_systems, //
       systems_with_permission: updated_systems, //
       access: selectedAccessForTMS, //

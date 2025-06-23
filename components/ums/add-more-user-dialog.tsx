@@ -72,6 +72,14 @@ export function AddMoreUserDialog({
     crm_user_role_id: -1,
     tms_user_id: -1,
     tms_user_role_id: -1,
+    ams_user_id: -1,
+    ams_user_role_id: "",
+    qcms_user_id: -1,
+    qcms_user_role_id: -1,
+    tsms_user_id: -1,
+    tsms_user_role_id: -1,
+    tdms_user_id: -1,
+    tdms_user_role_id: -1,
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -91,6 +99,10 @@ export function AddMoreUserDialog({
     WMS: "",
     CRM: "",
     TMS: "",
+    AMS: "",
+    QCMS: "",
+    TSMS: "",
+    TDMS: "",
   });
 
   const { access_token, updateUserInKeycloak } = useAuth();
@@ -100,6 +112,8 @@ export function AddMoreUserDialog({
 
   useEffect(() => {
     if (user) {
+      console.log("user for add on dialog", user);
+
       setFormData({
         name: user.name || "",
         email: user.email || "",
@@ -117,17 +131,30 @@ export function AddMoreUserDialog({
         crm_user_id: user.crm_user_id || -1,
         crm_user_role_id: user.crm_user_role_id || -1,
         tms_user_id: user.tms_user_id || -1,
-        tms_user_role_id: user.tms_user_role_id || -1,
+        tms_user_role_id: user.tms_user_role_id || "",
+        ams_user_id: user.ams_user_id || -1,
+        ams_user_role_id: user.ams_user_role_id || "",
+        qcms_user_id: user.qcms_user_id || -1,
+        qcms_user_role_id: user.qcms_user_role_id || "",
+        tsms_user_id: user.tsms_user_id || -1,
+        tsms_user_role_id: user.tsms_user_role_id || "",
+        tdms_user_id: user.tdms_user_id || -1,
+        tdms_user_role_id: user.tdms_user_role_id || "",
         selected_systems: user.selected_systems || [],
         systems_with_permission: user.systems_with_permission || [],
         access: user.access || "",
         teams: user.teams || [],
       });
+
       setSystemRoleSelections({
         FMS: getRoleName("FMS", user.fms_user_role_id) || "",
         WMS: getRoleName("WMS", user.wms_user_role_id) || "",
         CRM: getRoleName("CRM", user.crm_user_role_id) || "",
         TMS: getRoleName("TMS", user.tms_user_role_id) || "",
+        AMS: getRoleName("AMS", user.ams_user_role_id) || "",
+        QCMS: getRoleName("QCMS", user.qcms_user_role_id) || "",
+        TSMS: getRoleName("TSMS", user.tsms_user_role_id) || "",
+        TDMS: getRoleName("TDMS", user.tdms_user_role_id) || "",
       });
     }
   }, [user]);
@@ -169,43 +196,64 @@ export function AddMoreUserDialog({
     }));
   };
 
-  const handleSubmit = async () => {
-    if (system == "FMS" && systemRoleSelections.FMS === "") {
-      toastify.warn("Please select a role for FMS");
-      return;
-    }
-    if (system == "WMS" && systemRoleSelections.WMS === "") {
-      toastify.warn("Please select a role for WMS");
-      return;
-    }
-    if (system == "CRM" && systemRoleSelections.CRM === "") {
-      toastify.warn("Please select a role for CRM");
-      return;
-    }
-    if (system == "TMS" && systemRoleSelections.TMS === "") {
-      toastify.warn("Please select a role for TMS");
-      return;
+  const validateForm = () => {
+    const systemRolesRequired: system[] = [
+      "FMS",
+      "WMS",
+      "CRM",
+      "TMS",
+      "AMS",
+      "QCMS",
+      "TSMS",
+      "TDMS",
+    ];
+
+    for (const system of systemRolesRequired) {
+      if (
+        systemRolesRequired.includes(system) &&
+        !systemRoleSelections[system]
+      ) {
+        toastify.warn(`Please select a role for ${system}`);
+        return false;
+      }
     }
 
     if (system == "FMS" && selectedBranches.length === 0) {
-      toastify.warn("Please select branch in FMS setting");
-      return;
+      toastify.warn("Please select at least one branch");
+      return false;
     }
 
-    if (
-      system == "TMS" &&
-      selectedAccess === "0" &&
-      formData.teams.filter((team) => team !== "").length === 0
-    ) {
-      toastify.warn("Please select teams in TMS setting");
-      return;
+    if (system == "TMS") {
+      if (!selectedAccess) {
+        toastify.warn("Please select access");
+        return false;
+      }
+
+      const validTeams = formData.teams.filter((team) => team.trim() !== "");
+      if (selectedAccess === "0" && validTeams.length === 0) {
+        toastify.warn("Please select teams in TMS setting");
+        return false;
+      }
     }
+
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    validateForm();
 
     let fms_user_id = 0;
     let crm_user_id = 0;
     let wms_user_id = 0;
     let tms_user_id = 0;
+    let ams_user_id = 0;
+    let qcms_user_id = 0;
+    let tsms_user_id = 0;
+    let tdms_user_id = 0;
+
     let registered_system: system[] = user.selected_systems;
+
+    console.log("formData", formData);
 
     const ssoUser = {
       ...formData,
@@ -222,7 +270,7 @@ export function AddMoreUserDialog({
         formData.username,
         formData.password,
         [],
-        [system],
+        [system]
       );
 
       if (!keycloakResponse.error) {
@@ -293,6 +341,38 @@ export function AddMoreUserDialog({
             access: selectedAccess || "0",
             teams: formData.teams || [],
           };
+        } else if (system === "AMS") {
+          ams_user_id = responseData.data.userid;
+          updatedUser = {
+            ...user,
+            ams_user_id: ams_user_id,
+            ams_user_role_id: getRoleId(systemRoleSelections["AMS"], "AMS"),
+            systems_with_permission: [...user.systems_with_permission, "AMS"],
+          };
+        } else if (system === "QCMS") {
+          ams_user_id = responseData.data.userid;
+          updatedUser = {
+            ...user,
+            qcms_user_id: qcms_user_id,
+            qcms_user_role_id: getRoleId(systemRoleSelections["QCMS"], "QCMS"),
+            systems_with_permission: [...user.systems_with_permission, "QCMS"],
+          };
+        } else if (system === "TSMS") {
+          tsms_user_id = responseData.data.userid;
+          updatedUser = {
+            ...user,
+            tsms_user_id: tsms_user_id,
+            tsms_user_role_id: getRoleId(systemRoleSelections["TSMS"], "TSMS"),
+            systems_with_permission: [...user.systems_with_permission, "TSMS"],
+          };
+        } else if (system === "TDMS") {
+          tsms_user_id = responseData.data.userid;
+          updatedUser = {
+            ...user,
+            tdms_user_id: tdms_user_id,
+            tdms_user_role_id: getRoleId(systemRoleSelections["TDMS"], "TDMS"),
+            systems_with_permission: [...user.systems_with_permission, "TDMS"],
+          };
         }
 
         registered_system.push(system);
@@ -318,6 +398,10 @@ export function AddMoreUserDialog({
               WMS: "",
               CRM: "",
               TMS: "",
+              AMS: "",
+              QCMS: "",
+              TSMS: "",
+              TDMS: "",
             });
             setSelectedAccess(null);
             onOpenChange(false);
