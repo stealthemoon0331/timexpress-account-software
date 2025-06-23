@@ -56,41 +56,20 @@ interface FormData {
 export default function SystemRegistration() {
   const [registeredUser, setRegisteredUser] = useState<FormUser | null>(null);
   const [hasTenant, setHasTenant] = useState<boolean>(false);
-  // const [formData, setFormData] = useState<FormData>({
-  //   name: "",
-  //   email: "",
-  //   username: "",
-  //   password: "",
-  //   confirmPassword: "",
-  //   phone: "",
-  //   mobile: "",
-  //   fms_branch: [],
-  //   tenantId: "",
-  //   teams: [],
-  //   selected_systems: [],
-  // });
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [availableSystems, setAvailableSystems] = useState<system[]>([]);
+  const [formInitialized, setFormInitialized] = useState(false);
 
   const [systemOptions, setSystemOptions] = useState<
     {
       value: system;
       label: string;
     }[]
-  >([
-    // { value: "FMS" as system, label: "FMS" },
-    // // { value: "TMS" as system, label: "TMS" },
-    // { value: "CRM" as system, label: "CRM" },
-    // { value: "WMS" as system, label: "WMS" },
-    // { value: "AMS" as system, label: "AMS" },
-    // { value: "QCMS" as system, label: "QCMS" },
-    // { value: "TSMS" as system, label: "TSMS" },
-  ]);
+  >([]);
 
   const { user: loggedUser, loading } = useUser();
 
@@ -140,16 +119,12 @@ export default function SystemRegistration() {
   }, [availableSystems]);
 
   useEffect(() => {
-    //Get registered data
-
     console.log("teams => ", teams);
+    console.log("loggedUser name => ", loggedUser?.name);
+    console.log("loggedUser email => ", loggedUser?.email);
 
-    if (
-      !formData.username &&
-      !formData.phone &&
-      !formData.mobile &&
-      !formData.selected_systems
-    ) {
+
+    if (loggedUser && teams && !formInitialized) {     
       setFormData({
         name: loggedUser?.name || "",
         email: loggedUser?.email || "",
@@ -163,8 +138,11 @@ export default function SystemRegistration() {
         teams: teams?.map((team) => team.teamId.toString()),
         selected_systems: [],
       });
+
+      setFormInitialized(true);
+
     }
-  }, [loggedUser, teams]);
+  }, [loggedUser, teams, setFormData]);
 
   const checkTenant = async () => {
     if (loggedUser?.email) {
@@ -508,8 +486,13 @@ export default function SystemRegistration() {
     // Optionally, reset the form to original data
   };
 
+  // if (formData.email === "" || formData.name === "") {
+  //   return <div>Loading...</div>;
+  // }
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4 sm:p-6 md:p-8">
+    <div
+      className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4 sm:p-6 md:p-8"
+    >
       {/* Left Panel: Form */}
       {!hasTenant ? (
         <div className="space-y-4">
