@@ -934,12 +934,21 @@ export default function UserManagement() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={confirmDeleteUser}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                <button
+                  onClick={async () => {
+                    setIsDeleting(true);
+                    try {
+                      await confirmDeleteUser();
+                      setIsDeleteDialogOpen(false);
+                    } finally {
+                      setIsDeleting(false);
+                    }
+                  }}
+                  disabled={isDeleting}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 px-4 py-2 rounded-md"
                 >
                   {isDeleting ? "Deleting..." : "Delete"}
-                </AlertDialogAction>
+                </button>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
