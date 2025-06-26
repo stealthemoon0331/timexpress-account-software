@@ -69,9 +69,6 @@ export async function PUT(req: Request) {
       );
     }
 
-    console.log("username ==>> ", username);
-    console.log("newPassword ==>> ", newPassword);
-
     const kcResponse = await fetch(
       `${KEYCLOAK_AUTH_ENDPOINT}/admin/realms/${KEYCLOAK_REALM}/users/${userId}`,
       {
@@ -90,7 +87,7 @@ export async function PUT(req: Request) {
 
     if (!kcResponse.ok) {
       const errorText = await kcResponse.text();
-      console.log("kcResponse ==>> ", kcResponse)
+
       return new Response(
         JSON.stringify({
           error: true,
@@ -103,9 +100,6 @@ export async function PUT(req: Request) {
         }
       );
     }
-
-    console.log("Role update deselectedSystems => ", deselectedSystems)
-    console.log("Role update selectedSystems => ", selectedSystems)
 
     // Unassign roles
     for (const system of deselectedSystems || []) {
@@ -146,8 +140,6 @@ export async function PUT(req: Request) {
         console.warn(`Role ${roleName} not found in client ${clientId}`);
         continue;
       }
-
-      console.log(`🔑 Unassigning role '${role.id}' for system '${system}'`);
 
       // Remove role from user
       const removeRoleRes = await fetch(
@@ -236,7 +228,6 @@ export async function PUT(req: Request) {
         continue;
       }
     
-      console.log(`✅ Role '${roleName}' assigned in '${clientId}'`);
     }
 
     return new Response(

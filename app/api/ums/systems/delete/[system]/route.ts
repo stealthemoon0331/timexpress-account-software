@@ -9,7 +9,6 @@ export async function DELETE(
 ) {
   const { user, accessToken } = await req.json();
   const { system } = await context.params;
-  console.log("params system", system);
   try {
     let result;
     switch (system.toUpperCase()) {

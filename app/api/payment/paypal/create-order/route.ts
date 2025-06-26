@@ -14,7 +14,6 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { amount } = body;
-    console.log("amount 🤑 ", amount);
 
     const request = new paypal.orders.OrdersCreateRequest();
     request.prefer("return=representation");

@@ -124,7 +124,6 @@ export function CreateUserDialog({
     });
 
   const getTeamName = (teamId: string): string => {
-    console.log(teamId);
     const team = teams.find((team: Team) => team.teamId === Number(teamId));
     return team ? team.teamName : "Unknown Team";
   };
@@ -224,8 +223,6 @@ export function CreateUserDialog({
       }
 
       const updatedFormData = { ...formData, tenantId: loggedUser?.tenantId };
-
-      console.log("*** updatedFormData *** ", updatedFormData);
 
       const result = await addUserToPortals(
         updatedFormData,

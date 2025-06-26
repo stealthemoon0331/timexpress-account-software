@@ -26,7 +26,6 @@ export async function deleteUserFromFMS({ user, accessToken }: DeleteParams) {
       },
       body: JSON.stringify({ delete_user_id: user.fms_user_id }),
     });
-    console.log("FMS delete response ===> ", response);
     if (!response.ok) {
       const error = await response.json();
       return { success: false, error: error.message };
@@ -42,7 +41,6 @@ export async function deleteUserFromFMS({ user, accessToken }: DeleteParams) {
 // Similar handlers for other systems
 export async function deleteUserFromWMS({ user, accessToken }: DeleteParams) {
   try {
-    console.log("user.wms_user_id ==> ", user.wms_user_id);
     const response = await fetch(
       `${WMS_API_PATH}/api/users/${user.wms_user_id}`,
       {
@@ -53,7 +51,6 @@ export async function deleteUserFromWMS({ user, accessToken }: DeleteParams) {
         },
       }
     );
-    console.log("WMS delete response ===> ", response);
     if (!response.ok) {
       const error = await response.json();
       return { success: false, error: error.message };
@@ -68,8 +65,6 @@ export async function deleteUserFromWMS({ user, accessToken }: DeleteParams) {
 
 export async function deleteUserFromCRM({ user, accessToken }: DeleteParams) {
   try {
-    console.log("user.crm_user_id ==> ", user.crm_user_id);
-
     const response = await fetch(
       `${CRM_API_PATH}/api/users/${user.crm_user_id}`,
       {
@@ -80,13 +75,12 @@ export async function deleteUserFromCRM({ user, accessToken }: DeleteParams) {
         },
       }
     );
-    console.log("CRM delete response ===> ", response);
+
     let responseData: any = null;
 
     try {
       const text = await response.text();
       responseData = text ? JSON.parse(text) : {};
-      console.log("responseData ==> ", responseData);
     } catch (jsonErr) {
       console.warn("Failed to parse response JSON:", jsonErr);
     }
@@ -105,7 +99,6 @@ export async function deleteUserFromCRM({ user, accessToken }: DeleteParams) {
 
 export async function deleteUserFromTMS({ user, accessToken }: DeleteParams) {
   try {
-    console.log("user.tms_user_id ==> ", user.tms_user_id);
 
     const response = await fetch(
       `${TMS_API_PATH}/shypvdriverapp/personnel/deletePersonnel`,
@@ -117,7 +110,7 @@ export async function deleteUserFromTMS({ user, accessToken }: DeleteParams) {
         body: JSON.stringify({ personnel_id: user.tms_user_id }),
       }
     );
-    console.log("TMS delete response ===> ", response);
+
     if (!response.ok) {
       const error = await response.json();
       return { success: false, error: error.message };
@@ -132,7 +125,6 @@ export async function deleteUserFromTMS({ user, accessToken }: DeleteParams) {
 
 export async function deleteUserFromAMS({ user }: DeleteParams) {
   try {
-    console.log("user.ams_user_id ==> ", user.ams_user_id);
 
     const response = await fetch(
       `${AMS_API_PATH}/api/auth/user?id=${user.ams_user_id}`,
@@ -140,7 +132,7 @@ export async function deleteUserFromAMS({ user }: DeleteParams) {
         method: "DELETE",
       }
     );
-    console.log("AMS delete response ===> ", response);
+
     if (!response.ok) {
       const error = await response.json();
       return { success: false, error: error.message };
@@ -155,7 +147,6 @@ export async function deleteUserFromAMS({ user }: DeleteParams) {
 
 export async function deleteUserFromQCMS({ user }: DeleteParams) {
   try {
-    console.log("user.qcms_user_id ==> ", user.qcms_user_id);
 
     const response = await fetch(
       `${QCMS_API_PATH}/api/auth/user?id=${user.qcms_user_id}`,
@@ -163,7 +154,7 @@ export async function deleteUserFromQCMS({ user }: DeleteParams) {
         method: "DELETE",
       }
     );
-    console.log("QCMS delete response ===> ", response);
+
     if (!response.ok) {
       const error = await response.json();
       return { success: false, error: error.message };
@@ -178,7 +169,6 @@ export async function deleteUserFromQCMS({ user }: DeleteParams) {
 
 export async function deleteUserFromTSMS({ user }: DeleteParams) {
   try {
-    console.log("user.tsms_user_id ==> ", user.tsms_user_id);
 
     const response = await fetch(
       `${TSMS_API_PATH}/api/auth/user?id=${user.tsms_user_id}`,
@@ -186,7 +176,7 @@ export async function deleteUserFromTSMS({ user }: DeleteParams) {
         method: "DELETE",
       }
     );
-    console.log("TSMS delete response ===> ", response);
+
     if (!response.ok) {
       const error = await response.json();
       return { success: false, error: error.message };
@@ -201,7 +191,6 @@ export async function deleteUserFromTSMS({ user }: DeleteParams) {
 
 export async function deleteUserFromTDMS({ user }: DeleteParams) {
   try {
-    console.log("user.tdms_user_id ==> ", user.tdms_user_id);
 
     const response = await fetch(
       `${TDMS_API_PATH}/api/auth/user?id=${user.tdms_user_id}`,
@@ -209,7 +198,7 @@ export async function deleteUserFromTDMS({ user }: DeleteParams) {
         method: "DELETE",
       }
     );
-    console.log("TDMS delete response ===> ", response);
+
     if (!response.ok) {
       const error = await response.json();
       return { success: false, error: error.message };

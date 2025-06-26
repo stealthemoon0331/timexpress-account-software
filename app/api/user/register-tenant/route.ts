@@ -12,13 +12,10 @@ export async function GET(req: Request) {
   }
 
   try {
-    console.log("✅ Tenant Check email : ", email);
 
     const existingTenant = await prisma.tenants.findUnique({
       where: { email },
     });
-
-    console.log("✅ ExistingTenant =>", existingTenant);
 
     if (existingTenant) {
       return NextResponse.json(
@@ -36,8 +33,6 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const { email, tenantId } = await req.json();
-
-    console.log("✅ * id check: ", email);
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
 

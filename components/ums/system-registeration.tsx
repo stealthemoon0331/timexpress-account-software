@@ -17,6 +17,8 @@ import {
   ListItem,
   ListItemText,
   IconButton,
+  CircularProgress,
+  Box,
 } from "@mui/material";
 import PhoneIcon from "@mui/icons-material/Phone";
 import SmartphoneIcon from "@mui/icons-material/Smartphone";
@@ -59,17 +61,19 @@ export default function SystemRegistration() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
   const [availableSystems, setAvailableSystems] = useState<system[]>([]);
   const [formInitialized, setFormInitialized] = useState(false);
-
   const [systemOptions, setSystemOptions] = useState<
     {
       value: system;
       label: string;
     }[]
   >([]);
+
+  // Status
+  const [isLoading, setLoading] = useState(true);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const { user: loggedUser, loading } = useUser();
 
@@ -119,12 +123,7 @@ export default function SystemRegistration() {
   }, [availableSystems]);
 
   useEffect(() => {
-    console.log("teams => ", teams);
-    console.log("loggedUser name => ", loggedUser?.name);
-    console.log("loggedUser email => ", loggedUser?.email);
-
-
-    if (loggedUser && teams && !formInitialized) {     
+    if (loggedUser && teams && !formInitialized) {
       setFormData({
         name: loggedUser?.name || "",
         email: loggedUser?.email || "",
@@ -140,7 +139,6 @@ export default function SystemRegistration() {
       });
 
       setFormInitialized(true);
-
     }
   }, [loggedUser, teams, setFormData]);
 
@@ -158,6 +156,7 @@ export default function SystemRegistration() {
         console.error(checkingResponse.errorMessage);
       }
     }
+    setLoading(false);
   };
 
   const fetchUsers = async () => {
@@ -169,8 +168,6 @@ export default function SystemRegistration() {
         },
       });
       const fetchData = await response.json();
-
-      console.log("fetchData from ums/customers => ", fetchData);
 
       // Check if fetchData is an array
       if (Array.isArray(fetchData)) {
@@ -217,7 +214,6 @@ export default function SystemRegistration() {
           });
 
           if (fetchData.find((data) => data.email === loggedUser?.email)) {
-            console.log("fetchdata for checking registeration", fetchData);
 
             setRegisteredUser(
               fetchData.find((data) => data.email === loggedUser?.email)
@@ -265,14 +261,12 @@ export default function SystemRegistration() {
       });
 
       const fetchPlans = await response.json();
-      console.log("fetchPlans => ", fetchPlans);
       // Check if fetchData is an array
       if (Array.isArray(fetchPlans)) {
         setAvailableSystems(
           fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
         );
       } else {
-        console.log("fetch plans error");
         return false;
       }
     } catch (error) {
@@ -312,8 +306,6 @@ export default function SystemRegistration() {
       });
       return;
     }
-
-    console.log("Form Data => ", formData);
 
     //Generating the talentId and then register into table
     let tenantId = "";
@@ -357,11 +349,6 @@ export default function SystemRegistration() {
         fmsBranches
       );
 
-      console.log(
-        ":: addUserToSystemsAndUMS result from registeration panel :: => ",
-        result
-      );
-
       if (result.success) {
         setRegisteredUser(result.data);
 
@@ -378,7 +365,6 @@ export default function SystemRegistration() {
         throw new Error(result.error || "Failed to register user");
       }
     } catch (error: unknown) {
-      console.log("error => ", error);
       const errorMessage =
         error instanceof Error ? error.message : "An unexpected error occurred";
       hotToast.error(errorMessage, {
@@ -389,7 +375,6 @@ export default function SystemRegistration() {
     }
 
     // If all validations pass
-    console.log("Registration Successful", formData);
     // Add backend integration logic here
   };
 
@@ -398,7 +383,6 @@ export default function SystemRegistration() {
   };
 
   const handleSaveUpdates = async () => {
-    console.log("formData to be updated : ", formData);
 
     if (!registeredUser) return;
 
@@ -426,9 +410,6 @@ export default function SystemRegistration() {
       return;
     }
 
-    console.log("handleSaveUpdates() is called");
-    console.log("formData is ", formData);
-
     try {
       setIsUpdating(true);
 
@@ -442,7 +423,6 @@ export default function SystemRegistration() {
       );
 
       if (!keycloakUpdateResponse.error) {
-        console.log("updateUserToPortal calling");
 
         const portalUpdateResponse: any = await updateUserToPortals(
           formData,
@@ -459,11 +439,6 @@ export default function SystemRegistration() {
           // notifySuccess("Successfully updated!")
 
           handleCancelEdit();
-
-          console.log(
-            "portalUpdateResponse.data => ",
-            portalUpdateResponse.data
-          );
 
           setRegisteredUser(portalUpdateResponse.data);
         } else {
@@ -486,9 +461,14 @@ export default function SystemRegistration() {
     // Optionally, reset the form to original data
   };
 
-  // if (formData.email === "" || formData.name === "") {
-  //   return <div>Loading...</div>;
-  // }
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <CircularProgress/>
+      </div>
+    );
+  }
+
   return (
     <div
       className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4 sm:p-6 md:p-8"
@@ -626,6 +606,7 @@ export default function SystemRegistration() {
                   ...provided,
                   maxHeight: 100,
                   overflowY: "auto",
+                  WebkitOverflowScrolling: "touch",
                   zIndex: 9999,
                 }),
               }}

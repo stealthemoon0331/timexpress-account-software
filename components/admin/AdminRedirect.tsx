@@ -7,7 +7,6 @@ export default function AdminRedirect() {
   const pathname = usePathname();
 
   useEffect(() => {
-    console.log("Client-side path:", pathname);
   }, [pathname]);
 
   return null;

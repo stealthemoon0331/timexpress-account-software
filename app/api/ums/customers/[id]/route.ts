@@ -5,7 +5,6 @@ import { use } from "react";
 export async function PUT(request: Request, context: { params: { id: string } }) {
   try {
     const userData = await request.json();
-    console.log("Received data:", userData);
 
     const { id } = await context.params; // ✅ Fix: No need for `await`
     
@@ -60,7 +59,6 @@ export async function PUT(request: Request, context: { params: { id: string } })
     ];
 
     const [result] = await pool.query(query, values);
-    console.log("SQL Update Result:", result); // ✅ Debugging log
 
     if ((result as any).affectedRows === 0) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });

@@ -36,7 +36,6 @@ export default function ForgotPasswordPage() {
     setIsLoading(true)
 
     try {
-      console.log("verify email : ", values.email)
       const email = values.email;
       const response = await fetch("/api/auth/forgot-password", {
         method: "POST",

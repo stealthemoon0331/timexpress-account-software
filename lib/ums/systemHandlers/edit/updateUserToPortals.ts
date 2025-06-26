@@ -21,8 +21,6 @@ export const updateUserToPortals = async (
   let tsms_user_role_id = -1;
   let tdms_user_role_id = -1;
 
-  console.log("formData in updateUserToPortals => ", formData);
-
   try {
     const results = await Promise.allSettled(
       systemsToUpdate.map(async (system) => {
@@ -51,8 +49,6 @@ export const updateUserToPortals = async (
     results.forEach((result) => {
       if (result.status === "fulfilled") {
         updated_systems.push(result.value.system);
-
-        console.log("result => ", result);
 
         if (result.value.system === "FMS") {
           fms_user_role_id = result.value?.data?.roleId;

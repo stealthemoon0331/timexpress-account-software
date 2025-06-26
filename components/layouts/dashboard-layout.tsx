@@ -76,7 +76,7 @@ export default function DashboardLayout({
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
         <Sidebar className="gap-4">
-          <SidebarHeader>
+          <SidebarHeader className="bg-white">
             <Link href="/" className="flex items-center">
               <Image
                 src="/logo.svg"
@@ -88,7 +88,7 @@ export default function DashboardLayout({
               {/* <span className="text-3xl font-bold">Shiper.io</span> */}
             </Link>
           </SidebarHeader>
-          <SidebarContent className="px-4">
+          <SidebarContent className="px-4 bg-white">
             <SidebarMenu>
               {routes.map((route) => (
                 <SidebarMenuItem key={route.href}>
@@ -129,7 +129,7 @@ export default function DashboardLayout({
             </SidebarMenu>
           </SidebarContent>
 
-          <SidebarFooter>
+          <SidebarFooter className="bg-white">
             <div className="flex items-center justify-between p-4">
               <div className="flex items-center gap-2">
                 <ProfileAvatar loggedUser={loggedUser} />

@@ -153,26 +153,6 @@ export default function UserManagement() {
 
   const totalPages = Math.ceil(users.length / itemsPerPage);
 
-  useEffect(() => {
-    if (!users) return;
-
-    const filtered = users.filter((user) => {
-      const matchesSearch =
-        user.name?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
-        user.email?.toLowerCase().includes(searchQuery?.toLowerCase());
-
-      const matchesSystem =
-        searchSystemQueryList?.length === 0 ||
-        user.selected_systems?.some((system) =>
-          searchSystemQueryList?.includes(system)
-        );
-
-      return matchesSearch && matchesSystem;
-    });
-
-    setSearchedUsers(filtered);
-  }, [searchQuery, users, searchSystemQueryList]);
-
   // useEffect(() => {
   //   setSearchedUsers(
   //     users?.filter((user) => {
@@ -220,6 +200,29 @@ export default function UserManagement() {
     fetchAvailableSystems();
   }, [loggedUser]);
 
+    useEffect(() => {
+    if (!users) return;
+
+    const filtered = users.filter((user) => {
+      const matchesSearch =
+        user.name?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchQuery?.toLowerCase());
+
+      const matchesSystem =
+        searchSystemQueryList?.length === 0 ||
+        user.selected_systems?.some((system) =>
+          searchSystemQueryList?.includes(system)
+        );
+
+      return matchesSearch && matchesSystem;
+    });
+
+    setSearchedUsers(filtered);
+  }, [searchQuery, users, searchSystemQueryList]);
+
+  useEffect(() => {
+  }, [selectedUser])
+  
   const fetchUsers = async () => {
     try {
       const response = await fetch("/api/ums/customers", {
@@ -280,8 +283,6 @@ export default function UserManagement() {
             }
           });
 
-          console.log("fetchData => ", fetchData);
-
           setIsLoading(false);
           setUsers(fetchData);
           return true;
@@ -340,7 +341,6 @@ export default function UserManagement() {
       });
 
       const fetchPlans = await response.json();
-      console.log("fetchPlans => ", fetchPlans);
       // Check if fetchData is an array
       if (Array.isArray(fetchPlans)) {
         setAvailableSystems(
@@ -350,7 +350,6 @@ export default function UserManagement() {
           fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
         );
       } else {
-        console.log("fetch plans error");
         return false;
       }
     } catch (error) {
@@ -359,6 +358,7 @@ export default function UserManagement() {
   };
 
   const handleEditUser = (user: user) => {
+
     setSelectedUser(user);
     setIsEditDialogOpen(true);
   };
@@ -387,13 +387,11 @@ export default function UserManagement() {
   };
 
   const getTeamName = (teamId: string): string => {
-    console.log(teamId);
     const team = teams.find((team: Team) => team.teamId === Number(teamId));
     return team ? team.teamName : "Unknown Team";
   };
 
   const handleSendCredentialToUser = (user: user) => {
-    console.log("handleSendCredentialToUser => ", user);
     setSelectedUser(user);
 
     setIsSendDialogOpen(true);
@@ -595,7 +593,6 @@ export default function UserManagement() {
         : [...prev, system];
     });
 
-    console.log("searchSystemQueryList => ", searchSystemQueryList);
   };
 
   const addNewUser = async (newUser: user) => {

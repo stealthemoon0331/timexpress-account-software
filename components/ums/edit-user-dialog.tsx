@@ -106,7 +106,7 @@ export function EditUserDialog({
           ? ""
           : getRoleName("CRM", user.crm_user_role_id) || "",
       TMS:
-        user.tms_user_id === -1
+        user.tms_user_role_id === -1
           ? ""
           : getRoleName("TMS", user.tms_user_role_id) || "",
       AMS:
@@ -124,7 +124,7 @@ export function EditUserDialog({
       TDMS:
         user.tdms_user_role_id === -1
           ? ""
-          : getRoleName("TSMS", user.tdms_user_role_id) || "",
+          : getRoleName("TDMS", user.tdms_user_role_id) || "",
     });
 
   const { access_token, updateUserInKeycloak } = useAuth();
@@ -135,7 +135,6 @@ export function EditUserDialog({
   // Initialize form data when user changes
   useEffect(() => {
     if (user) {
-      console.log("user in edit dialog => ", user);
       setFormData({
         name: user.name || "",
         email: user.email || "",
@@ -183,14 +182,13 @@ export function EditUserDialog({
         TMS: getRoleName("TMS", user.tms_user_role_id) || "",
         AMS: getRoleName("AMS", user.ams_user_role_id) || "",
         QCMS: getRoleName("QCMS", user.qcms_user_role_id) || "",
-        TSMS: getRoleName("TSMS", user.tms_user_role_id) || "",
-        TDMS: getRoleName("TDMS", user.tms_user_role_id) || "",
+        TSMS: getRoleName("TSMS", user.tdms_user_role_id) || "",
+        TDMS: getRoleName("TDMS", user.tsms_user_role_id) || "",
       });
     }
   }, [user]);
 
   const getTeamName = (teamId: string): string => {
-    console.log(teamId);
     const team = teams.find((team: Team) => team.teamId === Number(teamId));
     return team ? team.teamName : "Unknown Team";
   };
@@ -228,7 +226,6 @@ export function EditUserDialog({
   };
 
   const handleRoleChange = (system: string, roleId: string) => {
-    console.log("system & roleId in handleRoleChage => ", roleId);
     setSystemRoleSelections((prev) => ({
       ...prev,
       [system]: roleId,
@@ -280,7 +277,6 @@ export function EditUserDialog({
     }
 
     if (selectedSystems.includes("FMS") && selectedBranches.length === 0) {
-      console.log("the number of selectedBranches ? ", selectedBranches.length);
       toastify.warn("Please select at least one branch");
       return false;
     }
@@ -309,8 +305,6 @@ export function EditUserDialog({
   setIsUpdating(true);
 
   try {
-    console.log("formData selected systems", formData.selected_systems);
-
     const deselectedSystemsToUpdateRole = user.selected_systems.filter(
       (system) => !selectedSystems.includes(system)
     );
@@ -337,8 +331,6 @@ export function EditUserDialog({
     if (keycloakUpdateResponse.error) {
       throw new Error(`Keycloak Error: ${keycloakUpdateResponse.message}`);
     }
-
-    console.log("systemRoleSelections calling => ", systemRoleSelections);
 
     const portalUpdateResponse = await updateUserToPortals(
       formData,

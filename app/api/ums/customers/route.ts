@@ -29,14 +29,11 @@ export async function GET() {
     pool
       .getConnection()
       .then((connection) => {
-        console.log("Successfully connected to the database");
         connection.release(); // Always release the connection after use
       })
       .catch((error) => {
         console.error("Error connecting to the database:", error);
       });
-
-    console.log("user:", user);
 
     const [users] = await pool.query(
       `SELECT id, name, username, email, password, tenant_id, phone, mobile, fms_user_id, fms_branch,
@@ -46,8 +43,6 @@ export async function GET() {
          FROM customers WHERE status = 1 AND adminId = ?`,
       [user.id]
     );
-
-    console.log("users:", users);
 
     return NextResponse.json(users);
   } catch (error) {
@@ -75,10 +70,7 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log("POST : Fetching users...");
-
-    const customerData = await request.json();
-    console.log("Received data:", customerData);
+   const customerData = await request.json();
 
     if (
       !customerData.name ||
@@ -113,8 +105,6 @@ export async function POST(request: Request) {
       "tsms_user_id, tsms_user_role_id, tdms_user_id, tdms_user_role_id, " +
       "teams, access, selected_systems, systems_with_permission, status, adminId" +
       ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-    console.log("**** customerData.tenantId *** ", customerData.tenantId);
 
     const values = [
       customerData.name,
@@ -152,14 +142,11 @@ export async function POST(request: Request) {
     const [result] = await pool.query(query, values);
     const customerId = (result as any).insertId;
 
-    console.log("SQL Insert Result:", result);
-
     return NextResponse.json(
       { ...customerData, id: customerId, status: "Active" },
       { status: 201 }
     );
   } catch (error: any) {
-    console.log("Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

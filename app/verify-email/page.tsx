@@ -29,7 +29,6 @@ export default function VerifyEmailPage() {
 
   useEffect(() => {
     if (email && !hasAutoSentRef.current) {
-      console.log("useEffect calling")
       hasAutoSentRef.current = true;
       handleResendEmail();
     }
