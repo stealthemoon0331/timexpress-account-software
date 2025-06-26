@@ -37,12 +37,9 @@ export default function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClos
   };
 
   const handlePhoneChange = (value: string, info: any) => {
-    console.log("country calling code", info.countryCallingCode);
-    console.log("country code", info.countryCode);
     
     // Get the country name based on the country code
     const countryName = countryNames[info.countryCode] || "Unknown";
-    console.log(countryName)
     setFormData({
       ...formData,
       phone: value,

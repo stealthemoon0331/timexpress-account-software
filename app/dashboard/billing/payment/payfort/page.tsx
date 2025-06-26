@@ -94,7 +94,6 @@ const PayFortForm = ({ amount, email }: PayFortFormProps) => {
     const res = await fetch("/api/payment/payfort/initiate");
     const params = await res.json();
 
-    console.log("* params => ", params);
     // return;
     // const form = document.createElement("form");
     // form.method = "POST";

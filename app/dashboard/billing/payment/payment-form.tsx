@@ -55,7 +55,6 @@ export function PaymentForm({
     setIsLoading(true);
 
     try {
-      console.log(`Processing payment of ${amount} with ${paymentMethod}`);
 
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -205,8 +204,6 @@ function PayPalWrapper({
     );
   }
 
-  console.log("paypalPlanId ===> ", paypalPlanId);
-
   return (
     <div>
       {isPending ? (
@@ -229,7 +226,6 @@ function PayPalWrapper({
               );
 
               const data = await res.json();
-              console.log("change subscription response data", data);
               toast.error(data.error);
               return data.id;
             }
@@ -245,7 +241,6 @@ function PayPalWrapper({
               );
 
               const data = await res.json();
-              console.log("change subscription response data", data);
               toast.error(data.error);
               return data.id;
             }

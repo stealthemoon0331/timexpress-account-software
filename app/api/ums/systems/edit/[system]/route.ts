@@ -27,8 +27,6 @@ export async function POST(
 
   const roleId = getRoleId(systemRoleSelections[system], system as system);
 
-  console.log("Form Data from edit endpoint => ", formData);
-
   try {
     switch (system) {
       case "FMS":
@@ -108,8 +106,6 @@ export async function POST(
           system,
         });
         
-        console.log("tdmsResponse => ", tdmsResponse);
-
         return NextResponse.json(tdmsResponse);
       default:
         return NextResponse.json(

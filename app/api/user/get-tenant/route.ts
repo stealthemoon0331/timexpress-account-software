@@ -86,12 +86,10 @@ export async function GET(req: Request) {
       );
     }
 
-    console.log("Processing request for email: ", email);
 
     // Test database connection
     try {
       connection = await pool.getConnection();
-      console.log("✅ Successfully connected to the database");
     } catch (dbError) {
       console.error("Database connection error:", dbError);
       return NextResponse.json(
@@ -230,7 +228,6 @@ export async function GET(req: Request) {
     if (connection) {
       try {
         connection.release();
-        console.log("Database connection released");
       } catch (releaseError) {
         console.error("Error releasing database connection:", releaseError);
       }

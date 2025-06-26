@@ -19,12 +19,8 @@ export async function POST(
   const { ssoUser, systemRoleSelections, accessToken, selectedAccess } =
     await req.json();
   const { system } = await context.params;
-  console.log(
-    "🚀 ~ file: route.ts:16 ~ POST ~ systemRoleSelections[system]: ",
-    systemRoleSelections[system]
-  );
+  
   const roleId = getRoleId(systemRoleSelections[system], system as system);
-  console.log("🚀 ~ file: route.ts:16 ~ POST ~ roleId: ", roleId);
   try {
     switch (system) {
       case "FMS":
@@ -73,7 +69,6 @@ export async function POST(
           accessToken,
           system,
         });
-        console.log("tmsResponse ==> ", tmsResponse);
         return NextResponse.json({
           error: tmsResponse.isError,
           message: tmsResponse.message,
@@ -85,8 +80,6 @@ export async function POST(
           roleId,
           system,
         });
-
-        console.log("amsResponse => ", amsResponse);
 
         return NextResponse.json({
           error: amsResponse.isError,
@@ -127,8 +120,6 @@ export async function POST(
           system,
         });
 
-        console.log("tdmsResponse => ", tdmsResponse);
-
         return NextResponse.json({
           error: tdmsResponse.isError,
           message: tdmsResponse.message,
@@ -139,7 +130,6 @@ export async function POST(
         return NextResponse.json({ error: "Invalid system" }, { status: 400 });
     }
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

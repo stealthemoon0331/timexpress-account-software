@@ -66,7 +66,6 @@ export default function RegisterPage() {
 
     try {
       // In a real app, you would call your API here
-      console.log(values);
 
       // Simulate API call
       const res = await fetch("/api/auth/signup", {

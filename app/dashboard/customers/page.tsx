@@ -19,23 +19,7 @@ import { checkIfHasTenant } from "@/lib/tenant";
 
 export default function page() {
   const { user: loggedUser } = useUser();
-  const [hasTenant, setHasTenant] = useState<boolean>(false);
-
-  const checkAdminRegisteration = async () => {
-    if (loggedUser?.email) {
-      const checkingResponse = await checkIfHasTenant(loggedUser.email);
-      if (!checkingResponse.error) {
-        const tenantId = checkingResponse.data;
-        if (tenantId) {
-          setHasTenant(true);
-        } else {
-          setHasTenant(false);
-        }
-      } else {
-        console.error(checkingResponse.errorMessage);
-      }
-    }
-  };
+  
 
   return (
     <AuthProvider>
@@ -45,10 +29,6 @@ export default function page() {
           <Toaster position="bottom-right" reverseOrder={false} />
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold">Portal Management</h1>
-            {/* <div className="flex gap-2 items-center">
-              <ProfileWrapper />
-              <ThemeToggle />
-            </div> */}
           </div>
           <Tabs defaultValue="systems" className="w-full">
             <TabsList className="grid w-full md:w-auto grid-cols-2">
@@ -65,18 +45,8 @@ export default function page() {
               <SystemRegisteration />
             </TabsContent>
             <TabsContent value="customers" className="mt-6">
-              {hasTenant ? (
-                <UserManagement />
-              ) : (
-                <p className="text-red-500 text-xl"> Sorry, You didnt register tenant yet. Please register</p>
-              )}
+              <UserManagement />
             </TabsContent>
-            {/* <TabsContent value="roles" className="mt-6">
-            <RoleManagement />
-          </TabsContent>
-          <TabsContent value="systems" className="mt-6">
-            <SystemIntegration />
-          </TabsContent> */}
           </Tabs>
         </main>
       </DataProvider>

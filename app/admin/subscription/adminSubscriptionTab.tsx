@@ -101,10 +101,7 @@ export function AdminSubscriptionsTab() {
 
   const handleSaveEdit = async () => {
     if (!newPlanData) return;
-    console.log(
-      "newPlanData.price => ",
-      newPlanData.price.replace(/[^0-9.]/g, "")
-    );
+    
     const payload = {
       ...newPlanData,
       price: parseFloat(newPlanData.price.replace(/[^0-9.]/g, "")),
@@ -112,7 +109,6 @@ export function AdminSubscriptionsTab() {
 
     setLoadingPlans((prev) => ({ ...prev, [newPlanData.id]: true }));
     try {
-      console.log("payload => ", payload);
       const res = await fetch("/api/admin/payment/paypal/update-plan", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

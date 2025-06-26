@@ -592,7 +592,6 @@ export default function AdminPage() {
                   if (!res.ok) throw new Error("Reset failed");
 
                   const resData = await res.json();
-                  console.log(resData);
                   toast.success(resData.message);
                   setIsResetModalOpen(false);
                   setNewPassword("");

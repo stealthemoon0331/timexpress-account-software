@@ -26,9 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
 
-  
-
-  return (
+ return (
     <html lang="en">
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap" rel="stylesheet"/>

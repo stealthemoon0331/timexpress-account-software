@@ -112,7 +112,6 @@ export function AddMoreUserDialog({
 
   useEffect(() => {
     if (user) {
-      console.log("user for add on dialog", user);
 
       setFormData({
         name: user.name || "",
@@ -172,7 +171,6 @@ export function AddMoreUserDialog({
   }, [selectedTeams]);
 
   const getTeamName = (teamId: string): string => {
-    console.log(teamId);
     const team = teams.find((team: Team) => team.teamId === Number(teamId));
     return team ? team.teamName : "Unknown Team";
   };
@@ -253,8 +251,6 @@ export function AddMoreUserDialog({
 
     let registered_system: system[] = user.selected_systems;
 
-    console.log("formData", formData);
-
     const ssoUser = {
       ...formData,
       teams: Array.isArray(formData?.teams)
@@ -292,7 +288,6 @@ export function AddMoreUserDialog({
 
         if (!response.ok) {
           const error = await response.json();
-          console.log(error);
           throw new Error(error.message);
         }
 

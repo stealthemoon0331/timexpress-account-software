@@ -16,8 +16,6 @@ export async function POST(req: Request) {
     where: { email: session.user.email },
   });
 
-  await console.log("paypalSubscriptionId ===>>> ", user?.paypalSubscriptionId)
-
   if (!user || !user.paypalSubscriptionId) {
     return NextResponse.json(
       { error: "Subscription not found" },

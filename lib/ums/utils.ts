@@ -44,7 +44,6 @@ export function getRoleName(
 
 
 export function getRoleId(roleName: string, system: keyof typeof systemRoles): number | string {
-  console.log("system ", system, " roleName : ", roleName);
   const roleId = systemRoles[system].find((role) => role.name === roleName)?.roleId;
   return roleId !== undefined ? roleId : -1;
 }

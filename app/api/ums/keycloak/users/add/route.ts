@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
     if (!createUserRes.ok) {
       const errorText = await createUserRes.text();
-      console.log("❌ Error response:", errorText);
+
       return new Response(
         JSON.stringify({
           error: true,
@@ -146,7 +146,6 @@ export async function POST(req: Request) {
         continue;
       }
     
-      console.log(`✅ Role '${roleName}' assigned in '${clientId}'`);
     }
 
     return new Response(

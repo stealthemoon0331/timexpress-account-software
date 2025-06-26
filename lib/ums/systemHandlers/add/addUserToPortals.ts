@@ -74,8 +74,6 @@ export const addUserToPortals = async (
       if (result.status === "fulfilled") {
         const val = result.value;
 
-        console.log("val of results => ", val);
-
         if (val.system === "FMS") fms_user_id = val.userid;
         else if (val.system === "WMS") wms_user_id = val.userid;
         else if (val.system === "CRM") crm_user_id = val.userid;
@@ -149,8 +147,6 @@ export const addUserToPortals = async (
           ssoUser.teams.filter((team) => team !== "")
         : [""],
     };
-
-    console.log("*** newUser *** ", newUser);
 
     const umsResponse = await fetch(`/api/ums/customers`, {
       method: "POST",

@@ -14,7 +14,6 @@ export const db = drizzle(pool)
 export async function testConnection() {
   try {
     const result = await pool.query("SELECT NOW()")
-    console.log("Database connection successful:", result.rows[0].now)
     return true
   } catch (error) {
     console.error("Database connection failed:", error)

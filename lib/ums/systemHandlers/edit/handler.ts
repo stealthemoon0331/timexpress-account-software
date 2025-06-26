@@ -106,16 +106,6 @@ export async function updateUserInWMS({
   system,
 }: UpdateParams) {
   try {
-    console.log("system : ", system);
-    console.log("roleId : ", roleId);
-
-    console.log("updateParam : ", {
-      ...formData,
-      role: {
-        id: roleId,
-        role: getRoleName(system, roleId),
-      },
-    })
 
     const response = await fetch(
       `${WMS_API_PATH}/api/users/${user.wms_user_id}`,
@@ -324,8 +314,6 @@ export async function updateUserInAMS({
   // CRM update implementation
   try {
 
-    console.log("formData from updateUserAMS => ", formData)
-
     if(!user.ams_user_id) {
       throw new Error("Update field. Your data was not initialized");
     } 
@@ -344,8 +332,6 @@ export async function updateUserInAMS({
       updateBody = {...updateBody, role: roleId}
     }
 
-    console.log("updateBody from edit handler => ", updateBody);
-
     const response = await fetch(
       `${AMS_API_PATH}/api/auth/user?id=${user.ams_user_id}`,
       {
@@ -362,7 +348,6 @@ export async function updateUserInAMS({
       const text = await response.text();
       responseData = text ? JSON.parse(text) : {};
 
-      console.log("responseData => ", responseData);
     } catch (jsonErr) {
       console.warn("Failed to parse response JSON:", jsonErr);
     }
@@ -411,8 +396,6 @@ export async function updateUserInQCMS({
   // CRM update implementation
   try {
 
-    console.log("formData from updateUserInQCMS => ", formData)
-
     if(!user.qcms_user_id) {
       throw new Error("Update field. Your data was not initialized");
     } 
@@ -431,8 +414,6 @@ export async function updateUserInQCMS({
       updateBody = {...updateBody, role: roleId}
     }
 
-    console.log("updateBody from edit handler => ", updateBody);
-
     const response = await fetch(
       `${QCMS_API_PATH}/api/auth/user?id=${user.qcms_user_id}`,
       {
@@ -444,8 +425,6 @@ export async function updateUserInQCMS({
       }
     );
     let responseData: any = null;
-
-    console.log("QCMS response => ", response);
 
     try {
       // Try to parse response only if there is content
@@ -491,8 +470,6 @@ export async function updateUserInTSMS({
   // CRM update implementation
   try {
 
-    console.log("formData from updateUserInTSMS => ", formData)
-
     if(!user.tsms_user_id) {
       throw new Error("Update field. Your data was not initialized");
     } 
@@ -511,8 +488,6 @@ export async function updateUserInTSMS({
       updateBody = {...updateBody, role: roleId}
     }
 
-    console.log("updateBody from edit handler => ", updateBody);
-
     const response = await fetch(
       `${TSMS_API_PATH}/api/auth/user?id=${user.tsms_user_id}`,
       {
@@ -524,8 +499,6 @@ export async function updateUserInTSMS({
       }
     );
     let responseData: any = null;
-
-    console.log("QCMS response => ", response);
 
     try {
       // Try to parse response only if there is content
@@ -571,8 +544,6 @@ export async function updateUserInTDMS({
   // CRM update implementation
   try {
 
-    console.log("formData from updateUserInTDMS => ", formData)
-
     if(!user.tdms_user_id) {
       throw new Error("Update field. Your data was not initialized");
     } 
@@ -591,8 +562,6 @@ export async function updateUserInTDMS({
       updateBody = {...updateBody, role: roleId}
     }
 
-    console.log("updateBody from edit handler => ", updateBody);
-
     const response = await fetch(
       `${TDMS_API_PATH}/api/auth/user?id=${user.tdms_user_id}`,
       {
@@ -604,8 +573,6 @@ export async function updateUserInTDMS({
       }
     );
     let responseData: any = null;
-
-    console.log("TDMS response => ", response);
 
     try {
       // Try to parse response only if there is content
