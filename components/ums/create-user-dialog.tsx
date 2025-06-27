@@ -88,6 +88,8 @@ export function CreateUserDialog({
     tsms_user_role_id: "",
     tdms_user_id: -1,
     tdms_user_role_id: "",
+    hr_user_id: -1,
+    hr_user_role_id: "",
     selected_systems: [],
     access: "",
     teams: [""],
@@ -121,6 +123,7 @@ export function CreateUserDialog({
       QCMS: "",
       TSMS: "",
       TDMS: "",
+      HR: "",
     });
 
   const getTeamName = (teamId: string): string => {
@@ -173,7 +176,7 @@ export function CreateUserDialog({
       return false;
     }
 
-    const systemRolesRequired: system[] = ["FMS", "WMS", "CRM", "TMS", "AMS", "QCMS", "TSMS", "TDMS"];
+    const systemRolesRequired: system[] = ["FMS", "WMS", "CRM", "TMS", "AMS", "QCMS", "TSMS", "TDMS", "HR"];
 
     for (const system of systemRolesRequired) {
       if (selectedSystems.includes(system) && !systemRoleSelections[system]) {
@@ -284,6 +287,8 @@ export function CreateUserDialog({
       tsms_user_role_id: "",
       tdms_user_id: -1,
       tdms_user_role_id: "",
+      hr_user_id: -1,
+      hr_user_role_id: "",
       access: "",
       teams: [],
       selected_systems: [],
@@ -300,6 +305,7 @@ export function CreateUserDialog({
       QCMS: "",
       TSMS: "",
       TDMS: "",
+      HR: "",
     });
     setSelectedAccess("");
   };
@@ -328,6 +334,8 @@ export function CreateUserDialog({
       QCMS: "",
       TSMS: "",
       TDMS: "",
+      HR: "",
+
     });
     setSelectedAccess("");
     setSelectedTeams([]);
@@ -357,6 +365,8 @@ export function CreateUserDialog({
       tsms_user_role_id: "",
       tdms_user_id: -1,
       tdms_user_role_id: "",
+      hr_user_id: -1,
+      hr_user_role_id: "",
       access: "",
       teams: [],
       selected_systems: [],

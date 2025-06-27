@@ -33,6 +33,8 @@ export const addUserToPortals = async (
     let qcms_user_id = -1;
     let tsms_user_id = -1;
     let tdms_user_id = -1;
+    let hr_user_id = -1;
+
 
     let registered_system: any[] = [];
     let countsOfRegisteredSystem = 0;
@@ -74,6 +76,8 @@ export const addUserToPortals = async (
       if (result.status === "fulfilled") {
         const val = result.value;
 
+        console.log("val ==> ", val);
+
         if (val.system === "FMS") fms_user_id = val.userid;
         else if (val.system === "WMS") wms_user_id = val.userid;
         else if (val.system === "CRM") crm_user_id = val.userid;
@@ -82,6 +86,10 @@ export const addUserToPortals = async (
         else if (val.system === "QCMS") qcms_user_id = val.userid;
         else if (val.system === "TSMS") tsms_user_id = val.userid;
         else if (val.system === "TDMS") tdms_user_id = val.userid;
+        else if (val.system === "HR") hr_user_id = val.userid;
+
+        console.log("val.userid ==> ", val.userid);
+        console.log("val.hr_user_id ==> ", val.hr_user_id);
 
         registered_system.push(val.system);
         countsOfRegisteredSystem++;
@@ -138,6 +146,10 @@ export const addUserToPortals = async (
       tdms_user_id: registered_system.includes("TDMS") ? tdms_user_id : -1,
       tdms_user_role_id: registered_system.includes("TDMS")
         ? getRoleId(seletectedSystemRoles["TDMS"], "TDMS")
+        : -1,
+      hr_user_id: registered_system.includes("HR") ? hr_user_id : -1,
+      hr_user_role_id: registered_system.includes("HR")
+        ? getRoleId(seletectedSystemRoles["HR"], "HR")
         : -1,
       selected_systems: registered_system,
       systems_with_permission: registered_system,

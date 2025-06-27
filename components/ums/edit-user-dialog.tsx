@@ -81,6 +81,8 @@ export function EditUserDialog({
     tsms_user_role_id: "",
     tdms_user_id: 0,
     tdms_user_role_id: "",
+    hr_user_id: 0,
+    hr_user_role_id: "",
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -125,6 +127,10 @@ export function EditUserDialog({
         user.tdms_user_role_id === -1
           ? ""
           : getRoleName("TDMS", user.tdms_user_role_id) || "",
+      HR:
+        user.hr_user_role_id === -1
+          ? ""
+          : getRoleName("HR", user.hr_user_role_id) || "",
     });
 
   const { access_token, updateUserInKeycloak } = useAuth();
@@ -161,6 +167,8 @@ export function EditUserDialog({
         tsms_user_role_id: user.tsms_user_role_id || -1,
         tdms_user_id: user.tdms_user_id || 0,
         tdms_user_role_id: user.tdms_user_role_id || -1,
+        hr_user_id: user.tdms_user_id || 0,
+        hr_user_role_id: user.tdms_user_role_id || -1,
         selected_systems: user.selected_systems || [],
         systems_with_permission: user.systems_with_permission || [],
         access: user.access || "",
@@ -184,6 +192,8 @@ export function EditUserDialog({
         QCMS: getRoleName("QCMS", user.qcms_user_role_id) || "",
         TSMS: getRoleName("TSMS", user.tdms_user_role_id) || "",
         TDMS: getRoleName("TDMS", user.tsms_user_role_id) || "",
+        HR: getRoleName("HR", user.hr_user_role_id) || "",
+
       });
     }
   }, [user]);
@@ -267,6 +277,7 @@ export function EditUserDialog({
       "QCMS",
       "TSMS",
       "TDMS",
+      "HR",
     ];
 
     for (const system of systemRolesRequired) {

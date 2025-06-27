@@ -7,6 +7,7 @@ import {
   registerUserToTMS,
   registerUserToTSMS,
   registerUserToWMS,
+  registerUserToHR,
 } from "@/lib/ums/systemHandlers/add/handler";
 import { system } from "@/lib/ums/type";
 import { getRoleId } from "@/lib/ums/utils";
@@ -124,6 +125,19 @@ export async function POST(
           error: tdmsResponse.isError,
           message: tdmsResponse.message,
           data: { system: system, userid: tdmsResponse.data?.id },
+        });
+
+      case "HR":
+        const hrResponse = await registerUserToHR({
+          ssoUser,
+          roleId,
+          system,
+        });
+
+        return NextResponse.json({
+          error: hrResponse.isError,
+          message: hrResponse.message,
+          data: { system: system, userid: hrResponse.data?.id },
         });
 
       default:
