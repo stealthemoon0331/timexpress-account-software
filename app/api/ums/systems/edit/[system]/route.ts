@@ -7,6 +7,7 @@ import {
   updateUserInTMS,
   updateUserInTSMS,
   updateUserInWMS,
+  updateUserInHR,
 } from "@/lib/ums/systemHandlers/edit/handler";
 import { system } from "@/lib/ums/type";
 import { getRoleId } from "@/lib/ums/utils";
@@ -105,8 +106,19 @@ export async function POST(
           user,
           system,
         });
-        
+
         return NextResponse.json(tdmsResponse);
+
+      
+      case "HR":
+        const hrResponse = await updateUserInHR({
+          formData,
+          roleId,
+          user,
+          system,
+        });
+        
+        return NextResponse.json(hrResponse);
       default:
         return NextResponse.json(
           { isError: true, message: "Invalid system" },

@@ -7,6 +7,7 @@ import {
   QCMS_API_PATH,
   TSMS_API_PATH,
   TDMS_API_PATH,
+  HR_API_PATH,
 } from "@/app/config/setting";
 import { systemRoles } from "@/lib/ums/data";
 import { system } from "@/lib/ums/type";
@@ -60,7 +61,6 @@ export async function registerUserToFMS({
   accessToken,
   system,
 }: RegistrationParams) {
-
   const payload = {
     name: ssoUser.name,
     username: ssoUser.username,
@@ -269,7 +269,6 @@ export async function registerUserToAMS({
     status: 1,
   };
 
-
   const response = await fetch(`${AMS_API_PATH}/api/auth/signup`, {
     method: "POST",
     headers: {
@@ -283,8 +282,15 @@ export async function registerUserToAMS({
   if (!response.ok) {
     return {
       isError: true,
-      message:
-        responseData?.msg || "Failed to register user",
+      message: responseData?.msg || "Failed to register user",
+      data: null,
+    };
+  }
+
+  if (!responseData?.result) {
+    return {
+      isError: true,
+      message: responseData?.msg,
       data: null,
     };
   }
@@ -324,8 +330,15 @@ export async function registerUserToQCMS({
   if (!response.ok) {
     return {
       isError: true,
-      message:
-        responseData?.msg,
+      message: responseData?.msg,
+      data: null,
+    };
+  }
+
+  if (!responseData?.result) {
+    return {
+      isError: true,
+      message: responseData?.msg,
       data: null,
     };
   }
@@ -335,7 +348,6 @@ export async function registerUserToQCMS({
     message: "User registered successfully",
     data: responseData?.user,
   };
-
 }
 
 export async function registerUserToTSMS({
@@ -365,8 +377,15 @@ export async function registerUserToTSMS({
   if (!response.ok) {
     return {
       isError: true,
-      message:
-        responseData?.msg,
+      message: responseData?.msg,
+      data: null,
+    };
+  }
+
+  if (!responseData?.result) {
+    return {
+      isError: true,
+      message: responseData?.msg,
       data: null,
     };
   }
@@ -376,7 +395,6 @@ export async function registerUserToTSMS({
     message: "User registered successfully",
     data: responseData?.user,
   };
-
 }
 
 export async function registerUserToTDMS({
@@ -406,8 +424,15 @@ export async function registerUserToTDMS({
   if (!response.ok) {
     return {
       isError: true,
-      message:
-        responseData?.msg,
+      message: responseData?.msg,
+      data: null,
+    };
+  }
+
+  if (!responseData?.result) {
+    return {
+      isError: true,
+      message: responseData?.msg,
       data: null,
     };
   }
@@ -417,5 +442,55 @@ export async function registerUserToTDMS({
     message: "User registered successfully",
     data: responseData?.user,
   };
+}
 
+export async function registerUserToHR({
+  ssoUser,
+  roleId,
+  system,
+}: RegistrationParams) {
+  const payload = {
+    email: ssoUser.email,
+    name: ssoUser.name,
+    password: ssoUser.password,
+    role: roleId,
+    tenantId: ssoUser.tenantId,
+    status: 1,
+  };
+
+  const response = await fetch(`${HR_API_PATH}/api/auth/signup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const responseData = await safeParseJSON(response);
+
+  console.log("HR HR_API_PATH => ", HR_API_PATH);
+
+  console.log("HR responseData => ", responseData);
+
+  if (!response.ok) {
+    return {
+      isError: true,
+      message: responseData?.msg,
+      data: null,
+    };
+  }
+
+  if (!responseData?.result) {
+    return {
+      isError: true,
+      message: responseData?.msg,
+      data: null,
+    };
+  }
+
+  return {
+    isError: false,
+    message: "User registered successfully",
+    data: responseData?.user,
+  };
 }

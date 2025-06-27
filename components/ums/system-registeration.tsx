@@ -101,6 +101,7 @@ export default function SystemRegistration() {
     QCMS: "Admin",
     TSMS: "Admin",
     TDMS: "Admin",
+    HR: "Admin",
   };
 
   const tmsAdminAccess = "1";
@@ -214,7 +215,6 @@ export default function SystemRegistration() {
           });
 
           if (fetchData.find((data) => data.email === loggedUser?.email)) {
-
             setRegisteredUser(
               fetchData.find((data) => data.email === loggedUser?.email)
             );
@@ -310,35 +310,35 @@ export default function SystemRegistration() {
     //Generating the talentId and then register into table
     let tenantId = "";
 
-    if (loggedUser?.email) {
-      const tenantRegResponse = await registerTenantId(loggedUser.email);
-
-      if (!tenantRegResponse.error) {
-        tenantId = tenantRegResponse.tenantId;
-      } else {
-        hotToast.error(tenantRegResponse?.errorMessage || "Error", {
-          duration: 3000,
-        });
-
-        return;
-      }
-    }
-
     setIsRegistering(true);
-
-    const formDataWithTenantId = { ...formData, tenantId };
 
     try {
       const keycloakResponse = await addUserToKeycloak(
-        formDataWithTenantId.username,
-        formDataWithTenantId.email,
-        formDataWithTenantId.password,
-        formDataWithTenantId.selected_systems
+        formData.username,
+        formData.email,
+        formData.password,
+        formData.selected_systems
       );
 
       if (keycloakResponse.error) {
         throw new Error(keycloakResponse.message);
       }
+
+      if (loggedUser?.email) {
+          const tenantRegResponse = await registerTenantId(loggedUser.email);
+
+          if (!tenantRegResponse.error) {
+            tenantId = tenantRegResponse.tenantId;
+          } else {
+            hotToast.error(tenantRegResponse?.errorMessage || "Error", {
+              duration: 3000,
+            });
+
+            return;
+          }
+        }
+
+      const formDataWithTenantId = { ...formData, tenantId };
 
       const result = await addUserToPortals(
         formDataWithTenantId,
@@ -350,6 +350,8 @@ export default function SystemRegistration() {
       );
 
       if (result.success) {
+        
+
         setRegisteredUser(result.data);
 
         setHasTenant(true);
@@ -383,7 +385,6 @@ export default function SystemRegistration() {
   };
 
   const handleSaveUpdates = async () => {
-
     if (!registeredUser) return;
 
     for (let { field, label } of requiredFields) {
@@ -423,7 +424,6 @@ export default function SystemRegistration() {
       );
 
       if (!keycloakUpdateResponse.error) {
-
         const portalUpdateResponse: any = await updateUserToPortals(
           formData,
           registeredUser.selected_systems,
@@ -464,15 +464,13 @@ export default function SystemRegistration() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <CircularProgress/>
+        <CircularProgress />
       </div>
     );
   }
 
   return (
-    <div
-      className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4 sm:p-6 md:p-8"
-    >
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4 sm:p-6 md:p-8">
       {/* Left Panel: Form */}
       {!hasTenant ? (
         <div className="space-y-4">
@@ -758,9 +756,7 @@ export default function SystemRegistration() {
 
                 <ListItem>
                   <div className="flex gap-2">
-                    <Button
-                      onClick={handleSaveUpdates}
-                    >
+                    <Button onClick={handleSaveUpdates}>
                       {isUpdating ? "Saving..." : "Save"}
                     </Button>
                     <Button onClick={handleCancelEdit}>Cancel</Button>

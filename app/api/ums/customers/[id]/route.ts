@@ -22,7 +22,7 @@ export async function PUT(request: Request, context: { params: { id: string } })
           wms_user_id = ?, wms_user_role_id = ?, crm_user_id = ?, crm_user_role_id = ?,
           tms_user_id = ?, tms_user_role_id = ?, ams_user_id = ?, ams_user_role_id = ?, 
           qcms_user_id = ?, qcms_user_role_id = ?, tsms_user_id = ?, tsms_user_role_id = ?,
-          tdms_user_id = ?, tdms_user_role_id = ?, access = ?, teams = ?,
+          tdms_user_id = ?, tdms_user_role_id = ?, hr_user_id = ?, hr_user_role_id = ?, access = ?, teams = ?,
           phone = ?, mobile = ?, systems_with_permission = ?
       WHERE id = ?
     `; 
@@ -50,6 +50,8 @@ export async function PUT(request: Request, context: { params: { id: string } })
       userData.tsms_user_role_id,
       userData.tdms_user_id,
       userData.tdms_user_role_id,
+      userData.hr_user_id,
+      userData.hr_user_role_id,
       userData.access,
       JSON.stringify(userData.teams),
       userData.phone,

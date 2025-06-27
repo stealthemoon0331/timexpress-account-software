@@ -80,6 +80,8 @@ export function AddMoreUserDialog({
     tsms_user_role_id: -1,
     tdms_user_id: -1,
     tdms_user_role_id: -1,
+    hr_user_id: -1,
+    hr_user_role_id: -1,
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -103,6 +105,7 @@ export function AddMoreUserDialog({
     QCMS: "",
     TSMS: "",
     TDMS: "",
+    HR: ""
   });
 
   const { access_token, updateUserInKeycloak } = useAuth();
@@ -139,6 +142,8 @@ export function AddMoreUserDialog({
         tsms_user_role_id: user.tsms_user_role_id || "",
         tdms_user_id: user.tdms_user_id || -1,
         tdms_user_role_id: user.tdms_user_role_id || "",
+        hr_user_id: user.hr_user_id || -1,
+        hr_user_role_id: user.hr_user_role_id || "",
         selected_systems: user.selected_systems || [],
         systems_with_permission: user.systems_with_permission || [],
         access: user.access || "",
@@ -154,6 +159,7 @@ export function AddMoreUserDialog({
         QCMS: getRoleName("QCMS", user.qcms_user_role_id) || "",
         TSMS: getRoleName("TSMS", user.tsms_user_role_id) || "",
         TDMS: getRoleName("TDMS", user.tdms_user_role_id) || "",
+        HR: getRoleName("HR", user.hr_user_role_id) || "",
       });
     }
   }, [user]);
@@ -204,6 +210,7 @@ export function AddMoreUserDialog({
       "QCMS",
       "TSMS",
       "TDMS",
+      "HR",
     ];
 
     for (const system of systemRolesRequired) {
@@ -248,6 +255,7 @@ export function AddMoreUserDialog({
     let qcms_user_id = 0;
     let tsms_user_id = 0;
     let tdms_user_id = 0;
+    let hr_user_id = 0;
 
     let registered_system: system[] = user.selected_systems;
 
@@ -368,6 +376,14 @@ export function AddMoreUserDialog({
             tdms_user_role_id: getRoleId(systemRoleSelections["TDMS"], "TDMS"),
             systems_with_permission: [...user.systems_with_permission, "TDMS"],
           };
+        } else if (system === "HR") {
+          tsms_user_id = responseData.data.userid;
+          updatedUser = {
+            ...user,
+            hr_user_id: hr_user_id,
+            tdms_user_role_id: getRoleId(systemRoleSelections["HR"], "HR"),
+            systems_with_permission: [...user.systems_with_permission, "HR"],
+          };
         }
 
         registered_system.push(system);
@@ -397,6 +413,7 @@ export function AddMoreUserDialog({
               QCMS: "",
               TSMS: "",
               TDMS: "",
+              HR: "",
             });
             setSelectedAccess(null);
             onOpenChange(false);
