@@ -760,7 +760,6 @@ export default function SystemRegistration() {
                   <div className="flex gap-2">
                     <Button
                       onClick={handleSaveUpdates}
-                      startIcon={<SaveIcon />}
                     >
                       {isUpdating ? "Saving..." : "Save"}
                     </Button>
