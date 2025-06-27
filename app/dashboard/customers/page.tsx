@@ -35,7 +35,6 @@ export default function page() {
               <TabsTrigger value="systems">Register to System</TabsTrigger>
               <TabsTrigger
                 value="customers"
-                onClick={() => checkAdminRegisteration()}
               >
                 Users
               </TabsTrigger>
