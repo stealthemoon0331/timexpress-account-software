@@ -48,7 +48,6 @@ export default function NotificationBell() {
             }
           );
           const data = await res.json();
-          console.log("data ==> ", data);
           setNotifications(data);
         } catch (error) {
           console.error("Error fetching notifications:", error);

@@ -17,6 +17,8 @@ import {
   ListItem,
   ListItemText,
   IconButton,
+  CircularProgress,
+  Box,
 } from "@mui/material";
 import PhoneIcon from "@mui/icons-material/Phone";
 import SmartphoneIcon from "@mui/icons-material/Smartphone";
@@ -37,6 +39,7 @@ import { useData } from "@/app/contexts/dataContext";
 import { checkIfHasTenant, registerTenantId } from "@/lib/tenant";
 import { updateUserToPortals } from "@/lib/ums/systemHandlers/edit/updateUserToPortals";
 import { getRoleName } from "@/lib/ums/utils";
+import { useFormStore } from "@/lib/store/user-form";
 
 interface FormData {
   name: string;
@@ -55,29 +58,30 @@ interface FormData {
 export default function SystemRegistration() {
   const [registeredUser, setRegisteredUser] = useState<FormUser | null>(null);
   const [hasTenant, setHasTenant] = useState<boolean>(false);
-  const [formData, setFormData] = useState<FormData>({
-    name: "",
-    email: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
-    phone: "",
-    mobile: "",
-    fms_branch: [],
-    tenantId: "",
-    teams: [],
-    selected_systems: [],
-  });
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [availableSystems, setAvailableSystems] = useState<system[]>([]);
+  const [formInitialized, setFormInitialized] = useState(false);
+  const [systemOptions, setSystemOptions] = useState<
+    {
+      value: system;
+      label: string;
+    }[]
+  >([]);
+
+  // Status
+  const [isLoading, setLoading] = useState(true);
   const [isRegistering, setIsRegistering] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const { user: loggedUser, loading } = useUser();
+
   const { access_token, addUserToKeycloak, updateUserInKeycloak } = useAuth();
+
   const { teams } = useData();
+
+  const { formData, setFormData } = useFormStore();
 
   const requiredFields: { field: keyof FormData; label: string }[] = [
     { field: "name", label: "Name" },
@@ -88,21 +92,16 @@ export default function SystemRegistration() {
     { field: "selected_systems", label: "Selected Systems" },
   ];
 
-  const systemOptions = [
-    { value: "FMS" as system, label: "FMS" },
-    // { value: "TMS" as system, label: "TMS" },
-    { value: "CRM" as system, label: "CRM" },
-    { value: "WMS" as system, label: "WMS" },
-    { value: "AMS" as system, label: "AMS" },
-
-  ];
-
   const systemAdminRoles = {
     CRM: "Admin",
     WMS: "Admin",
     FMS: "Admin",
     TMS: "2",
     AMS: "Admin",
+    QCMS: "Admin",
+    TSMS: "Admin",
+    TDMS: "Admin",
+    HR: "Admin",
   };
 
   const tmsAdminAccess = "1";
@@ -112,34 +111,43 @@ export default function SystemRegistration() {
   useEffect(() => {
     checkTenant();
     fetchUsers();
+    fetchAvailableSystems();
   }, []);
 
   useEffect(() => {
-    //Get registered data
+    setSystemOptions(
+      availableSystems.map((system) => ({
+        value: system,
+        label: system,
+      }))
+    );
+  }, [availableSystems]);
 
-    console.log("teams => ", teams);
+  useEffect(() => {
+    if (loggedUser && teams && !formInitialized) {
+      setFormData({
+        name: loggedUser?.name || "",
+        email: loggedUser?.email || "",
+        username: "",
+        password: "",
+        confirmPassword: "",
+        phone: "",
+        mobile: "",
+        tenantId: "",
+        fms_branch: fmsBranches,
+        teams: teams?.map((team) => team.teamId.toString()),
+        selected_systems: [],
+      });
 
-    setFormData({
-      name: loggedUser?.name || "",
-      email: loggedUser?.email || "",
-      username: "",
-      password: "",
-      confirmPassword: "",
-      phone: "",
-      mobile: "",
-      tenantId: "",
-      fms_branch: fmsBranches,
-      teams: teams?.map((team) => team.teamId.toString()),
-      selected_systems: [],
-    });
-  }, [loggedUser, teams]);
+      setFormInitialized(true);
+    }
+  }, [loggedUser, teams, setFormData]);
 
   const checkTenant = async () => {
     if (loggedUser?.email) {
       const checkingResponse = await checkIfHasTenant(loggedUser.email);
       if (!checkingResponse.error) {
         const tenantId = checkingResponse.data;
-        console.log("*** tenantId *** ", tenantId);
         if (tenantId) {
           setHasTenant(true);
         } else {
@@ -149,6 +157,7 @@ export default function SystemRegistration() {
         console.error(checkingResponse.errorMessage);
       }
     }
+    setLoading(false);
   };
 
   const fetchUsers = async () => {
@@ -160,8 +169,6 @@ export default function SystemRegistration() {
         },
       });
       const fetchData = await response.json();
-
-      console.log("fetchData from ums/customers => ", fetchData);
 
       // Check if fetchData is an array
       if (Array.isArray(fetchData)) {
@@ -208,8 +215,6 @@ export default function SystemRegistration() {
           });
 
           if (fetchData.find((data) => data.email === loggedUser?.email)) {
-            console.log("fetchdata for checking registeration", fetchData);
-
             setRegisteredUser(
               fetchData.find((data) => data.email === loggedUser?.email)
             );
@@ -246,8 +251,34 @@ export default function SystemRegistration() {
     }
   };
 
-  const handleChange = (field: keyof FormData, value: string | string[]) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const fetchAvailableSystems = async () => {
+    try {
+      const response = await fetch("/api/payment/plans", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const fetchPlans = await response.json();
+      // Check if fetchData is an array
+      if (Array.isArray(fetchPlans)) {
+        setAvailableSystems(
+          fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
+        );
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.error("Error fetching available systems:", error);
+    }
+  };
+
+  const handleChange = <K extends keyof FormData>(
+    field: K,
+    value: FormData[K]
+  ) => {
+    setFormData({ [field]: value });
   };
 
   const handleRegistration = async () => {
@@ -276,40 +307,38 @@ export default function SystemRegistration() {
       return;
     }
 
-    console.log("Form Data => ", formData);
-
     //Generating the talentId and then register into table
     let tenantId = "";
 
-    if (loggedUser?.email) {
-      const tenantRegResponse = await registerTenantId(loggedUser.email);
-
-      if (!tenantRegResponse.error) {
-        tenantId = tenantRegResponse.tenantId;
-      } else {
-        hotToast.error(tenantRegResponse?.errorMessage || "Error", {
-          duration: 3000,
-        });
-
-        return;
-      }
-    }
-
     setIsRegistering(true);
-
-    const formDataWithTenantId = { ...formData, tenantId };
 
     try {
       const keycloakResponse = await addUserToKeycloak(
-        formDataWithTenantId.username,
-        formDataWithTenantId.email,
-        formDataWithTenantId.password,
-        formDataWithTenantId.selected_systems
+        formData.username,
+        formData.email,
+        formData.password,
+        formData.selected_systems
       );
 
       if (keycloakResponse.error) {
         throw new Error(keycloakResponse.message);
       }
+
+      if (loggedUser?.email) {
+          const tenantRegResponse = await registerTenantId(loggedUser.email);
+
+          if (!tenantRegResponse.error) {
+            tenantId = tenantRegResponse.tenantId;
+          } else {
+            hotToast.error(tenantRegResponse?.errorMessage || "Error", {
+              duration: 3000,
+            });
+
+            return;
+          }
+        }
+
+      const formDataWithTenantId = { ...formData, tenantId };
 
       const result = await addUserToPortals(
         formDataWithTenantId,
@@ -320,29 +349,24 @@ export default function SystemRegistration() {
         fmsBranches
       );
 
-      console.log(
-        ":: addUserToSystemsAndUMS result from registeration panel :: => ",
-        result
-      );
-
       if (result.success) {
         
+
         setRegisteredUser(result.data);
-        
+
         setHasTenant(true);
-        
+
         toastify.success("Registered new user into UMS!", { autoClose: 3000 });
-        
+
         if (result.warning) {
           toastify.warn(result.warning, { autoClose: 3000 });
         }
-        
+
         // Reset form states
       } else {
         throw new Error(result.error || "Failed to register user");
       }
     } catch (error: unknown) {
-      console.log("error => ", error);
       const errorMessage =
         error instanceof Error ? error.message : "An unexpected error occurred";
       hotToast.error(errorMessage, {
@@ -353,7 +377,6 @@ export default function SystemRegistration() {
     }
 
     // If all validations pass
-    console.log("Registration Successful", formData);
     // Add backend integration logic here
   };
 
@@ -362,8 +385,6 @@ export default function SystemRegistration() {
   };
 
   const handleSaveUpdates = async () => {
-    console.log("formData to be updated : ", formData);
-
     if (!registeredUser) return;
 
     for (let { field, label } of requiredFields) {
@@ -390,9 +411,6 @@ export default function SystemRegistration() {
       return;
     }
 
-    console.log("handleSaveUpdates() is called");
-    console.log("formData is ", formData);
-
     try {
       setIsUpdating(true);
 
@@ -406,8 +424,6 @@ export default function SystemRegistration() {
       );
 
       if (!keycloakUpdateResponse.error) {
-        console.log("updateUserToPortal calling");
-
         const portalUpdateResponse: any = await updateUserToPortals(
           formData,
           registeredUser.selected_systems,
@@ -420,10 +436,11 @@ export default function SystemRegistration() {
         if (portalUpdateResponse.success) {
           // addUpdatedUser(portalUpdateResponse.data);
           toastify.success("Successfully updated!");
+          // notifySuccess("Successfully updated!")
 
           handleCancelEdit();
-          
-          setRegisteredUser(portalUpdateResponse.data)
+
+          setRegisteredUser(portalUpdateResponse.data);
         } else {
           throw new Error(portalUpdateResponse.error);
         }
@@ -431,7 +448,9 @@ export default function SystemRegistration() {
         hotToast.error(`Keycloak Error : ${keycloakUpdateResponse.message}`);
       }
     } catch (error: any) {
-      hotToast.error(`Failed update error ${error.message ? ": " + error.message : ""}`);
+      hotToast.error(
+        `Failed update error ${error.message ? ": " + error.message : ""}`
+      );
     } finally {
       setIsUpdating(false);
     }
@@ -441,6 +460,14 @@ export default function SystemRegistration() {
     setEditMode(false);
     // Optionally, reset the form to original data
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4 sm:p-6 md:p-8">
@@ -560,7 +587,7 @@ export default function SystemRegistration() {
               isMulti
               options={systemOptions}
               value={systemOptions.filter((option) =>
-                formData.selected_systems.includes(option.value)
+                formData?.selected_systems.includes(option.value)
               )}
               onChange={(selected) =>
                 handleChange(
@@ -570,6 +597,17 @@ export default function SystemRegistration() {
               }
               className="basic-multi-select"
               classNamePrefix="select"
+              menuPlacement="auto" // <-- auto opens up if there's no space below
+              menuPosition="absolute" // <-- default; works well with auto
+              styles={{
+                menu: (provided) => ({
+                  ...provided,
+                  maxHeight: 100,
+                  overflowY: "auto",
+                  WebkitOverflowScrolling: "touch",
+                  zIndex: 9999,
+                }),
+              }}
               required
             />
           </div>
@@ -687,13 +725,38 @@ export default function SystemRegistration() {
                     }}
                   />
                 </ListItem>
+                <ListItem className="relative overflow-visible">
+                  <Select
+                    isMulti
+                    options={systemOptions}
+                    value={systemOptions.filter((option) =>
+                      formData?.selected_systems.includes(option.value)
+                    )}
+                    onChange={(selected) =>
+                      handleChange(
+                        "selected_systems",
+                        selected.map((option) => option.value)
+                      )
+                    }
+                    className="basic-multi-select"
+                    classNamePrefix="select"
+                    menuPlacement="auto" // <-- auto opens up if there's no space below
+                    menuPosition="absolute" // <-- default; works well with auto
+                    styles={{
+                      menu: (provided) => ({
+                        ...provided,
+                        maxHeight: 100,
+                        overflowY: "auto",
+                        zIndex: 9999,
+                      }),
+                    }}
+                    required
+                  />
+                </ListItem>
 
                 <ListItem>
                   <div className="flex gap-2">
-                    <Button
-                      onClick={handleSaveUpdates}
-                      startIcon={<SaveIcon />}
-                    >
+                    <Button onClick={handleSaveUpdates}>
                       {isUpdating ? "Saving..." : "Save"}
                     </Button>
                     <Button onClick={handleCancelEdit}>Cancel</Button>
@@ -701,8 +764,7 @@ export default function SystemRegistration() {
                 </ListItem>
               </List>
             ) : (
-              <>
-              </>
+              <></>
             )}
             <List>
               <ListItem>

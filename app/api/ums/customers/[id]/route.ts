@@ -5,7 +5,6 @@ import { use } from "react";
 export async function PUT(request: Request, context: { params: { id: string } }) {
   try {
     const userData = await request.json();
-    console.log("Received data:", userData);
 
     const { id } = await context.params; // ✅ Fix: No need for `await`
     
@@ -21,7 +20,9 @@ export async function PUT(request: Request, context: { params: { id: string } })
       SET name = ?, username = ?, email = ?, password = ?, selected_systems = ?, 
           fms_user_id = ?, fms_branch = ?, fms_user_role_id = ?, 
           wms_user_id = ?, wms_user_role_id = ?, crm_user_id = ?, crm_user_role_id = ?,
-          tms_user_id = ?, tms_user_role_id = ?, ams_user_id = ?, ams_user_role_id = ?, access = ?, teams = ?,
+          tms_user_id = ?, tms_user_role_id = ?, ams_user_id = ?, ams_user_role_id = ?, 
+          qcms_user_id = ?, qcms_user_role_id = ?, tsms_user_id = ?, tsms_user_role_id = ?,
+          tdms_user_id = ?, tdms_user_role_id = ?, hr_user_id = ?, hr_user_role_id = ?, access = ?, teams = ?,
           phone = ?, mobile = ?, systems_with_permission = ?
       WHERE id = ?
     `; 
@@ -43,6 +44,14 @@ export async function PUT(request: Request, context: { params: { id: string } })
       userData.tms_user_role_id,
       userData.ams_user_id,
       userData.ams_user_role_id,
+      userData.qcms_user_id,
+      userData.qcms_user_role_id,
+      userData.tsms_user_id,
+      userData.tsms_user_role_id,
+      userData.tdms_user_id,
+      userData.tdms_user_role_id,
+      userData.hr_user_id,
+      userData.hr_user_role_id,
       userData.access,
       JSON.stringify(userData.teams),
       userData.phone,
@@ -52,7 +61,6 @@ export async function PUT(request: Request, context: { params: { id: string } })
     ];
 
     const [result] = await pool.query(query, values);
-    console.log("SQL Update Result:", result); // ✅ Debugging log
 
     if ((result as any).affectedRows === 0) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });

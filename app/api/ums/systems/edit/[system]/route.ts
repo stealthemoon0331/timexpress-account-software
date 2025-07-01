@@ -2,8 +2,12 @@ import {
   updateUserInAMS,
   updateUserInCRM,
   updateUserInFMS,
+  updateUserInQCMS,
+  updateUserInTDMS,
   updateUserInTMS,
+  updateUserInTSMS,
   updateUserInWMS,
+  updateUserInHR,
 } from "@/lib/ums/systemHandlers/edit/handler";
 import { system } from "@/lib/ums/type";
 import { getRoleId } from "@/lib/ums/utils";
@@ -24,8 +28,6 @@ export async function POST(
 
   const roleId = getRoleId(systemRoleSelections[system], system as system);
 
-  console.log("Form Data from edit endpoint => ", formData);
-  
   try {
     switch (system) {
       case "FMS":
@@ -69,12 +71,6 @@ export async function POST(
         return NextResponse.json(tmsResponse);
 
       case "AMS":
-        console.log("AMS formData => ", formData);
-        console.log("AMS roleId => ", roleId);
-        console.log("AMS user => ", user);
-        console.log("AMS system => ", system);
-
-
         const amsResponse = await updateUserInAMS({
           formData,
           roleId,
@@ -83,6 +79,46 @@ export async function POST(
         });
         return NextResponse.json(amsResponse);
 
+      case "QCMS":
+        const qcmsResponse = await updateUserInQCMS({
+          formData,
+          roleId,
+          user,
+          system,
+        });
+
+        return NextResponse.json(qcmsResponse);
+
+      case "TSMS":
+        const tsmsResponse = await updateUserInTSMS({
+          formData,
+          roleId,
+          user,
+          system,
+        });
+
+        return NextResponse.json(tsmsResponse);
+
+      case "TDMS":
+        const tdmsResponse = await updateUserInTDMS({
+          formData,
+          roleId,
+          user,
+          system,
+        });
+
+        return NextResponse.json(tdmsResponse);
+
+      
+      case "HR":
+        const hrResponse = await updateUserInHR({
+          formData,
+          roleId,
+          user,
+          system,
+        });
+        
+        return NextResponse.json(hrResponse);
       default:
         return NextResponse.json(
           { isError: true, message: "Invalid system" },

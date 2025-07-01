@@ -135,7 +135,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (response.ok || !data.error) {
       return { error: false, message: "User added successfully" };
     } else {
-      console.log("data.details => ", data.details)
       const errorMessage = JSON.parse(data.details).errorMessage;
       return { error: true, message: "Keycloak server error: " + errorMessage };
     }

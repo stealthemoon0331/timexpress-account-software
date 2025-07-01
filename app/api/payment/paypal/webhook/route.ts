@@ -89,8 +89,6 @@ export async function POST(req: Request) {
 
   const subscription = await subscriptionRes.json();
 
-  console.log("subscription => ", subscription);
-
   const cardInfo = subscription.subscriber?.payment_source?.card;
   const cardBrand = cardInfo?.brand || null;
   const cardLast4 = cardInfo?.last_digits || null;

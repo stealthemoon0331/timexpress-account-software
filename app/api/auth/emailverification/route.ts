@@ -8,8 +8,6 @@ export async function POST(req: Request) {
   try {
     const { email } = await req.json();
 
-    console.log("* email : ", email);
-
     if (!email) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
@@ -17,8 +15,6 @@ export async function POST(req: Request) {
     const user = await prisma.user.findUnique({
       where: { email },
     });
-
-    console.log("* user : ", user);
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -33,8 +29,6 @@ export async function POST(req: Request) {
 
     const verificationToken = await generateVerificationToken(email);
 
-    console.log("before calling transporter : ");
-
     const transporter = nodemailer.createTransport({
       host: SMTPHOST,
       port: SMTPPORT,
@@ -44,8 +38,6 @@ export async function POST(req: Request) {
         pass: SMTPPASS,
       },
     } as nodemailer.TransportOptions);
-
-    console.log("transporter => ", transporter);
 
     const mailOptions = {
       from: "noreply@shiper.io", // Verified sender email address
@@ -90,8 +82,6 @@ export async function POST(req: Request) {
       if (error) {
         return console.error("Error sending email:", error);
       }
-      console.log("Email sent:", info.messageId);
-      console.log("Preview URL:", info);
     });
 
     return NextResponse.json({ message: "Verification email sent" });

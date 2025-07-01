@@ -18,8 +18,6 @@ export const registerTenantId = async (email: string) => {
     if (response.ok) {
       const resData = await response.json();
 
-      console.log("*** resData ***", resData);
-
       return {
         error: false,
         tenantId: resData.tenantId,
@@ -46,7 +44,7 @@ export const checkIfHasTenant = async (email: string) => {
 
     if (response.ok) {
       const tenantId = (await response.json()).data;
-      console.log("*** tenantId *** ", tenantId);
+     
       return {
         error: false,
         data: tenantId

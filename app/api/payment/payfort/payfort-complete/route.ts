@@ -21,7 +21,6 @@ const subscriptions: Record<
 export async function POST(req: Request) {
   const formData = await req.formData();
 
-  console.log("formData => ", formData);
   const responseCode = formData.get("response_code") as string | null;
   const merchantReference = formData.get("merchant_reference") as string | null;
   const customerEmail = formData.get("customer_email") as string | null;
@@ -63,9 +62,6 @@ export async function POST(req: Request) {
   if (generatedSignature !== signature) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
-
-  console.log("PayFort responseCode:", responseCode);
-  console.log("Merchant Ref:", merchantReference);
 
   if (responseCode === "14000") {
     const now = new Date();

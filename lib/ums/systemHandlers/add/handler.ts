@@ -4,6 +4,10 @@ import {
   TMS_API_PATH,
   WMS_API_PATH,
   AMS_API_PATH,
+  QCMS_API_PATH,
+  TSMS_API_PATH,
+  TDMS_API_PATH,
+  HR_API_PATH,
 } from "@/app/config/setting";
 import { systemRoles } from "@/lib/ums/data";
 import { system } from "@/lib/ums/type";
@@ -35,7 +39,6 @@ const handleAPIResponse = async (
   fallbackMessage: string
 ) => {
   const data = await safeParseJSON(response);
-  console.log("🌐 API response:", response);
 
   if (!response.ok) {
     return {
@@ -44,7 +47,7 @@ const handleAPIResponse = async (
       data: null,
     };
   }
-  console.log("👨 response data:", data);
+
   return {
     isError: false,
     message: "User registered successfully",
@@ -58,7 +61,6 @@ export async function registerUserToFMS({
   accessToken,
   system,
 }: RegistrationParams) {
-  console.log("FMS ssoUser ==> ", ssoUser);
   const payload = {
     name: ssoUser.name,
     username: ssoUser.username,
@@ -70,7 +72,7 @@ export async function registerUserToFMS({
     tenantId: ssoUser.tenantId,
     status: 1,
   };
-  console.log("FMS payload ==> ", payload);
+
   const response = await fetch(`${FMS_API_PATH}/api/adduser`, {
     method: "POST",
     headers: {
@@ -184,9 +186,6 @@ export async function registerUserToWMS({
     status: 1,
   };
 
-  console.log(" Payload Admin => ", payload);
-  console.log(" WMS_API_PATH => ", WMS_API_PATH);
-
   const response = await fetch(`${WMS_API_PATH}/api/users/adduser`, {
     method: "POST",
     headers: {
@@ -208,7 +207,7 @@ export async function registerUserToTMS({
   const roleType = systemRoles["TMS"].find(
     (role) => role.roleId === roleId
   )?.role_type;
-  console.log("TMS ssoUser ==> ", ssoUser);
+
   const payload = {
     personnel_name: ssoUser.name,
     phone: ssoUser.phone,
@@ -248,7 +247,7 @@ export async function registerUserToTMS({
       data: null,
     };
   }
-  console.log("TMS responseData ==> ", responseData?.data);
+
   return {
     isError: false,
     message: "User registered successfully",
@@ -263,16 +262,12 @@ export async function registerUserToAMS({
 }: RegistrationParams) {
   const payload = {
     email: ssoUser.email,
-    firstName: ssoUser.name.split(" ")[0],
-    lastName: ssoUser.name.split(" ")[1],
+    name: ssoUser.name,
     password: ssoUser.password,
     role: roleId,
     tenantId: ssoUser.tenantId,
     status: 1,
   };
-
-  console.log(" Payload Admin => ", payload);
-  console.log(" AMS_API_PATH => ", AMS_API_PATH);
 
   const response = await fetch(`${AMS_API_PATH}/api/auth/signup`, {
     method: "POST",
@@ -282,5 +277,220 @@ export async function registerUserToAMS({
     body: JSON.stringify(payload),
   });
 
-  return await handleAPIResponse(system, response, "Failed to register user");
+  const responseData = await safeParseJSON(response);
+
+  if (!response.ok) {
+    return {
+      isError: true,
+      message: responseData?.msg || "Failed to register user",
+      data: null,
+    };
+  }
+
+  if (!responseData?.result) {
+    return {
+      isError: true,
+      message: responseData?.msg,
+      data: null,
+    };
+  }
+
+  return {
+    isError: false,
+    message: responseData?.msg || "User registered successfully",
+    data: responseData?.user,
+  };
+}
+
+export async function registerUserToQCMS({
+  ssoUser,
+  roleId,
+  system,
+}: RegistrationParams) {
+  const payload = {
+    email: ssoUser.email,
+    firstName: ssoUser.name.split(" ")[0],
+    lastName: ssoUser.name.split(" ")[1],
+    password: ssoUser.password,
+    role: roleId,
+    tenantId: ssoUser.tenantId,
+    status: 1,
+  };
+
+  const response = await fetch(`${QCMS_API_PATH}/api/auth/signup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const responseData = await safeParseJSON(response);
+
+  if (!response.ok) {
+    return {
+      isError: true,
+      message: responseData?.msg,
+      data: null,
+    };
+  }
+
+  if (!responseData?.result) {
+    return {
+      isError: true,
+      message: responseData?.msg,
+      data: null,
+    };
+  }
+
+  return {
+    isError: false,
+    message: "User registered successfully",
+    data: responseData?.user,
+  };
+}
+
+export async function registerUserToTSMS({
+  ssoUser,
+  roleId,
+  system,
+}: RegistrationParams) {
+  const payload = {
+    email: ssoUser.email,
+    name: ssoUser.name,
+    password: ssoUser.password,
+    role: roleId,
+    tenantId: ssoUser.tenantId,
+    status: 1,
+  };
+
+  const response = await fetch(`${TSMS_API_PATH}/api/auth/signup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const responseData = await safeParseJSON(response);
+
+  if (!response.ok) {
+    return {
+      isError: true,
+      message: responseData?.msg,
+      data: null,
+    };
+  }
+
+  if (!responseData?.result) {
+    return {
+      isError: true,
+      message: responseData?.msg,
+      data: null,
+    };
+  }
+
+  return {
+    isError: false,
+    message: "User registered successfully",
+    data: responseData?.user,
+  };
+}
+
+export async function registerUserToTDMS({
+  ssoUser,
+  roleId,
+  system,
+}: RegistrationParams) {
+  const payload = {
+    email: ssoUser.email,
+    name: ssoUser.name,
+    password: ssoUser.password,
+    role: roleId,
+    tenantId: ssoUser.tenantId,
+    status: 1,
+  };
+
+  const response = await fetch(`${TDMS_API_PATH}/api/auth/signup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const responseData = await safeParseJSON(response);
+
+  if (!response.ok) {
+    return {
+      isError: true,
+      message: responseData?.msg,
+      data: null,
+    };
+  }
+
+  if (!responseData?.result) {
+    return {
+      isError: true,
+      message: responseData?.msg,
+      data: null,
+    };
+  }
+
+  return {
+    isError: false,
+    message: "User registered successfully",
+    data: responseData?.user,
+  };
+}
+
+export async function registerUserToHR({
+  ssoUser,
+  roleId,
+  system,
+}: RegistrationParams) {
+  const payload = {
+    email: ssoUser.email,
+    name: ssoUser.name,
+    password: ssoUser.password,
+    role: roleId,
+    tenantId: ssoUser.tenantId,
+    status: 1,
+  };
+
+  const response = await fetch(`${HR_API_PATH}/api/auth/signup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const responseData = await safeParseJSON(response);
+
+  console.log("HR HR_API_PATH => ", HR_API_PATH);
+
+  console.log("HR responseData => ", responseData);
+
+  if (!response.ok) {
+    return {
+      isError: true,
+      message: responseData?.msg,
+      data: null,
+    };
+  }
+
+  if (!responseData?.result) {
+    return {
+      isError: true,
+      message: responseData?.msg,
+      data: null,
+    };
+  }
+
+  return {
+    isError: false,
+    message: "User registered successfully",
+    data: responseData?.user,
+  };
 }

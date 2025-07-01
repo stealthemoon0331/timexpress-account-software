@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/table";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
@@ -59,6 +60,7 @@ import { toast as hotToast } from "react-hot-toast";
 import { useAuth } from "@/app/contexts/authContext";
 import "@/lib/ums/css/loading.css";
 import {
+  CircularProgress,
   MenuItem,
   PaginationItem,
   Select,
@@ -73,6 +75,8 @@ import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
 import { useUser } from "@/app/contexts/UserContext";
 import { consoleLog } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { checkIfHasTenant } from "@/lib/tenant";
 
 export default function UserManagement() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -106,6 +110,14 @@ export default function UserManagement() {
     tms_user_role_id: -1,
     ams_user_id: -1,
     ams_user_role_id: -1,
+    qcms_user_id: -1,
+    qcms_user_role_id: -1,
+    tsms_user_id: -1,
+    tsms_user_role_id: -1,
+    tdms_user_id: -1,
+    tdms_user_role_id: -1,
+    hr_user_id: -1,
+    hr_user_role_id: -1,
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -114,7 +126,6 @@ export default function UserManagement() {
   const [users, setUsers] = useState<user[]>([]);
 
   const [searchedUsers, setSearchedUsers] = useState<user[]>([]);
-
 
   const [permissionedSystems, setPermissionedSystems] = useState<
     PermissionedSystem[]
@@ -126,6 +137,10 @@ export default function UserManagement() {
     WMS: false,
     TMS: false,
     AMS: false,
+    QCMS: false,
+    TSMS: false,
+    TDMS: false,
+    HR: false,
     count: 0,
   });
 
@@ -141,7 +156,48 @@ export default function UserManagement() {
 
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [hasTenant, setHasTenant] = useState<boolean>(false);
+  const [isTenantChecking, setTenantChecking] = useState(true);
+
   const totalPages = Math.ceil(users.length / itemsPerPage);
+
+  const paginatedUsers = searchedUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const { checkAndUpdateAccessToken } = useAuth();
+
+  const hasRun = useRef(false);
+  const { user: loggedUser } = useUser();
+
+  useEffect(() => {
+    setIsLoading(true);
+
+    const init = async () => {
+      await checkAndUpdateAccessToken();
+      await checkAdminRegisteration();
+      const result = await fetchUsers();
+      if (result) {
+        toastify.success("Data loaded successfully!", {
+          autoClose: 3000,
+        });
+      }
+    };
+
+    if (!hasRun.current) {
+      hasRun.current = true;
+      init();
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAvailableSystems();
+  }, [loggedUser]);
 
   useEffect(() => {
     if (!users) return;
@@ -163,120 +219,93 @@ export default function UserManagement() {
     setSearchedUsers(filtered);
   }, [searchQuery, users, searchSystemQueryList]);
 
-  // useEffect(() => {
-  //   setSearchedUsers(
-  //     users?.filter((user) => {
-  //       return (
-  //         user?.selected_systems.some(s => searchSystemQueryList.includes(s))
-  //       );
-  //     })
-  //   );
-  // }, [searchSystemQueryList, users]);
+  useEffect(() => {}, [selectedUser]);
 
-  const paginatedUsers = searchedUsers.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const checkAdminRegisteration = async () => {
+    if (loggedUser?.email) {
+      const checkingResponse = await checkIfHasTenant(loggedUser.email);
+      if (!checkingResponse.error) {
+        const tenantId = checkingResponse.data;
+        if (tenantId) {
+          setHasTenant(true);
+        } else {
+          setHasTenant(false);
+        }
+      } else {
+        console.error(checkingResponse.errorMessage);
+      }
+    }
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSending, setIsSending] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+    setTenantChecking(false);
+  };
 
-  const { checkAndUpdateAccessToken } = useAuth();
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch("/api/ums/customers", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const fetchData = await response.json();
 
-  const hasRun = useRef(false);
-  const { user: loggedUser } = useUser();
+      // Check if fetchData is an array
+      if (Array.isArray(fetchData)) {
+        if (fetchData.length > 0) {
+          fetchData.map((data: any) => {
+            if (data.fms_branch) {
+              try {
+                data.fms_branch = JSON.parse(data.fms_branch);
+              } catch (error) {
+                console.error("Error parsing fms_branch:", error);
+                data.fms_branch = [];
+              }
+            }
 
-  useEffect(() => {
-    setIsLoading(true);
-    // Fetch users from the API
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch("/api/ums/customers", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        const fetchData = await response.json();
+            if (data.selected_systems) {
+              const selected_systems: string[] = [];
+              JSON.parse(data.selected_systems).map((system: system) => {
+                selected_systems.push(system);
+              });
+              data.selected_systems = selected_systems;
+            }
 
-        // Check if fetchData is an array
-        if (Array.isArray(fetchData)) {
-          if (fetchData.length > 0) {
-            fetchData.map((data: any) => {
-              if (data.fms_branch) {
+            if (data.teams) {
+              if (typeof data.teams === "string") {
                 try {
-                  data.fms_branch = JSON.parse(data.fms_branch);
-                } catch (error) {
-                  console.error("Error parsing fms_branch:", error);
-                  data.fms_branch = [];
-                }
-              }
-
-              if (data.selected_systems) {
-                const selected_systems: string[] = [];
-                JSON.parse(data.selected_systems).map((system: system) => {
-                  selected_systems.push(system);
-                });
-                data.selected_systems = selected_systems;
-              }
-
-              if (data.teams) {
-                if (typeof data.teams === "string") {
-                  try {
-                    const parsed = JSON.parse(data.teams.replace(/'/g, '"'));
-                    data.teams = Array.isArray(parsed) ? parsed : [];
-                  } catch (e) {
-                    console.error("Error parsing teams:", e);
-                    data.teams = [];
-                  }
-                } else if (!Array.isArray(data.teams)) {
+                  const parsed = JSON.parse(data.teams.replace(/'/g, '"'));
+                  data.teams = Array.isArray(parsed) ? parsed : [];
+                } catch (e) {
+                  console.error("Error parsing teams:", e);
                   data.teams = [];
                 }
+              } else if (!Array.isArray(data.teams)) {
+                data.teams = [];
               }
+            }
 
-              if (data.systems_with_permission) {
-                const systems_with_permission: string[] = [];
-                JSON.parse(data.systems_with_permission).map(
-                  (system: system) => {
-                    systems_with_permission.push(system);
-                  }
-                );
-                data.systems_with_permission = systems_with_permission;
-                setPermissionedSystems((prev) => {
-                  return [
-                    ...prev,
-                    { userId: data.id, systems: data.systems_with_permission },
-                  ];
-                });
-              }
-            });
+            if (data.systems_with_permission) {
+              const systems_with_permission: string[] = [];
+              JSON.parse(data.systems_with_permission).map((system: system) => {
+                systems_with_permission.push(system);
+              });
+              data.systems_with_permission = systems_with_permission;
+              setPermissionedSystems((prev) => {
+                return [
+                  ...prev,
+                  { userId: data.id, systems: data.systems_with_permission },
+                ];
+              });
+            }
+          });
 
-            console.log("fetchData => ", fetchData)
-
-            setIsLoading(false);
-            setUsers(fetchData);
-            return true;
-          } else {
-            toastify.warning("Currently there is no data!", {
-              position: "top-right",
-              autoClose: 3000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "light",
-            });
-            setIsLoading(false);
-            setUsers([]);
-            return false;
-          }
-        } else {
           setIsLoading(false);
-          toastify.error("Server Error: can not load data!", {
-            position: "bottom-right",
-            autoClose: 5000,
+          setUsers(fetchData);
+          return true;
+        } else {
+          toastify.warning("Currently there is no data!", {
+            position: "top-right",
+            autoClose: 3000,
             hideProgressBar: false,
             closeOnClick: true,
             pauseOnHover: true,
@@ -284,12 +313,14 @@ export default function UserManagement() {
             progress: undefined,
             theme: "light",
           });
+          setIsLoading(false);
+          setUsers([]);
           return false;
         }
-      } catch (error) {
+      } else {
         setIsLoading(false);
         toastify.error("Server Error: can not load data!", {
-          position: "top-right",
+          position: "bottom-right",
           autoClose: 5000,
           hideProgressBar: false,
           closeOnClick: true,
@@ -300,54 +331,49 @@ export default function UserManagement() {
         });
         return false;
       }
-    };
-
-    const init = async () => {
-      await checkAndUpdateAccessToken();
-      const result = await fetchUsers();
-      if (result) {
-        toastify.success("Data loaded successfully!", {
-          autoClose: 3000,
-        });
-      }
-    };
-
-    if (!hasRun.current) {
-      hasRun.current = true;
-      init();
+    } catch (error) {
+      setIsLoading(false);
+      toastify.error("Server Error: can not load data!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      return false;
     }
-  }, []);
+  };
 
-  useEffect(() => {
-    const fetchAvailableSystems = async () => {
-      try {
-        const response = await fetch("/api/payment/plans", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+  const fetchAvailableSystems = async () => {
+    try {
+      const response = await fetch("/api/payment/plans", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-        const fetchPlans = await response.json();
-        // Check if fetchData is an array
-        if (Array.isArray(fetchPlans)) {
-          setAvailableSystems(
-            fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
-          );
-          setSearchSystemQueryList(
-            fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
-          );
-        } else {
-          console.log("fetch plans error");
-          return false;
-        }
-      } catch (error) {}
-    };
+      const fetchPlans = await response.json();
+      // Check if fetchData is an array
+      if (Array.isArray(fetchPlans)) {
+        setAvailableSystems(
+          fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
+        );
+        setSearchSystemQueryList(
+          fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
+        );
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.error("Error fetching available systems:", error);
+    }
+  };
 
-    fetchAvailableSystems();
-  }, [loggedUser]);
   const handleEditUser = (user: user) => {
-
     setSelectedUser(user);
     setIsEditDialogOpen(true);
   };
@@ -376,13 +402,11 @@ export default function UserManagement() {
   };
 
   const getTeamName = (teamId: string): string => {
-    console.log(teamId);
     const team = teams.find((team: Team) => team.teamId === Number(teamId));
     return team ? team.teamName : "Unknown Team";
   };
 
   const handleSendCredentialToUser = (user: user) => {
-    console.log("handleSendCredentialToUser => ", user);
     setSelectedUser(user);
 
     setIsSendDialogOpen(true);
@@ -424,12 +448,6 @@ export default function UserManagement() {
   };
 
   const confirmSendUserCredential = async () => {
-    consoleLog("selectedUser", selectedUser);
-    consoleLog("user email", selectedUser?.email);
-    consoleLog("user password", selectedUser?.password);
-    consoleLog("user selected systems", selectedUser?.selected_systems);
-    consoleLog("admin email", loggedUser?.email);
-
     setIsSending(true);
 
     const email = selectedUser?.email;
@@ -476,71 +494,95 @@ export default function UserManagement() {
   };
 
   const confirmDeleteUser = async () => {
+    if (!selectedUser || !selectedUser.email) {
+      hotToast.error("User data is missing");
+      return;
+    }
+
     deletedSystemCount = 0;
 
     setIsDeleting(true);
 
-    const keycloakResponse = await removeUserFromKeycloak(selectedUser.email);
+    try {
+      const keycloakResponse = await removeUserFromKeycloak(selectedUser.email);
 
-    if (keycloakResponse.error) {
-      hotToast.error(`keycloak : ${keycloakResponse.message}`);
-    } else {
-      toastify.success("User was deleted from keycloak successfully", {
-        autoClose: 2000,
+      if (keycloakResponse.error) {
+        hotToast.error(`keycloak : ${keycloakResponse.message}`);
+      } else {
+        toastify.success("User was deleted from keycloak successfully", {
+          autoClose: 2000,
+        });
+      }
+
+      const systemDeletePromises = selectedUser.selected_systems.map((system) =>
+        deleteUserFromSystem(system)
+      );
+
+      const systemDeleteResults = await Promise.allSettled(
+        systemDeletePromises
+      );
+
+      const failedSystems = systemDeleteResults
+        .map((result, index) =>
+          result.status === "rejected"
+            ? selectedUser.selected_systems[index]
+            : null
+        )
+        .filter(Boolean);
+
+      if (failedSystems.length > 0) {
+        hotToast.error(
+          `Failed to delete user from: ${failedSystems.join(", ")}`,
+          { duration: 4000 }
+        );
+      }
+
+      if (typeof selectedUser.id !== "number") {
+        hotToast.error("User info is not correct!", {
+          duration: 3000,
+        });
+      }
+
+      const umsResponse = await fetch(`/api/ums/customers`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${access_token}`,
+        },
+        body: JSON.stringify({ id: selectedUser.id }),
       });
+
+      if (!umsResponse.ok) {
+        throw new Error("Failed to delete user from UMS");
+      }
+
+      const contentType = umsResponse.headers.get("Content-Type");
+      if (contentType && contentType.includes("application/json")) {
+        toastify.success("User was deleted from UMS successfully");
+
+        setUsers((prevUsers) =>
+          prevUsers.filter((user) => user.id !== selectedUser.id)
+        );
+
+        setDeletedSystem({
+          FMS: false,
+          CRM: false,
+          WMS: false,
+          TMS: false,
+          AMS: false,
+          QCMS: false,
+          TSMS: false,
+          TDMS: false,
+          HR: false,
+          count: 0,
+        });
+      }
+    } catch (error: any) {
+      hotToast.error(error.message || "Unexpected error during user deletion");
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
     }
-
-    const systemDeletePromises = selectedUser.selected_systems.map((system) =>
-      deleteUserFromSystem(system)
-    );
-
-    await Promise.allSettled(systemDeletePromises);
-
-    if (typeof selectedUser.id !== "number") {
-      hotToast.error("User info is not correct!", {
-        duration: 3000,
-      });
-    }
-
-    await fetch(`/api/ums/customers`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + access_token,
-      },
-      body: JSON.stringify({
-        id: selectedUser.id,
-      }),
-    })
-      .then(async (response) => {
-        if (response.ok) {
-          const contentType = response.headers.get("Content-Type");
-          if (contentType && contentType.includes("application/json")) {
-            toastify.success("User was deleted from UMS successfully");
-
-            setUsers((prevUsers) =>
-              prevUsers.filter((user) => user.id !== selectedUser.id)
-            );
-            setDeletedSystem({
-              FMS: false,
-              CRM: false,
-              WMS: false,
-              TMS: false,
-              AMS: false,
-              count: 0,
-            });
-          } else {
-            console.warn("Response is empty or not JSON");
-          }
-        }
-      })
-      .catch((error) => {
-        hotToast.error("Server Error: can not delete user");
-      });
-
-    setIsDeleting(false);
-
-    setIsDeleteDialogOpen(false);
   };
 
   const addMoreSystem = (user: user, system: system) => {
@@ -554,8 +596,6 @@ export default function UserManagement() {
     setSelectedUser(user);
   };
 
- 
-
   const handleResetPassword = (user: any) => {
     setSelectedUser(user);
     setIsPasswordResetDialogOpen(true);
@@ -567,8 +607,6 @@ export default function UserManagement() {
         ? prev.filter((s) => s != system)
         : [...prev, system];
     });
-
-    console.log("searchSystemQueryList => ", searchSystemQueryList);
   };
 
   const addNewUser = async (newUser: user) => {
@@ -586,341 +624,386 @@ export default function UserManagement() {
     setCurrentPage(1); // Reset to page 1 when changing rows per page
   };
 
+  if (isTenantChecking) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <CircularProgress />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 vh-96">
-      <ToastContainer position="top-right" autoClose={800} />
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <InputWrapper
-            placeholder="Search users..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full sm:w-[300px]"
-          />
-          <Button variant="outline" size="icon">
-            <Filter className="h-4 w-4" />
-          </Button>
+      {hasTenant ? (
+        <div>
+          <ToastContainer position="top-right" autoClose={800} />
+          <div className="flex flex-col sm:flex-row justify-between gap-4">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <InputWrapper
+                placeholder="Search users..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full sm:w-[300px]"
+              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    Filter Systems
+                  </Button>
+                </PopoverTrigger>
 
-          {availableSystems?.map((system: system) => (
-            <div key={system} className="flex flex-wrap gap-4 pt-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id={system}
-                  checked={searchSystemQueryList?.includes(system)}
-                  onCheckedChange={() => handleSystemSearchQuery(system)}
-                />
-                <Label htmlFor={system} className="font-normal">
-                  {system}
-                </Label>
-              </div>
+                <PopoverContent className="w-64 max-h-64 overflow-y-auto space-y-2">
+                  {availableSystems?.map((system: system) => (
+                    <div key={system} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={system}
+                        checked={searchSystemQueryList?.includes(system)}
+                        onCheckedChange={() => handleSystemSearchQuery(system)}
+                      />
+                      <Label htmlFor={system}>{system}</Label>
+                    </div>
+                  ))}
+                </PopoverContent>
+              </Popover>
             </div>
-          ))}
-        </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <GroupAddIcon className="h-8 w-8" />
-          New User
-        </Button>
-      </div>
-      <div className="relative" style={{ height: "70vh" }}>
-        {/* Scrollable Container */}
-        <div className="overflow-y-auto h-[calc(70vh-60px)]">
-          <Table className="w-full border-collapse">
-            {/* Sticky Header */}
-            <TableHeader
-              className="sticky top-0 shadow-md z-20"
-              style={{ position: "sticky", top: 0, zIndex: 20 }}
-            >
-              <TableRow>
-                <TableHead>No</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Password</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Systems</TableHead>
-                <TableHead className="w-[80px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-
-            {/* Table Body with Scroll */}
-            <TableBody className="" style={{ overflowY: "auto" }}>
-              {!isLoading &&
-                paginatedUsers?.map((user: user, index) => (
-                  <TableRow key={user.id} className="fit-content h-12">
-                    <TableCell>
-                      {index + (currentPage - 1) * itemsPerPage + 1}
-                    </TableCell>
-                    <TableCell className="font-medium">{user.name} {loggedUser?.email === user.email ? "( me )" : ""}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.password}</TableCell>
-                    <TableCell>{user.phone}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        <Tooltip.Provider>
-                          {user.selected_systems?.map((system: system) => {
-                            let roleId: string | number = -1;
-                            if (system === "FMS")
-                              roleId = user.fms_user_role_id;
-                            else if (system === "WMS")
-                              roleId = user.wms_user_role_id;
-                            else if (system === "CRM")
-                              roleId = user.crm_user_role_id;
-                            else if (system === "TMS")
-                              roleId = user.tms_user_role_id;
-                              else if (system === "AMS")
-                              roleId = user.ams_user_role_id;
-                            return (
-                              <Tooltip.Root key={system}>
-                                <Tooltip.Trigger
-                                  className={`px-3 py-1 bg-blue-500 text-white rounded-full cursor-pointer`}
-                                >
-                                  {system}
-                                </Tooltip.Trigger>
-                                <Tooltip.Portal>
-                                  <Tooltip.Content className="bg-gray-900 text-white p-2 rounded-md shadow-lg">
-                                    <div>
-                                      Role: {getRoleName(system, roleId)}
-                                    </div>
-                                    {system === "FMS" && (
-                                      <div className="w-[200px]">
-                                        Branch:{" "}
-                                        {Array.isArray(user?.fms_branch)
-                                          ? user.fms_branch
-                                              .map((branchId) =>
-                                                getBranchName(branchId)
-                                              )
-                                              .join(", ")
-                                          : "N/A"}
-                                      </div>
-                                    )}
-                                    {system === "TMS" && (
-                                      <div className="w-[200px]">
-                                        Team:{" "}
-                                        {user?.access === "0"
-                                          ? (() => {
-                                              let teams: string[] = [];
-
-                                              if (
-                                                typeof user.teams === "string"
-                                              ) {
-                                                try {
-                                                  // Try to parse the string safely
-                                                  teams = JSON.parse(
-                                                    (
-                                                      user.teams as string
-                                                    ).replace(/'/g, '"')
-                                                  );
-                                                } catch (err) {
-                                                  console.warn(
-                                                    "Failed to parse user.teams:",
-                                                    user.teams
-                                                  );
-                                                }
-                                              } else if (
-                                                Array.isArray(user.teams)
-                                              ) {
-                                                teams = user.teams;
-                                              }
-
-                                              return teams.length > 0
-                                                ? teams
-                                                    .map((teamId) =>
-                                                      getTeamName(teamId)
-                                                    )
-                                                    .filter(Boolean)
-                                                    .join(", ")
-                                                : "N/A";
-                                            })()
-                                          : "All Teams"}
-                                      </div>
-                                    )}
-
-                                    <Tooltip.Arrow className="fill-gray-900" />
-                                  </Tooltip.Content>
-                                </Tooltip.Portal>
-                              </Tooltip.Root>
-                            );
-                          })}
-
-                          {availableSystems
-                            ?.filter(
-                              (system: system) =>
-                                !user.selected_systems?.includes(system)
-                            )
-                            .map((system: system) => (
-                              <Tooltip.Provider key={system}>
-                                <Tooltip.Root>
-                                  <Tooltip.Trigger
-                                    className="px-3 py-1 bg-gray-500 text-white rounded-full cursor-pointer"
-                                    onClick={() => addMoreSystem(user, system)}
-                                  >
-                                    {system}
-                                  </Tooltip.Trigger>
-                                  <Tooltip.Portal>
-                                    <Tooltip.Content className="bg-gray-900 text-white p-2 rounded-md shadow-lg">
-                                      <div>Click to add {system}</div>
-                                      <Tooltip.Arrow className="fill-gray-900" />
-                                    </Tooltip.Content>
-                                  </Tooltip.Portal>
-                                </Tooltip.Root>
-                              </Tooltip.Provider>
-                            ))}
-                        </Tooltip.Provider>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => handleEditUser(user)}
-                          >
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-black"
-                            onClick={() => handleSendCredentialToUser(user)}
-                          >
-                            <Send className="h-4 w-4 mr-2" />
-                            Send to User
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => handleDeleteUser(user)}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <GroupAddIcon className="h-8 w-8" />
+              New User
+            </Button>
+          </div>
+          <div className="relative" style={{ height: "70vh" }}>
+            {/* Scrollable Container */}
+            <div className="overflow-y-auto h-[calc(70vh-60px)]">
+              <Table className="w-full border-collapse">
+                {/* Sticky Header */}
+                <TableHeader
+                  className="sticky top-0 shadow-md z-20"
+                  style={{ position: "sticky", top: 0, zIndex: 20 }}
+                >
+                  <TableRow>
+                    <TableHead>No</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Password</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Systems</TableHead>
+                    <TableHead className="w-[80px]">Actions</TableHead>
                   </TableRow>
-                ))}
-            </TableBody>
-          </Table>
-          {isLoading && (
-            <div className="flex items-center justify-center w-full absolute h-[60vh]">
-              <div className="loader" />
+                </TableHeader>
+
+                {/* Table Body with Scroll */}
+                <TableBody className="" style={{ overflowY: "auto" }}>
+                  {!isLoading &&
+                    paginatedUsers?.map((user: user, index) => (
+                      <TableRow key={user.id} className="fit-content h-12">
+                        <TableCell>
+                          {index + (currentPage - 1) * itemsPerPage + 1}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {user.name}{" "}
+                          {loggedUser?.email === user.email ? "( me )" : ""}
+                        </TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>{user.password}</TableCell>
+                        <TableCell>{user.phone}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            <Tooltip.Provider>
+                              {user.selected_systems?.map((system: system) => {
+                                let roleId: string | number = -1;
+                                if (system === "FMS")
+                                  roleId = user.fms_user_role_id;
+                                else if (system === "WMS")
+                                  roleId = user.wms_user_role_id;
+                                else if (system === "CRM")
+                                  roleId = user.crm_user_role_id;
+                                else if (system === "TMS")
+                                  roleId = user.tms_user_role_id;
+                                else if (system === "AMS")
+                                  roleId = user.ams_user_role_id;
+                                else if (system === "QCMS")
+                                  roleId = user.qcms_user_role_id;
+                                else if (system === "TSMS")
+                                  roleId = user.tsms_user_role_id;
+                                else if (system === "TDMS")
+                                  roleId = user.tdms_user_role_id;
+                                else if (system === "HR")
+                                  roleId = user.hr_user_role_id;
+                                return (
+                                  <Tooltip.Root key={system}>
+                                    <Tooltip.Trigger
+                                      className={`px-3 py-1 bg-blue-500 text-white rounded-full cursor-pointer`}
+                                    >
+                                      {system}
+                                    </Tooltip.Trigger>
+                                    <Tooltip.Portal>
+                                      <Tooltip.Content className="bg-gray-900 text-white p-2 rounded-md shadow-lg">
+                                        <div>
+                                          Role: {getRoleName(system, roleId)}
+                                        </div>
+                                        {system === "FMS" && (
+                                          <div className="w-[200px]">
+                                            Branch:{" "}
+                                            {Array.isArray(user?.fms_branch)
+                                              ? user.fms_branch
+                                                  .map((branchId) =>
+                                                    getBranchName(branchId)
+                                                  )
+                                                  .join(", ")
+                                              : "N/A"}
+                                          </div>
+                                        )}
+                                        {system === "TMS" && (
+                                          <div className="w-[200px]">
+                                            Team:{" "}
+                                            {user?.access === "0"
+                                              ? (() => {
+                                                  let teams: string[] = [];
+
+                                                  if (
+                                                    typeof user.teams ===
+                                                    "string"
+                                                  ) {
+                                                    try {
+                                                      // Try to parse the string safely
+                                                      teams = JSON.parse(
+                                                        (
+                                                          user.teams as string
+                                                        ).replace(/'/g, '"')
+                                                      );
+                                                    } catch (err) {
+                                                      console.warn(
+                                                        "Failed to parse user.teams:",
+                                                        user.teams
+                                                      );
+                                                    }
+                                                  } else if (
+                                                    Array.isArray(user.teams)
+                                                  ) {
+                                                    teams = user.teams;
+                                                  }
+
+                                                  return teams.length > 0
+                                                    ? teams
+                                                        .map((teamId) =>
+                                                          getTeamName(teamId)
+                                                        )
+                                                        .filter(Boolean)
+                                                        .join(", ")
+                                                    : "N/A";
+                                                })()
+                                              : "All Teams"}
+                                          </div>
+                                        )}
+
+                                        <Tooltip.Arrow className="fill-gray-900" />
+                                      </Tooltip.Content>
+                                    </Tooltip.Portal>
+                                  </Tooltip.Root>
+                                );
+                              })}
+
+                              {availableSystems
+                                ?.filter(
+                                  (system: system) =>
+                                    !user.selected_systems?.includes(system)
+                                )
+                                .map((system: system) => (
+                                  <Tooltip.Provider key={system}>
+                                    <Tooltip.Root>
+                                      <Tooltip.Trigger
+                                        className="px-3 py-1 bg-gray-500 text-white rounded-full cursor-pointer"
+                                        onClick={() =>
+                                          addMoreSystem(user, system)
+                                        }
+                                      >
+                                        {system}
+                                      </Tooltip.Trigger>
+                                      <Tooltip.Portal>
+                                        <Tooltip.Content className="bg-gray-900 text-white p-2 rounded-md shadow-lg">
+                                          <div>Click to add {system}</div>
+                                          <Tooltip.Arrow className="fill-gray-900" />
+                                        </Tooltip.Content>
+                                      </Tooltip.Portal>
+                                    </Tooltip.Root>
+                                  </Tooltip.Provider>
+                                ))}
+                            </Tooltip.Provider>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => handleEditUser(user)}
+                              >
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-black"
+                                onClick={() => handleSendCredentialToUser(user)}
+                              >
+                                <Send className="h-4 w-4 mr-2" />
+                                Send to User
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() => handleDeleteUser(user)}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+              {isLoading && (
+                <div className="flex items-center justify-center w-full absolute h-[60vh]">
+                  <div className="loader" />
+                </div>
+              )}
             </div>
+
+            {/* Pagination and Row Selection */}
+            <div className="absolute bottom-0 left-0 right-0 bg-white py-2 flex justify-center">
+              <Stack spacing={2}>
+                <Pagination
+                  count={totalPages}
+                  page={currentPage}
+                  onChange={goToPage}
+                />
+              </Stack>
+
+              <Stack spacing={2} direction="row" alignItems="center">
+                <Typography>Counts :</Typography>
+                <Select
+                  value={itemsPerPage}
+                  //@ts-ignore
+                  onChange={handleRowsPerPageChange}
+                  size="small"
+                >
+                  <MenuItem value={5}>5</MenuItem>
+                  <MenuItem value={10}>10</MenuItem>
+                  <MenuItem value={20}>20</MenuItem>
+                  <MenuItem value={50}>50</MenuItem>
+                  <MenuItem value={100}>100</MenuItem>
+                </Select>
+              </Stack>
+            </div>
+          </div>
+
+          <CreateUserDialog
+            availableSystems={availableSystems}
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+            addNewUser={addNewUser}
+          />
+
+          <AddMoreUserDialog
+            open={isCreateAddDialogOpen}
+            onOpenChange={setIsCreateAddDialogOpen}
+            user={selectedUser}
+            addUpdatedUser={addUpdatedUser}
+            system={systemToAdd}
+          />
+
+          {selectedUser && (
+            <EditUserDialog
+              open={isEditDialogOpen}
+              onOpenChange={setIsEditDialogOpen}
+              user={selectedUser}
+              addUpdatedUser={addUpdatedUser}
+            />
+          )}
+
+          <AlertDialog
+            open={isDeleteDialogOpen}
+            onOpenChange={setIsDeleteDialogOpen}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action will permanently delete the user
+                  <span className="font-semibold"> {selectedUser?.name}</span>.
+                  This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <button
+                  onClick={async () => {
+                    setIsDeleting(true);
+                    try {
+                      await confirmDeleteUser();
+                      setIsDeleteDialogOpen(false);
+                    } finally {
+                      setIsDeleting(false);
+                    }
+                  }}
+                  disabled={isDeleting}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 px-4 py-2 rounded-md"
+                >
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <AlertDialog
+            open={isSendDialogOpen}
+            onOpenChange={setIsSendDialogOpen}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  The credential will be sent to
+                  <span className="font-semibold"> {selectedUser?.name}</span>.
+                  This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction asChild>
+                  <button
+                    onClick={async (e) => {
+                      e.preventDefault(); // prevent auto-close
+                      await confirmSendUserCredential(); // control everything in here
+                    }}
+                    className="bg-emerald-600 text-white hover:bg-emerald-700"
+                    disabled={isSending}
+                  >
+                    {isSending ? "Sending..." : "Send"}
+                  </button>
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          {selectedUser && (
+            <PasswordResetDialog
+              open={isPasswordResetDialogOpen}
+              onOpenChange={setIsPasswordResetDialogOpen}
+              userId={selectedUser.id}
+              userName={selectedUser.name}
+            />
           )}
         </div>
-
-        {/* Pagination and Row Selection */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white py-2 flex justify-center">
-          <Stack spacing={2}>
-            <Pagination
-              count={totalPages}
-              page={currentPage}
-              onChange={goToPage}
-            />
-          </Stack>
-
-          <Stack spacing={2} direction="row" alignItems="center">
-            <Typography>Counts :</Typography>
-            <Select
-              value={itemsPerPage}
-              //@ts-ignore
-              onChange={handleRowsPerPageChange}
-              size="small"
-            >
-              <MenuItem value={5}>5</MenuItem>
-              <MenuItem value={10}>10</MenuItem>
-              <MenuItem value={20}>20</MenuItem>
-              <MenuItem value={50}>50</MenuItem>
-              <MenuItem value={100}>100</MenuItem>
-            </Select>
-          </Stack>
-        </div>
-      </div>
-
-      <CreateUserDialog
-        availableSystems={availableSystems}
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
-        addNewUser={addNewUser}
-      />
-
-      <AddMoreUserDialog
-        open={isCreateAddDialogOpen}
-        onOpenChange={setIsCreateAddDialogOpen}
-        user={selectedUser}
-        addUpdatedUser={addUpdatedUser}
-        system={systemToAdd}
-      />
-
-      {selectedUser && (
-        <EditUserDialog
-          open={isEditDialogOpen}
-          onOpenChange={setIsEditDialogOpen}
-          user={selectedUser}
-          addUpdatedUser={addUpdatedUser}
-        />
-      )}
-
-      <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action will permanently delete the user
-              <span className="font-semibold"> {selectedUser?.name}</span>. This
-              action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDeleteUser}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isDeleting ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={isSendDialogOpen} onOpenChange={setIsSendDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              The credential will be sent to
-              <span className="font-semibold"> {selectedUser?.name}</span>. This
-              action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction asChild>
-              <button
-                onClick={async (e) => {
-                  e.preventDefault(); // prevent auto-close
-                  await confirmSendUserCredential(); // control everything in here
-                }}
-                className="bg-emerald-600 text-white hover:bg-emerald-700"
-                disabled={isSending}
-              >
-                {isSending ? "Sending..." : "Send"}
-              </button>
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {selectedUser && (
-        <PasswordResetDialog
-          open={isPasswordResetDialogOpen}
-          onOpenChange={setIsPasswordResetDialogOpen}
-          userId={selectedUser.id}
-          userName={selectedUser.name}
-        />
+      ) : (
+        <p className="text-black">
+          {" "}
+          Sorry, you did not register your tenant yet.
+        </p>
       )}
     </div>
   );
