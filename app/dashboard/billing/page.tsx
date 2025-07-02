@@ -30,6 +30,8 @@ import { Plan } from "@/lib/data";
 import { useUser } from "@/app/contexts/UserContext";
 import { differenceInDays, format } from "date-fns";
 import { CheckCircle } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function BillingPage() {
   const { user: loggedUser, loading } = useUser();
@@ -40,30 +42,55 @@ export default function BillingPage() {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [plans, setPlans] = useState<Plan[] | null>(null);
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const status = searchParams.get("status");
+
   useEffect(() => {
-    const syncPlans = async () => {
-      try {
-        const res = await fetch("/api/payment/plans", { method: "GET" });
-        if (!res.ok) throw new Error("Failed to sync plans");
-
-        const responseData = await res.json();
-
-        const parsedPlans = responseData.map((plan: any) => ({
-          ...plan,
-          features:
-            typeof plan.features === "string"
-              ? JSON.parse(plan.features)
-              : plan.features,
-        }));
-
-        setPlans(parsedPlans);
-      } catch (err) {
-        console.error("Error loading plans:", err);
-      }
-    };
-
     syncPlans();
   }, []);
+
+  useEffect(() => {
+    if (!status) return;
+
+    console.log("status => ", status);
+
+    if (status === "14000") {
+      toast.success(`Your subscription has been updated successfully!`);
+    }
+
+    if (status === "failed") {
+      toast.error("Sorry but your subscription has not been updated");
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    params.delete("status");
+
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    router.replace(newUrl);
+
+  }, [status]);
+
+  const syncPlans = async () => {
+    try {
+      const res = await fetch("/api/payment/plans", { method: "GET" });
+      if (!res.ok) throw new Error("Failed to sync plans");
+
+      const responseData = await res.json();
+
+      const parsedPlans = responseData.map((plan: any) => ({
+        ...plan,
+        features:
+          typeof plan.features === "string"
+            ? JSON.parse(plan.features)
+            : plan.features,
+      }));
+
+      setPlans(parsedPlans);
+    } catch (err) {
+      console.error("Error loading plans:", err);
+    }
+  };
 
   const planImages: { [key: string]: string } = {
     starter: "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
@@ -105,7 +132,7 @@ export default function BillingPage() {
         "Your subscription has been cancelled. You can still use the service until the end of your billing period."
       );
     } catch (error) {
-      toast.success("Your subscription was not cancelled. Please try again.");
+      toast.error("Your subscription was not cancelled. Please try again.");
     } finally {
       setIsLoading(false);
     }

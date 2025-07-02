@@ -53,46 +53,7 @@ export function PaymentForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    try {
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      toast.success("Your payment has been processed successfully.");
-
-      if (onSuccess) onSuccess();
-    } catch (error) {
-      toast.error(
-        "There was an error processing your payment. Please try again."
-      );
-    } finally {
-      setIsLoading(false);
-    }
   };
-
-  async function createOrder() {
-    const response = await fetch("/api/payment/paypal/create-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount }),
-    });
-    const data = await response.json();
-    return data.id; // order ID returned from backend
-  }
-
-  // Function to call your backend API to capture the order
-  async function captureOrder(orderID: string) {
-    const response = await fetch("/api/payment/paypal/capture-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderID }),
-    });
-
-    const result = await response.json();
-
-    return result;
-  }
 
   return (
     <Card className="w-full">

@@ -26,7 +26,6 @@ export async function POST(req: Request) {
   const responseCode = formData.get("response_code") as string | null;
   const merchantReference = formData.get("merchant_reference") as string | null;
   const customerEmail = formData.get("customer_email") as string | null;
-  // const agreementId = formData.get("agreement_id") as string | null;
   const amount = formData.get("amount") as string | null;
   const signature = formData.get("signature") as string | null;
 
@@ -34,7 +33,6 @@ export async function POST(req: Request) {
     !responseCode ||
     !merchantReference ||
     !customerEmail ||
-    // !agreementId ||
     !amount ||
     !signature
   ) {
@@ -59,12 +57,7 @@ export async function POST(req: Request) {
       .join("") +
     RESPONSE_PHRASE.trim();
 
-    console.log("signatureString => ", signatureString);
-
   const generatedSignature = sha256(signatureString);
-
-  console.log("generatedSignature => ", generatedSignature);
-  console.log("signature => ", signature);
 
   if (generatedSignature !== signature) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });

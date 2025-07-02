@@ -2,27 +2,17 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { sha256 } from "js-sha256";
-import {
-  ACCESS_CODE,
-  COMMAND,
-  CURRENCY,
-  LANGUAGE,
-  MERCHANT_ID,
-  PAYFORT_PAYMENT_PAGE_URL,
-  PAYMENT_URL,
-  REQUEST_PHRASE,
-  RETURN_URL,
-} from "@/app/config/setting";
-import { Currency, Loader } from "lucide-react";
+import { PAYFORT_PAYMENT_PAGE_URL } from "@/app/config/setting";
 
 interface PayFortFormProps {
-  amount: number; // amount in minor units (e.g. "10000" for 100 AED)
+  amount: number;
   email: string | undefined | null;
 }
 
 const PayFortForm = ({ amount, email }: PayFortFormProps) => {
-  const [submitted, setSubmitted] = useState(false);
+  useEffect(() => {
+    initiatePayment();
+  });
 
   const initiatePayment = async () => {
     try {
@@ -32,9 +22,9 @@ const PayFortForm = ({ amount, email }: PayFortFormProps) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: 15,
+          amount: amount,
           currency: "USD",
-          customer_email: "kijimatakuma0331@gmail.com",
+          customer_email: email,
         }),
       });
 
@@ -61,10 +51,7 @@ const PayFortForm = ({ amount, email }: PayFortFormProps) => {
     }
   };
 
-  return (
-    // <Loader/>
-    <button onClick={initiatePayment}>Start Subscription</button>
-  );
+  return <></>;
 };
 
 export default PayFortForm;
