@@ -25,7 +25,6 @@ type InitialPaymentParamType = {
 };
 
 const generateSignature = (params: Record<string, any>): string => {
-  console.log("params =>*" + params + "*");
   const filteredParams = Object.keys(params)
     .filter((key) => key !== "signature")
     .reduce((obj, key) => {
@@ -35,26 +34,19 @@ const generateSignature = (params: Record<string, any>): string => {
 
   const sortedKeys = Object.keys(filteredParams).sort();
 
-  const trimmedRequestPhrase = String(REQUEST_PHRASE || "").trim();
-
   const keyValuePairs = sortedKeys.map(
     (key) => `${key.trim()}=${String(filteredParams[key]).trim()}`
   );
 
+  console.log("keyValuePairs => ", keyValuePairs);
+
   const signatureString = REQUEST_PHRASE.trim() + keyValuePairs.join("") + REQUEST_PHRASE.trim();
 
-    console.log("✅ keyValuePairs => *" + keyValuePairs + "*");
-    console.log("✅ trimmedRequestPhrase => *"+trimmedRequestPhrase+"*");
-
-    console.log("✅ signatureString => *"+signatureString+"*");
-    
     const signature = crypto
     .createHash("sha256")
     .update(signatureString)
     .digest("hex");
     
-    // console.log("✅" + signature);
-
   return signature;
 };
 
@@ -81,7 +73,7 @@ export async function POST(request: Request) {
       recurring_mode: "FIXED",
       recurring_transactions_count: 12,
       recurring_expiry_date: "2026-06-30",
-      return_url: "https://shiper.io/api/payment/payfort/callback",
+      return_url: RETURN_URL,
     };
 
     const signature = generateSignature(initialParams);
@@ -90,23 +82,6 @@ export async function POST(request: Request) {
       ...initialParams,
       signature: signature,
     };
-
-    // const response = await fetch(PAYFORT_API, {
-    //   method: "POST",
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   },
-    //   body: JSON.stringify(params)
-    // })
-
-    // if(response.ok) {
-
-    //   const responseData = await response.json();
-
-    //   console.log("✅ Response Data => ", responseData);
-    // } else {
-    //   throw new Error("Payfort Response Error Occured");
-    // }
 
     return NextResponse.json({ params });
   } catch (error) {

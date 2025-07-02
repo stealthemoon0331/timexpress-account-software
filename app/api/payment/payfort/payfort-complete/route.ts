@@ -1,6 +1,6 @@
 // app/api/payment/payfort/payfort-complete/route.ts
 
-import { REQUEST_PHRASE, RETURN_PAGE_URL } from "@/app/config/setting";
+import { RESPONSE_PHRASE, RETURN_PAGE_URL } from "@/app/config/setting";
 import { sha256 } from "js-sha256";
 import { NextResponse } from "next/server";
 
@@ -20,6 +20,8 @@ const subscriptions: Record<
 
 export async function POST(req: Request) {
   const formData = await req.formData();
+
+  console.log("* 🍀 formData ==> ", formData);
 
   const responseCode = formData.get("response_code") as string | null;
   const merchantReference = formData.get("merchant_reference") as string | null;
@@ -45,19 +47,24 @@ export async function POST(req: Request) {
   const paramsToVerify: Record<string, string> = {};
   formData.forEach((value, key) => {
     if (key !== "signature" && typeof value === "string") {
-      paramsToVerify[key] = value;
+      paramsToVerify[key.trim()] = value.trim();
     }
   });
 
   const signatureString =
-    REQUEST_PHRASE +
+    RESPONSE_PHRASE.trim() +
     Object.keys(paramsToVerify)
       .sort()
       .map((key) => `${key}=${paramsToVerify[key]}`)
       .join("") +
-    REQUEST_PHRASE;
+    RESPONSE_PHRASE.trim();
+
+    console.log("signatureString => ", signatureString);
 
   const generatedSignature = sha256(signatureString);
+
+  console.log("generatedSignature => ", generatedSignature);
+  console.log("signature => ", signature);
 
   if (generatedSignature !== signature) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
