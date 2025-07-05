@@ -633,12 +633,12 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="space-y-4 vh-96">
+    <div className="space-y-4 vh-96 overflow-y-auto px-2 sm:px-4">
       {hasTenant ? (
-        <div>
+        <>
           <ToastContainer position="top-right" autoClose={800} />
-          <div className="flex flex-col sm:flex-row justify-between gap-4">
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 flex-wrap">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
               <InputWrapper
                 placeholder="Search users..."
                 value={searchQuery}
@@ -647,11 +647,14 @@ export default function UserManagement() {
               />
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    Filter Systems
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto"
+                  >
+                    Systems
                   </Button>
                 </PopoverTrigger>
-
                 <PopoverContent className="w-64 max-h-64 overflow-y-auto space-y-2">
                   {availableSystems?.map((system: system) => (
                     <div key={system} className="flex items-center space-x-2">
@@ -666,15 +669,22 @@ export default function UserManagement() {
                 </PopoverContent>
               </Popover>
             </div>
-            <Button onClick={() => setIsCreateDialogOpen(true)}>
-              <GroupAddIcon className="h-8 w-8" />
-              New User
-            </Button>
+
+            <div className="flex w-full sm:w-auto justify-end sm:justify-start">
+              <Button
+                onClick={() => setIsCreateDialogOpen(true)}
+                className="w-full sm:w-auto"
+              >
+                <GroupAddIcon className="h-5 w-5 mr-2" />
+                New User
+              </Button>
+            </div>
           </div>
+
           <div className="relative" style={{ height: "70vh" }}>
             {/* Scrollable Container */}
-            <div className="overflow-y-auto h-[calc(70vh-60px)]">
-              <Table className="w-full border-collapse">
+            <div className="overflow-x-auto h-[calc(70vh-60px)]">
+              <Table className="min-w-[800px] w-full border-collapse">
                 {/* Sticky Header */}
                 <TableHeader
                   className="sticky top-0 shadow-md z-20"
@@ -874,7 +884,7 @@ export default function UserManagement() {
             </div>
 
             {/* Pagination and Row Selection */}
-            <div className="absolute bottom-0 left-0 right-0 bg-white py-2 flex justify-center">
+            <div className="absolute bottom-0 left-0 right-0 bg-white py-2 px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
               <Stack spacing={2}>
                 <Pagination
                   count={totalPages}
@@ -998,11 +1008,11 @@ export default function UserManagement() {
               userName={selectedUser.name}
             />
           )}
-        </div>
+        </>
       ) : (
         <p className="text-black">
           {" "}
-          Sorry, you did not register your tenant yet.
+          ⚠ Sorry, you did not register your tenant yet.
         </p>
       )}
     </div>
