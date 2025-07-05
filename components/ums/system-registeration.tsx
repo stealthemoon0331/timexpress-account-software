@@ -23,22 +23,17 @@ import {
 import PhoneIcon from "@mui/icons-material/Phone";
 import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import CloseIcon from "@mui/icons-material/Close";
-import SaveIcon from "@mui/icons-material/Save";
 import EditIcon from "@mui/icons-material/Edit";
 import { useUser } from "@/app/contexts/UserContext";
 import { useAuth } from "@/app/contexts/authContext";
 import {
   FormUser,
-  SelectedSystemRoles,
   system,
-  Team,
-  user,
 } from "@/lib/ums/type";
 import { addUserToPortals } from "@/lib/ums/systemHandlers/add/addUserToPortals";
 import { useData } from "@/app/contexts/dataContext";
 import { checkIfHasTenant, registerTenantId } from "@/lib/tenant";
 import { updateUserToPortals } from "@/lib/ums/systemHandlers/edit/updateUserToPortals";
-import { getRoleName } from "@/lib/ums/utils";
 import { useFormStore } from "@/lib/store/user-form";
 
 interface FormData {
@@ -745,8 +740,6 @@ export default function SystemRegistration() {
                     styles={{
                       menu: (provided) => ({
                         ...provided,
-                        maxHeight: 100,
-                        overflowY: "auto",
                         zIndex: 9999,
                       }),
                     }}
