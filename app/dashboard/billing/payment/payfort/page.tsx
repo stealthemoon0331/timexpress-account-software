@@ -9,11 +9,12 @@ import {
   CURRENCY,
   LANGUAGE,
   MERCHANT_ID,
+  PAYFORT_PAYMENT_PAGE_URL,
   PAYMENT_URL,
   REQUEST_PHRASE,
   RETURN_URL,
 } from "@/app/config/setting";
-import { Loader } from "lucide-react";
+import { Currency, Loader } from "lucide-react";
 
 interface PayFortFormProps {
   amount: number; // amount in minor units (e.g. "10000" for 100 AED)
@@ -91,24 +92,40 @@ const PayFortForm = ({ amount, email }: PayFortFormProps) => {
   // }, []);
 
   const initiatePayment = async () => {
-    const res = await fetch("/api/payment/payfort/initiate");
-    const params = await res.json();
+    try {
+      const res = await fetch("/api/payment/payfort/initiate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: 15,
+          currency: "USD",
+          customer_email: "kijimatakuma0331@gmail.com",
+        }),
+      });
 
-    // return;
-    // const form = document.createElement("form");
-    // form.method = "POST";
-    // form.action = "https://sbcheckout.payfort.com/FortAPI/paymentPage";
+      const data = await res.json();
+      console.log("* params => ", data.params);
 
-    // Object.entries(params).forEach(([key, value]) => {
-    //   const input = document.createElement("input");
-    //   input.type = "hidden";
-    //   input.name = key;
-    //   input.value = value.toString();
-    //   form.appendChild(input);
-    // });
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = PAYFORT_PAYMENT_PAGE_URL;
+      form.setAttribute("accept-charset", "utf-8");
 
-    // document.body.appendChild(form);
-    // form.submit();
+      Object.entries(data.params).forEach(([key, value]) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
+    } catch (error) {
+      console.error("PayFort payment initiation failed:", error);
+    }
   };
 
   return (
