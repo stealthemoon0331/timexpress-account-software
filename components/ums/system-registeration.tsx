@@ -26,10 +26,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import { useUser } from "@/app/contexts/UserContext";
 import { useAuth } from "@/app/contexts/authContext";
-import {
-  FormUser,
-  system,
-} from "@/lib/ums/type";
+import { FormUser, system } from "@/lib/ums/type";
 import { addUserToPortals } from "@/lib/ums/systemHandlers/add/addUserToPortals";
 import { useData } from "@/app/contexts/dataContext";
 import { checkIfHasTenant, registerTenantId } from "@/lib/tenant";
@@ -110,6 +107,8 @@ export default function SystemRegistration() {
   }, []);
 
   useEffect(() => {
+    if (!Array.isArray(availableSystems)) return;
+
     setSystemOptions(
       availableSystems.map((system) => ({
         value: system,
@@ -320,18 +319,18 @@ export default function SystemRegistration() {
       }
 
       if (loggedUser?.email) {
-          const tenantRegResponse = await registerTenantId(loggedUser.email);
+        const tenantRegResponse = await registerTenantId(loggedUser.email);
 
-          if (!tenantRegResponse.error) {
-            tenantId = tenantRegResponse.tenantId;
-          } else {
-            hotToast.error(tenantRegResponse?.errorMessage || "Error", {
-              duration: 3000,
-            });
+        if (!tenantRegResponse.error) {
+          tenantId = tenantRegResponse.tenantId;
+        } else {
+          hotToast.error(tenantRegResponse?.errorMessage || "Error", {
+            duration: 3000,
+          });
 
-            return;
-          }
+          return;
         }
+      }
 
       const formDataWithTenantId = { ...formData, tenantId };
 
@@ -345,8 +344,6 @@ export default function SystemRegistration() {
       );
 
       if (result.success) {
-        
-
         setRegisteredUser(result.data);
 
         setHasTenant(true);
@@ -413,9 +410,7 @@ export default function SystemRegistration() {
         registeredUser.email,
         // formData.email,
         formData.username,
-        formData.password,
-        [],
-        registeredUser.selected_systems
+        formData.password
       );
 
       if (!keycloakUpdateResponse.error) {

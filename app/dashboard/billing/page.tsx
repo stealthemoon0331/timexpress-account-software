@@ -178,12 +178,6 @@ export default function BillingPage() {
                   <p className="font-medium">
                     $ {plans?.find((p) => p.id === loggedUser?.planId)?.price}
                   </p>
-                  {/* <p className="text-sm text-muted-foreground">
-                    {
-                      plans?.find((p) => p.id === loggedUser?.planId)
-                        ?.description
-                    }
-                  </p> */}
                 </div>
               </div>
               <Separator className="my-4" />
@@ -200,12 +194,6 @@ export default function BillingPage() {
                       )}.`
                     : "Plan expired"}
                 </p>
-                {/* {loggedUser?.planId === "free-trial" && (
-                  <p>
-                    You will be automatically subscribed to the Monthly plan
-                    after your trial ends.
-                  </p>
-                )} */}
               </div>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
@@ -249,12 +237,6 @@ export default function BillingPage() {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-              {/* <Button
-                onClick={() => setShowPaymentDialog(true)}
-                className="bg-upwork-green hover:bg-upwork-darkgreen text-white"
-              >
-                Update Payment Method
-              </Button> */}
             </div>
           </CardContent>
         </Card>
@@ -330,31 +312,6 @@ export default function BillingPage() {
             </Button>
           </CardFooter>
         </Card>
-        {/* <Card>
-          <CardHeader>
-            <CardTitle>Billing History</CardTitle>
-            <CardDescription>
-              View your billing history and download invoices.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-md border">
-              <div className="flex items-center justify-between p-4">
-                <div className="grid gap-1">
-                  <p className="font-medium">Free Trial Started</p>
-                  <p className="text-sm text-muted-foreground">Apr 19, 2025</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <p className="font-medium">$0.00</p>
-                </div>
-              </div>
-              <Separator />
-              <div className="p-4 text-center text-sm text-muted-foreground">
-                No previous invoices
-              </div>
-            </div>
-          </CardContent>
-        </Card> */}
       </div>
 
       <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>

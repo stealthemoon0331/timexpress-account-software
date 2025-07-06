@@ -1,6 +1,12 @@
 // app/api/payment/payfort/payfort-complete/route.ts
 
-import { RESPONSE_PHRASE, RETURN_PAGE_URL } from "@/app/config/setting";
+import {
+  KEYCLOAK_AUTH_ENDPOINT,
+  KEYCLOAK_REALM,
+  RESPONSE_PHRASE,
+  RETURN_PAGE_URL,
+} from "@/app/config/setting";
+import prisma from "@/lib/prisma";
 import { sha256 } from "js-sha256";
 import { NextResponse } from "next/server";
 
@@ -20,8 +26,6 @@ const subscriptions: Record<
 
 export async function POST(req: Request) {
   const formData = await req.formData();
-
-  console.log("* 🍀 formData ==> ", formData);
 
   const responseCode = formData.get("response_code") as string | null;
   const merchantReference = formData.get("merchant_reference") as string | null;
@@ -67,6 +71,41 @@ export async function POST(req: Request) {
     const now = new Date();
     const expiryDate = addMonths(now, 1);
 
+    const user = await prisma.user.findUnique({
+      where: {
+        email: customerEmail,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!user?.id) {
+      return NextResponse.json({ error: "User Not Found" }, { status: 404 });
+    }
+
+    const plan = await prisma.plan.findFirst({
+      where: {
+        price: Number(amount),
+      },
+    });
+
+    console.log("* plan => ", plan);
+
+    if (!plan?.id) {
+      return NextResponse.json({ error: "Plan Not Found" }, { status: 404 });
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        planId: plan.id,
+        planActivatedAt: now,
+        planExpiresAt: expiryDate,
+        merchantReference: merchantReference,
+      },
+    });
+
     // subscriptions[merchantReference] = {
     //   email: customerEmail,
     //   // agreementId,
@@ -85,8 +124,5 @@ export async function POST(req: Request) {
   // Optionally, store the status in DB or session here
 
   // Redirect user to frontend page
-  return NextResponse.redirect(
-    `${RETURN_PAGE_URL}?status=failed`,
-    302
-  );
+  return NextResponse.redirect(`${RETURN_PAGE_URL}?status=failed`, 302);
 }

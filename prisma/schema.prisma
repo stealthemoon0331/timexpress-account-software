@@ -167,6 +167,7 @@ model user {
   planActivatedAt      DateTime?
   planExpiresAt        DateTime?
   paypalSubscriptionId String?        @unique(map: "User_paypalSubscriptionId_key")
+  merchantReference    String?
   lastLoginAt          DateTime?
   systems              String?        @db.LongText
   account              account[]

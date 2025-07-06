@@ -145,6 +145,7 @@ export function PaymentForm({
     </Card>
   );
 }
+
 function PayPalWrapper({
   planId,
   paypalPlanId,

@@ -11,6 +11,7 @@ export default function PaymentCompletePage() {
 
   useEffect(() => {
     if (status === "14000") {
+      
       toast.success("You paid successfully!");
     } else {
       toast.warn("Sorry, your payment failed.");

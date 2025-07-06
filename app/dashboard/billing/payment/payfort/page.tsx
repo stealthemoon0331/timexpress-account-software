@@ -40,6 +40,7 @@ const PayFortForm = ({ amount, email }: PayFortFormProps) => {
         const input = document.createElement("input");
         input.type = "hidden";
         input.name = key;
+        // @ts-ignore
         input.value = value;
         form.appendChild(input);
       });
