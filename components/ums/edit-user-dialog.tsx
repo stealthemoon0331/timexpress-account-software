@@ -181,8 +181,6 @@ export function EditUserDialog({
 
       setSelectedSystems(user.systems_with_permission || []);
 
-
-
       setSystemRoleSelections({
         FMS: getRoleName("FMS", user.fms_user_role_id) || "",
         WMS: getRoleName("WMS", user.wms_user_role_id) || "",
@@ -193,7 +191,6 @@ export function EditUserDialog({
         TSMS: getRoleName("TSMS", user.tdms_user_role_id) || "",
         TDMS: getRoleName("TDMS", user.tsms_user_role_id) || "",
         HR: getRoleName("HR", user.hr_user_role_id) || "",
-
       });
     }
   }, [user]);
@@ -258,16 +255,6 @@ export function EditUserDialog({
       }
     }
 
-    // if (formData.password !== formData.confirmPassword) {
-    //   toastify.warn("Passwords do not match");
-    //   return false;
-    // }
-
-    if (selectedSystems.length === 0) {
-      toastify.warn("Please select a system");
-      return false;
-    }
-
     const systemRolesRequired: system[] = [
       "FMS",
       "WMS",
@@ -309,66 +296,52 @@ export function EditUserDialog({
   };
 
   const handleSubmit = async () => {
-  if (!validateForm()) {
-    return;
-  }
-
-  setIsUpdating(true);
-
-  try {
-    const deselectedSystemsToUpdateRole = user.selected_systems.filter(
-      (system) => !selectedSystems.includes(system)
-    );
-
-    const selectedSystemsToUpdateRole = user.selected_systems.filter((system) =>
-      selectedSystems.includes(system)
-    );
-
-    const keycloakUpdateResponse = await updateUserInKeycloak(
-      user.email,
-      formData.username,
-      formData.password,
-      deselectedSystemsToUpdateRole,
-      selectedSystemsToUpdateRole
-    );
-
-    if (selectedSystemsToUpdateRole.length === 0) {
-      toastify.info("You just updated the permission of users in keycloak", {
-        autoClose: 4000,
-      });
+    if (!validateForm()) {
       return;
     }
 
-    if (keycloakUpdateResponse.error) {
-      throw new Error(`Keycloak Error: ${keycloakUpdateResponse.message}`);
+    setIsUpdating(true);
+
+    try {
+      const keycloakUpdateResponse = await updateUserInKeycloak(
+        user.email,
+        formData.username,
+        formData.password,
+      );
+
+
+      if (keycloakUpdateResponse.error) {
+        throw new Error(`Keycloak Error: ${keycloakUpdateResponse.message}`);
+      }
+
+      const portalUpdateResponse = await updateUserToPortals(
+        formData,
+        selectedSystems,
+        systemRoleSelections,
+        access_token,
+        selectedAccess,
+        user
+      );
+
+      if (portalUpdateResponse.success) {
+        addUpdatedUser(portalUpdateResponse.data as user);
+        toastify.success("Successfully updated!");
+        onOpenChange(false);
+      } else {
+        throw new Error(
+          portalUpdateResponse.error || "Failed to update user in portals"
+        );
+      }
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred during update";
+      hotToast.error(errorMessage);
+    } finally {
+      setIsUpdating(false);
     }
-
-    const portalUpdateResponse = await updateUserToPortals(
-      formData,
-      selectedSystems,
-      systemRoleSelections,
-      access_token,
-      selectedAccess,
-      user
-    );
-
-    if (portalUpdateResponse.success) {
-      
-      addUpdatedUser(portalUpdateResponse.data as user);
-      toastify.success("Successfully updated!");
-      onOpenChange(false);
-    } else {
-      throw new Error(portalUpdateResponse.error || "Failed to update user in portals");
-    }
-  } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "An unexpected error occurred during update";
-    hotToast.error(errorMessage);
-  } finally {
-    setIsUpdating(false);
-  }
-};
-
+  };
 
   const cancelBranchSelection = (branch: string) => {
     setSelectedBranches((prev) => prev.filter((b) => b !== branch));
@@ -522,7 +495,7 @@ export function EditUserDialog({
               </div> */}
             </div>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label>
                 Systems <span className="text-destructive">*</span>
               </Label>
@@ -543,7 +516,7 @@ export function EditUserDialog({
                   </div>
                 ))}
               </div>
-            </div>
+            </div> */}
           </div>
 
           {user.selected_systems.length > 0 && (

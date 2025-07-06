@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       planId,
       planActivatedAt: new Date(),
       paypalSubscriptionId,
-      // You can optionally set planExpiresAt or calculate later via webhook
+      planExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     },
   });
 
