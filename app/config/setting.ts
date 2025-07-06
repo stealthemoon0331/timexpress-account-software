@@ -33,15 +33,19 @@ export const DB_PORT = process.env.DB_PORT;
 
 // Payfort
 export const ACCESS_CODE = process.env.NEXT_PUBLIC_PAYFORT_ACCESS_CODE!;
-export const LANGUAGE = process.env.NEXT_PUBLIC_LANGUAGE!;
 export const MERCHANT_ID = process.env.NEXT_PUBLIC_PAYFORT_MERCHANT_IDENTIFIER!;
 export const PAYMENT_URL = process.env.NEXT_PUBLIC_PAYFORT_PAYMENT_URL!;
 export const REQUEST_PHRASE = process.env.NEXT_PUBLIC_PAYFORT_SHA_REQUEST_PHRASE!;
 export const RESPONSE_PHRASE = process.env.NEXT_PUBLIC_PAYFORT_SHA_RESPONSE_PHRASE!;
+export const PAYFORT_PAYMENT_PAGE_URL = process.env.NEXT_PUBLIC_PAYFORT_PAYMENT_PAGE_URL!;
+export const PAYFORT_API = process.env.NEXT_PUBLIC_PAYFORT_API!;
 export const RETURN_URL = process.env.NEXT_PUBLIC_PAYFORT_RETURN_URL!;
 export const RETURN_PAGE_URL = process.env.NEXT_PUBLIC_PAYFORT_RETURN_PAGE_URL
 export const COMMAND = "PURCHASE";
 export const CURRENCY = "USD";
+export const LANGUAGE = "en";
+
+
 
 //AWS SES SMTP
 export const SMTPHOST=process.env.SMTPHOST;

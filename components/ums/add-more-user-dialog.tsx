@@ -20,21 +20,13 @@ import {
 } from "@/components/ui/select";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
 import { accesses, branches, systemRoles } from "@/lib/ums/data";
 import { X } from "lucide-react";
-import {
-  CRM_API_PATH,
-  FMS_API_PATH,
-  TMS_API_PATH,
-  WMS_API_PATH,
-} from "@/app/config/setting";
 import { FormUser, system, Team, user } from "@/lib/ums/type";
 import { getBranchName, getRoleId, getRoleName } from "@/lib/ums/utils";
 import { toast as toastify } from "react-toastify";
 import { toast as hotToast } from "react-hot-toast";
 import { useAuth } from "@/app/contexts/authContext";
-import { set } from "date-fns";
 import InputWrapper from "./input-wrapper";
 import { useData } from "@/app/contexts/dataContext";
 import { useUser } from "@/app/contexts/UserContext";
@@ -273,8 +265,6 @@ export function AddMoreUserDialog({
         user.email,
         formData.username,
         formData.password,
-        [],
-        [system]
       );
 
       if (!keycloakResponse.error) {

@@ -1,38 +1,120 @@
 // app/api/payment/payfort/initiate/route.ts
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { ACCESS_CODE, MERCHANT_ID, REQUEST_PHRASE, RETURN_URL } from "@/app/config/setting";
+import {
+  ACCESS_CODE,
+  LANGUAGE,
+  MERCHANT_ID,
+  PAYFORT_API,
+  REQUEST_PHRASE,
+  RETURN_URL,
+} from "@/app/config/setting";
 
-export async function GET() {
-  const params = {
-    command: "PURCHASE",
-    access_code: ACCESS_CODE,
-    merchant_identifier: MERCHANT_ID,
-    merchant_reference: `SUB_${Date.now()}`,
-    amount: 1000, // In smallest currency unit (e.g., 100 AED = 10000)
-    currency: "USD",
-    language: "en",
-    customer_email: "kijimatakuma0331@gmail.com",
-    // return_url: `https://stage.shiper.io/api/payment/payfort`,
-    return_url: RETURN_URL,
+type InitialPaymentParamType = {
+  command: string;
+  access_code: string;
+  merchant_identifier: string;
+  merchant_reference: string;
+  amount: number;
+  currency: string;
+  language: string;
+  customer_email: string;
+  eci: string;
+  signature: string;
+  agreement_id: string;
+};
 
-    // agreement_id: `AGREEMENT_${Date.now()}`,
-    recurring_mode: "FIXED",
-    recurring_transactions_count: 12,
-    eci: "ECOMMERCE",
-    remember_me: "YES"
-  };
+const generateSignature = (params: Record<string, any>): string => {
+  console.log("params =>*" + params + "*");
+  const filteredParams = Object.keys(params)
+    .filter((key) => key !== "signature")
+    .reduce((obj, key) => {
+      obj[key] = params[key];
+      return obj;
+    }, {} as Record<string, any>);
 
-  // Generate signature
-  const sortedKeys = Object.keys(params).sort();
-  const signatureString = sortedKeys
-    .map(key => `${key}=${params[key as keyof typeof params]}`)
-    .join('');
-  
-  const signature = crypto
+  const sortedKeys = Object.keys(filteredParams).sort();
+
+  const trimmedRequestPhrase = String(REQUEST_PHRASE || "").trim();
+
+  const keyValuePairs = sortedKeys.map(
+    (key) => `${key.trim()}=${String(filteredParams[key]).trim()}`
+  );
+
+  const signatureString = REQUEST_PHRASE.trim() + keyValuePairs.join("") + REQUEST_PHRASE.trim();
+
+    console.log("✅ keyValuePairs => *" + keyValuePairs + "*");
+    console.log("✅ trimmedRequestPhrase => *"+trimmedRequestPhrase+"*");
+
+    console.log("✅ signatureString => *"+signatureString+"*");
+    
+    const signature = crypto
     .createHash("sha256")
-    .update(`${REQUEST_PHRASE}${signatureString}${REQUEST_PHRASE}`)
+    .update(signatureString)
     .digest("hex");
+    
+    // console.log("✅" + signature);
 
-  return NextResponse.json({ ...params, signature });
+  return signature;
+};
+
+
+export async function POST(request: Request) {
+  try {
+    const { amount, currency, customer_email } = await request.json();
+
+    if (!amount || !currency || !customer_email) {
+      return NextResponse.json({ error: "Not Found" }, { status: 404 });
+    }
+
+    const initialParams = {
+      command: "PURCHASE",
+      access_code: ACCESS_CODE,
+      merchant_identifier: MERCHANT_ID,
+      merchant_reference: `SUB_${Date.now()}`,
+      amount: 1500,
+      currency: currency,
+      language: LANGUAGE,
+      customer_email: customer_email,
+      // eci: "RECURRING",
+      agreement_id: `A${Date.now()}`,
+      recurring_mode: "FIXED",
+      recurring_transactions_count: 12,
+      recurring_expiry_date: "2026-06-30",
+      return_url: "https://shiper.io/api/payment/payfort/callback",
+    };
+
+    const signature = generateSignature(initialParams);
+
+    const params = {
+      ...initialParams,
+      signature: signature,
+    };
+
+    // const response = await fetch(PAYFORT_API, {
+    //   method: "POST",
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    //   body: JSON.stringify(params)
+    // })
+
+    // if(response.ok) {
+
+    //   const responseData = await response.json();
+
+    //   console.log("✅ Response Data => ", responseData);
+    // } else {
+    //   throw new Error("Payfort Response Error Occured");
+    // }
+
+    return NextResponse.json({ params });
+  } catch (error) {
+    console.log("Payment initiation error:", error);
+
+    return NextResponse.json(
+      { error: "Payment initiation failed" },
+      { status: 500 }
+    );
+  }
 }

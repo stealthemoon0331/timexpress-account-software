@@ -6,8 +6,6 @@ import {
   KEYCLOAK_REALM,
   KEYCLOAK_USERNAME,
 } from "@/app/config/setting";
-import { ErrorResponse } from "./type";
-import { useAuth } from "@/app/contexts/authContext";
 
 export async function getServiceToken() {
   try {
@@ -21,6 +19,8 @@ export async function getServiceToken() {
     // params.append("grant_type", "client_credentials");
 
     //   params.append("scope", 'openid profile email ums-scope');
+    console.log("Fetching token from:", `${KEYCLOAK_AUTH_ENDPOINT}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token`);
+
 
     const response = await fetch(
       `${KEYCLOAK_AUTH_ENDPOINT}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token`,

@@ -77,12 +77,15 @@ import { useUser } from "@/app/contexts/UserContext";
 import { consoleLog } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { checkIfHasTenant } from "@/lib/tenant";
+import { updateUserToPortals } from "@/lib/ums/systemHandlers/edit/updateUserToPortals";
+import { updateUserPermission } from "@/lib/ums/systemHandlers/edit/updateUserPermission";
 
 export default function UserManagement() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isCreateAddDialogOpen, setIsCreateAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [isSendDialogOpen, setIsSendDialogOpen] = useState(false);
   const [isPasswordResetDialogOpen, setIsPasswordResetDialogOpen] =
     useState(false);
@@ -130,6 +133,7 @@ export default function UserManagement() {
   const [permissionedSystems, setPermissionedSystems] = useState<
     PermissionedSystem[]
   >([]);
+  const [systemToAssign, setSystemToAssign] = useState<system | null>();
 
   const [deletedSystem, setDeletedSystem] = useState({
     FMS: false,
@@ -169,6 +173,7 @@ export default function UserManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
 
   const { checkAndUpdateAccessToken } = useAuth();
 
@@ -378,6 +383,83 @@ export default function UserManagement() {
     setIsEditDialogOpen(true);
   };
 
+  const handleUserAssign = (user: user, system: system) => {
+    setSystemToAssign(system);
+    setIsAssignDialogOpen(true);
+    setSelectedUser(user);
+  };
+
+  const confirmUserAssign = async () => {
+    if (!selectedUser?.email || !systemToAssign) {
+      toast.warning("Please select a user and system.");
+      return;
+    }
+
+    setIsAssigning(true);
+
+    const email = selectedUser.email;
+    const system = systemToAssign;
+    const isAssigned = !selectedUser.systems_with_permission.includes(system);
+    const systemsWithPermission: system[] = isAssigned
+      ? [...selectedUser.systems_with_permission, system]
+      : selectedUser.systems_with_permission.filter(
+          (s) => s !== systemToAssign
+        );
+
+    try {
+      const responseFromKecloak = await fetch(
+        `/api/ums/keycloak/users/updatePermission`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, system, isAssigned }),
+        }
+      );
+
+      const resData: { error: boolean; message: string } =
+        await responseFromKecloak.json();
+
+      if (!responseFromKecloak.ok) {
+        throw new Error(
+          resData.message || `Server error: ${responseFromKecloak.status}`
+        );
+      }
+
+      if (resData.error) {
+        hotToast.error(resData.message || "Something went wrong");
+        return;
+      }
+
+      const responseFromUMS = await updateUserPermission(
+        selectedUser.id,
+        systemsWithPermission
+      );
+
+      if (responseFromUMS.success) {
+        setUsers((prevUsers) =>
+          prevUsers.map((user) =>
+            user.id === selectedUser.id
+              ? {
+                  ...user,
+                  systems_with_permission: systemsWithPermission, 
+                }
+              : user
+          )
+        );
+        toast.success(resData.message || "Updated permission successfully");
+      } else {
+        toast.error(responseFromUMS.message || "Failed permission");
+      }
+    } catch (err: any) {
+      console.error("Error assigning user:", err);
+      hotToast.error(err?.message || "Unexpected error occurred");
+    } finally {
+      setIsAssigning(false);
+    }
+  };
+
   const addUpdatedUser = (user: user) => {
     const updatedUsers = users.map((u) => (u.id === user.id ? user : u));
 
@@ -484,7 +566,6 @@ export default function UserManagement() {
     } catch (err) {
       console.error("Error sending credentials:", err);
       toast.error("Failed to send credentials");
-      throw err;
     } finally {
       setIsSending(false);
       setIsSendDialogOpen(false);
@@ -633,12 +714,12 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="space-y-4 vh-96">
+    <div className="space-y-4 vh-96 overflow-y-auto px-2 sm:px-4">
       {hasTenant ? (
-        <div>
+        <>
           <ToastContainer position="top-right" autoClose={800} />
-          <div className="flex flex-col sm:flex-row justify-between gap-4">
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 flex-wrap">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
               <InputWrapper
                 placeholder="Search users..."
                 value={searchQuery}
@@ -647,11 +728,14 @@ export default function UserManagement() {
               />
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    Filter Systems
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto"
+                  >
+                    Systems
                   </Button>
                 </PopoverTrigger>
-
                 <PopoverContent className="w-64 max-h-64 overflow-y-auto space-y-2">
                   {availableSystems?.map((system: system) => (
                     <div key={system} className="flex items-center space-x-2">
@@ -666,15 +750,22 @@ export default function UserManagement() {
                 </PopoverContent>
               </Popover>
             </div>
-            <Button onClick={() => setIsCreateDialogOpen(true)}>
-              <GroupAddIcon className="h-8 w-8" />
-              New User
-            </Button>
+
+            <div className="flex w-full sm:w-auto justify-end sm:justify-start">
+              <Button
+                onClick={() => setIsCreateDialogOpen(true)}
+                className="w-full sm:w-auto"
+              >
+                <GroupAddIcon className="h-5 w-5 mr-2" />
+                New User
+              </Button>
+            </div>
           </div>
+
           <div className="relative" style={{ height: "70vh" }}>
             {/* Scrollable Container */}
-            <div className="overflow-y-auto h-[calc(70vh-60px)]">
-              <Table className="w-full border-collapse">
+            <div className="overflow-x-auto h-[calc(70vh-60px)]">
+              <Table className="min-w-[800px] w-full border-collapse">
                 {/* Sticky Header */}
                 <TableHeader
                   className="sticky top-0 shadow-md z-20"
@@ -732,7 +823,16 @@ export default function UserManagement() {
                                 return (
                                   <Tooltip.Root key={system}>
                                     <Tooltip.Trigger
-                                      className={`px-3 py-1 bg-blue-500 text-white rounded-full cursor-pointer`}
+                                      className={`px-3 py-1 ${
+                                        user.systems_with_permission.includes(
+                                          system
+                                        )
+                                          ? "bg-blue-500"
+                                          : "bg-blue-300"
+                                      } text-white rounded-full cursor-pointer`}
+                                      onClick={() => {
+                                        handleUserAssign(user, system);
+                                      }}
                                     >
                                       {system}
                                     </Tooltip.Trigger>
@@ -874,7 +974,7 @@ export default function UserManagement() {
             </div>
 
             {/* Pagination and Row Selection */}
-            <div className="absolute bottom-0 left-0 right-0 bg-white py-2 flex justify-center">
+            <div className="absolute bottom-0 left-0 right-0 bg-white py-2 px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
               <Stack spacing={2}>
                 <Pagination
                   count={totalPages}
@@ -924,7 +1024,40 @@ export default function UserManagement() {
               addUpdatedUser={addUpdatedUser}
             />
           )}
-
+          <AlertDialog
+            open={isAssignDialogOpen}
+            onOpenChange={setIsAssignDialogOpen}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {systemToAssign &&
+                  selectedUser?.systems_with_permission.includes(systemToAssign)
+                    ? "This action will unassign from system."
+                    : "This action will assign to system."}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <button
+                  onClick={async () => {
+                    setIsAssigning(true);
+                    try {
+                      await confirmUserAssign();
+                      setIsAssignDialogOpen(false);
+                    } finally {
+                      setIsAssigning(false);
+                    }
+                  }}
+                  disabled={isAssigning}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 px-4 py-2 rounded-md"
+                >
+                  {isAssigning ? "Request..." : "Request"}
+                </button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <AlertDialog
             open={isDeleteDialogOpen}
             onOpenChange={setIsDeleteDialogOpen}
@@ -998,11 +1131,11 @@ export default function UserManagement() {
               userName={selectedUser.name}
             />
           )}
-        </div>
+        </>
       ) : (
         <p className="text-black">
           {" "}
-          Sorry, you did not register your tenant yet.
+          ⚠ Sorry, you did not register your tenant yet.
         </p>
       )}
     </div>

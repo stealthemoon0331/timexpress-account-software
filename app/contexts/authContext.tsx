@@ -16,8 +16,6 @@ export interface AuthContextType {
     // newEmail: string,
     username: string,
     newPassword: string,
-    deselectedSystems: system[],
-    selectedSystems: system[]
   ) => Promise<ErrorResponse>;
   removeUserFromKeycloak: (email: string) => Promise<ErrorResponse>;
 }
@@ -59,7 +57,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           },
         });
         const responseData = await response.json();
-        if (responseData.token.access_token) {
+        if (responseData.token?.access_token) {
           setAccessToken(responseData.token.access_token);
           setRefreshToken(responseData.token.refresh_token);
           setExpiresIn(responseData.token.expires_in);
@@ -145,8 +143,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // newEmail: string,
     username: string,
     newPassword: string,
-    deselectedSystems: system[],
-    selectedSystems: system[]
   ): Promise<ErrorResponse> => {
 
     const response = await fetch(
@@ -160,8 +156,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           email,
           username,
           newPassword,
-          deselectedSystems,
-          selectedSystems
         }),
       }
     );
