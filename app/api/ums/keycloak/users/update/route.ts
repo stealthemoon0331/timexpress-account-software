@@ -32,7 +32,7 @@ const getUserIdByEmail = async (
 
 export async function PUT(req: Request) {
   try {
-    const { email, username, newPassword, deselectedSystems, selectedSystems } = await req.json();
+    const { email, username, newPassword } = await req.json();
     if (!email) {
       return new Response(
         JSON.stringify({ error: true, message: "Missing required fields" }),

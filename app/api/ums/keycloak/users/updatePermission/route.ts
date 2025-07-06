@@ -32,80 +32,78 @@ const getUserIdByEmail = async (
 };
 
 async function unAssignRoleToUser(
-  systems: system[],
+  system: system,
   access_token: string,
   user_id: string
 ) {
   try {
-    for (const system of systems || []) {
-      const config = systemConfig[system];
-      if (!config) {
-        return {
-          isError: true,
-          message: `No config found for system '${system}'`,
-        };
+    const config = systemConfig[system];
+    if (!config) {
+      return {
+        isError: true,
+        message: `No config found for system '${system}'`,
+      };
+    }
+
+    const { clientId, roleName } = config;
+
+    // Fetch client UUID
+    const clientRes = await fetch(
+      `${KEYCLOAK_AUTH_ENDPOINT}/admin/realms/${KEYCLOAK_REALM}/clients?clientId=${clientId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
       }
+    );
+    const clients = await clientRes.json();
+    const clientUUID = clients[0]?.id;
 
-      const { clientId, roleName } = config;
+    if (!clientUUID) {
+      return {
+        isError: true,
+        message: `Client '${clientId}' not found`,
+      };
+    }
 
-      // Fetch client UUID
-      const clientRes = await fetch(
-        `${KEYCLOAK_AUTH_ENDPOINT}/admin/realms/${KEYCLOAK_REALM}/clients?clientId=${clientId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-          },
-        }
-      );
-      const clients = await clientRes.json();
-      const clientUUID = clients[0]?.id;
-
-      if (!clientUUID) {
-        return {
-          isError: true,
-          message: `Client '${clientId}' not found`,
-        };
+    // Fetch role info
+    const roleRes = await fetch(
+      `${KEYCLOAK_AUTH_ENDPOINT}/admin/realms/${KEYCLOAK_REALM}/clients/${clientUUID}/roles/${roleName}`,
+      {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
       }
+    );
+    const role = await roleRes.json();
 
-      // Fetch role info
-      const roleRes = await fetch(
-        `${KEYCLOAK_AUTH_ENDPOINT}/admin/realms/${KEYCLOAK_REALM}/clients/${clientUUID}/roles/${roleName}`,
-        {
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-          },
-        }
-      );
-      const role = await roleRes.json();
+    if (!role || !role.id) {
+      console.warn(`Role ${roleName} not found in client ${clientId}`);
+      return {
+        isError: true,
+        message: `⚠️ Role '${roleName}' not found in client '${clientId}'`,
+      };
+    }
 
-      if (!role || !role.id) {
-        console.warn(`Role ${roleName} not found in client ${clientId}`);
-        return {
-          isError: true,
-          message: `⚠️ Role '${roleName}' not found in client '${clientId}'`,
-        };
+    // Remove role from user
+    const removeRoleRes = await fetch(
+      `${KEYCLOAK_AUTH_ENDPOINT}/admin/realms/${KEYCLOAK_REALM}/users/${user_id}/role-mappings/clients/${clientUUID}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${access_token}`,
+        },
+        body: JSON.stringify([{ id: role.id, name: role.name }]),
       }
+    );
 
-      // Remove role from user
-      const removeRoleRes = await fetch(
-        `${KEYCLOAK_AUTH_ENDPOINT}/admin/realms/${KEYCLOAK_REALM}/users/${user_id}/role-mappings/clients/${clientUUID}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${access_token}`,
-          },
-          body: JSON.stringify([{ id: role.id, name: role.name }]),
-        }
-      );
-
-      if (!removeRoleRes.ok) {
-        console.warn(`Failed to unassign role ${roleName} from user`);
-        return {
-          isError: true,
-          message: `Failed to unassign role ${roleName} from user`,
-        };
-      }
+    if (!removeRoleRes.ok) {
+      console.warn(`Failed to unassign role ${roleName} from user`);
+      return {
+        isError: true,
+        message: `Failed to unassign role ${roleName} from user`,
+      };
     }
     return {
       isError: false,
@@ -120,92 +118,90 @@ async function unAssignRoleToUser(
 }
 
 async function assignRoleFromUser(
-  systems: system[],
+  system: system,
   access_token: string,
   user_id: string
 ) {
   try {
     // Assign role
 
-    for (const system of systems || []) {
-      const config = systemConfig[system];
-      if (!config) {
-        return {
-          isError: true,
-          message: `No config found for system '${system}'`,
-        };
+    const config = systemConfig[system];
+    if (!config) {
+      return {
+        isError: true,
+        message: `No config found for system '${system}'`,
+      };
+    }
+
+    const { clientId, roleName } = config;
+
+    // Get client UUID
+    const clientRes = await fetch(
+      `${KEYCLOAK_AUTH_ENDPOINT}/admin/realms/${KEYCLOAK_REALM}/clients?clientId=${clientId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
       }
+    );
+    const clientList = await clientRes.json();
+    const clientUUID = clientList[0]?.id;
 
-      const { clientId, roleName } = config;
+    if (!clientUUID) {
+      return {
+        isError: true,
+        message: `Client '${clientId}' not found`,
+      };
+    }
 
-      // Get client UUID
-      const clientRes = await fetch(
-        `${KEYCLOAK_AUTH_ENDPOINT}/admin/realms/${KEYCLOAK_REALM}/clients?clientId=${clientId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${access_token}`,
+    // Fetch role info
+    const roleRes = await fetch(
+      `${KEYCLOAK_AUTH_ENDPOINT}/admin/realms/${KEYCLOAK_REALM}/clients/${clientUUID}/roles/${roleName}`,
+      {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      }
+    );
+
+    const role = await roleRes.json();
+
+    if (!role || !role.id) {
+      return {
+        isError: true,
+        message: `⚠️ Role '${roleName}' not found in client '${clientId}'`,
+      };
+    }
+
+    // assign role to user
+    const assignRoleRes = await fetch(
+      `${KEYCLOAK_AUTH_ENDPOINT}/admin/realms/${KEYCLOAK_REALM}/users/${user_id}/role-mappings/clients/${clientUUID}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${access_token}`,
+        },
+        body: JSON.stringify([
+          {
+            id: role.id,
+            name: role.name,
+            containerId: clientUUID,
           },
-        }
-      );
-      const clientList = await clientRes.json();
-      const clientUUID = clientList[0]?.id;
-
-      if (!clientUUID) {
-        return {
-          isError: true,
-          message: `Client '${clientId}' not found`,
-        };
+        ]),
       }
+    );
 
-      // Fetch role info
-      const roleRes = await fetch(
-        `${KEYCLOAK_AUTH_ENDPOINT}/admin/realms/${KEYCLOAK_REALM}/clients/${clientUUID}/roles/${roleName}`,
-        {
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-          },
-        }
+    if (!assignRoleRes.ok) {
+      const roleErr = await assignRoleRes.text();
+      console.error(
+        `❌ Failed to assign role '${roleName}' for client '${clientId}'`,
+        roleErr
       );
-
-      const role = await roleRes.json();
-
-      if (!role || !role.id) {
-        return {
-          isError: true,
-          message: `⚠️ Role '${roleName}' not found in client '${clientId}'`,
-        };
-      }
-
-      // assign role to user
-      const assignRoleRes = await fetch(
-        `${KEYCLOAK_AUTH_ENDPOINT}/admin/realms/${KEYCLOAK_REALM}/users/${user_id}/role-mappings/clients/${clientUUID}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${access_token}`,
-          },
-          body: JSON.stringify([
-            {
-              id: role.id,
-              name: role.name,
-              containerId: clientUUID,
-            },
-          ]),
-        }
-      );
-
-      if (!assignRoleRes.ok) {
-        const roleErr = await assignRoleRes.text();
-        console.error(
-          `❌ Failed to assign role '${roleName}' for client '${clientId}'`,
-          roleErr
-        );
-        return {
-          isError: true,
-          message: `Failed to assign role '${roleName}' for client '${clientId}'`,
-        };
-      }
+      return {
+        isError: true,
+        message: `Failed to assign role '${roleName}' for client '${clientId}'`,
+      };
     }
 
     return {
@@ -222,9 +218,9 @@ async function assignRoleFromUser(
 
 export async function PUT(req: Request) {
   try {
-    const { email, isAssigned, systems } = await req.json();
+    const { email, isAssigned, system } = await req.json();
 
-    if (email === null || isAssigned === null || systems.length === 0) {
+    if (email === null || isAssigned === null || system === null) {
       return new Response(
         JSON.stringify({ error: true, message: "Request Error" }),
         {
@@ -261,8 +257,10 @@ export async function PUT(req: Request) {
     }
 
     if (isAssigned) {
-      const response = await assignRoleFromUser(systems, access_token, user_id);
+      const response = await assignRoleFromUser(system, access_token, user_id);
       if (!response?.isError) {
+
+        
         return new Response(
           JSON.stringify({ error: false, message: response?.message }),
           {
@@ -280,7 +278,7 @@ export async function PUT(req: Request) {
         );
       }
     } else {
-      const response = await unAssignRoleToUser(systems, access_token, user_id);
+      const response = await unAssignRoleToUser(system, access_token, user_id);
 
       if (!response?.isError) {
         return new Response(
@@ -300,5 +298,13 @@ export async function PUT(req: Request) {
         );
       }
     }
-  } catch (error) {}
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: true, message: "Server Error" }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
 }

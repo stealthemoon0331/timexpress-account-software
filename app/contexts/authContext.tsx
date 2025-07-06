@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           },
         });
         const responseData = await response.json();
-        if (responseData.token.access_token) {
+        if (responseData.token?.access_token) {
           setAccessToken(responseData.token.access_token);
           setRefreshToken(responseData.token.refresh_token);
           setExpiresIn(responseData.token.expires_in);
