@@ -172,6 +172,7 @@ export default function AccountPage() {
           toast.warn("Current Password is not correct");
         }
       }
+      
       toast.success("Your password has been updated successfully.");
 
       passwordForm.reset({

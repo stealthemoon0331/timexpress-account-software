@@ -255,16 +255,6 @@ export function EditUserDialog({
       }
     }
 
-    // if (formData.password !== formData.confirmPassword) {
-    //   toastify.warn("Passwords do not match");
-    //   return false;
-    // }
-
-    // if (selectedSystems.length === 0) {
-    //   toastify.warn("Please select a system");
-    //   return false;
-    // }
-
     const systemRolesRequired: system[] = [
       "FMS",
       "WMS",
@@ -313,28 +303,12 @@ export function EditUserDialog({
     setIsUpdating(true);
 
     try {
-      const notAllowedSystems = user.selected_systems.filter(
-        (system) => !selectedSystems.includes(system)
-      );
-
-      const allowedSystems = user.selected_systems.filter(
-        (system) => selectedSystems.includes(system)
-      );
-
       const keycloakUpdateResponse = await updateUserInKeycloak(
         user.email,
         formData.username,
         formData.password,
-        notAllowedSystems,
-        allowedSystems
       );
 
-      if (allowedSystems.length === 0) {
-        toastify.info("This use has no permission for any systems", {
-          autoClose: 4000,
-        });
-        return;
-      }
 
       if (keycloakUpdateResponse.error) {
         throw new Error(`Keycloak Error: ${keycloakUpdateResponse.message}`);
@@ -521,7 +495,7 @@ export function EditUserDialog({
               </div> */}
             </div>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label>
                 Systems <span className="text-destructive">*</span>
               </Label>
@@ -542,7 +516,7 @@ export function EditUserDialog({
                   </div>
                 ))}
               </div>
-            </div>
+            </div> */}
           </div>
 
           {user.selected_systems.length > 0 && (
