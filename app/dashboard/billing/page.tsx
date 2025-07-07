@@ -30,6 +30,8 @@ import { Plan } from "@/lib/data";
 import { useUser } from "@/app/contexts/UserContext";
 import { differenceInDays, format } from "date-fns";
 import { CheckCircle } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function BillingPage() {
   const { user: loggedUser, loading } = useUser();
@@ -40,30 +42,55 @@ export default function BillingPage() {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [plans, setPlans] = useState<Plan[] | null>(null);
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const status = searchParams.get("status");
+
   useEffect(() => {
-    const syncPlans = async () => {
-      try {
-        const res = await fetch("/api/payment/plans", { method: "GET" });
-        if (!res.ok) throw new Error("Failed to sync plans");
-
-        const responseData = await res.json();
-
-        const parsedPlans = responseData.map((plan: any) => ({
-          ...plan,
-          features:
-            typeof plan.features === "string"
-              ? JSON.parse(plan.features)
-              : plan.features,
-        }));
-
-        setPlans(parsedPlans);
-      } catch (err) {
-        console.error("Error loading plans:", err);
-      }
-    };
-
     syncPlans();
   }, []);
+
+  useEffect(() => {
+    if (!status) return;
+
+    console.log("status => ", status);
+
+    if (status === "14000") {
+      toast.success(`Your subscription has been updated successfully!`);
+    }
+
+    if (status === "failed") {
+      toast.error("Sorry but your subscription has not been updated");
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    params.delete("status");
+
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    router.replace(newUrl);
+
+  }, [status]);
+
+  const syncPlans = async () => {
+    try {
+      const res = await fetch("/api/payment/plans", { method: "GET" });
+      if (!res.ok) throw new Error("Failed to sync plans");
+
+      const responseData = await res.json();
+
+      const parsedPlans = responseData.map((plan: any) => ({
+        ...plan,
+        features:
+          typeof plan.features === "string"
+            ? JSON.parse(plan.features)
+            : plan.features,
+      }));
+
+      setPlans(parsedPlans);
+    } catch (err) {
+      console.error("Error loading plans:", err);
+    }
+  };
 
   const planImages: { [key: string]: string } = {
     starter: "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
@@ -105,7 +132,7 @@ export default function BillingPage() {
         "Your subscription has been cancelled. You can still use the service until the end of your billing period."
       );
     } catch (error) {
-      toast.success("Your subscription was not cancelled. Please try again.");
+      toast.error("Your subscription was not cancelled. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -151,12 +178,6 @@ export default function BillingPage() {
                   <p className="font-medium">
                     $ {plans?.find((p) => p.id === loggedUser?.planId)?.price}
                   </p>
-                  {/* <p className="text-sm text-muted-foreground">
-                    {
-                      plans?.find((p) => p.id === loggedUser?.planId)
-                        ?.description
-                    }
-                  </p> */}
                 </div>
               </div>
               <Separator className="my-4" />
@@ -173,12 +194,6 @@ export default function BillingPage() {
                       )}.`
                     : "Plan expired"}
                 </p>
-                {/* {loggedUser?.planId === "free-trial" && (
-                  <p>
-                    You will be automatically subscribed to the Monthly plan
-                    after your trial ends.
-                  </p>
-                )} */}
               </div>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
@@ -222,12 +237,6 @@ export default function BillingPage() {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-              {/* <Button
-                onClick={() => setShowPaymentDialog(true)}
-                className="bg-upwork-green hover:bg-upwork-darkgreen text-white"
-              >
-                Update Payment Method
-              </Button> */}
             </div>
           </CardContent>
         </Card>
@@ -303,31 +312,6 @@ export default function BillingPage() {
             </Button>
           </CardFooter>
         </Card>
-        {/* <Card>
-          <CardHeader>
-            <CardTitle>Billing History</CardTitle>
-            <CardDescription>
-              View your billing history and download invoices.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-md border">
-              <div className="flex items-center justify-between p-4">
-                <div className="grid gap-1">
-                  <p className="font-medium">Free Trial Started</p>
-                  <p className="text-sm text-muted-foreground">Apr 19, 2025</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <p className="font-medium">$0.00</p>
-                </div>
-              </div>
-              <Separator />
-              <div className="p-4 text-center text-sm text-muted-foreground">
-                No previous invoices
-              </div>
-            </div>
-          </CardContent>
-        </Card> */}
       </div>
 
       <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>

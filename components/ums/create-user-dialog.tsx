@@ -176,7 +176,17 @@ export function CreateUserDialog({
       return false;
     }
 
-    const systemRolesRequired: system[] = ["FMS", "WMS", "CRM", "TMS", "AMS", "QCMS", "TSMS", "TDMS", "HR"];
+    const systemRolesRequired: system[] = [
+      "FMS",
+      "WMS",
+      "CRM",
+      "TMS",
+      "AMS",
+      "QCMS",
+      "TSMS",
+      "TDMS",
+      "HR",
+    ];
 
     for (const system of systemRolesRequired) {
       if (selectedSystems.includes(system) && !systemRoleSelections[system]) {
@@ -335,7 +345,6 @@ export function CreateUserDialog({
       TSMS: "",
       TDMS: "",
       HR: "",
-
     });
     setSelectedAccess("");
     setSelectedTeams([]);
@@ -482,22 +491,24 @@ export function CreateUserDialog({
               <Label>
                 Systems <span className="text-destructive">*</span>
               </Label>
-              <div className="flex flex-wrap gap-4 pt-2">
-                {availableSystems?.map((system: system) => (
-                  <div key={system} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={system.toLowerCase()}
-                      checked={selectedSystems.includes(system)}
-                      onCheckedChange={() => handleSystemToggle(system)}
-                    />
-                    <Label
-                      htmlFor={system.toLowerCase()}
-                      className="font-normal"
-                    >
-                      {system}
-                    </Label>
-                  </div>
-                ))}
+              <div className="flex gap-2">
+                {Array.isArray(availableSystems)
+                  ? availableSystems.map((system: system) => (
+                      <div key={system} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={system.toLowerCase()}
+                          checked={selectedSystems.includes(system)}
+                          onCheckedChange={() => handleSystemToggle(system)}
+                        />
+                        <Label
+                          htmlFor={system.toLowerCase()}
+                          className="font-normal"
+                        >
+                          {system}
+                        </Label>
+                      </div>
+                    ))
+                  : null}
               </div>
             </div>
           </div>

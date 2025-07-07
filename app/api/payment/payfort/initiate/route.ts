@@ -25,7 +25,6 @@ type InitialPaymentParamType = {
 };
 
 const generateSignature = (params: Record<string, any>): string => {
-  console.log("params =>*" + params + "*");
   const filteredParams = Object.keys(params)
     .filter((key) => key !== "signature")
     .reduce((obj, key) => {
@@ -35,78 +34,75 @@ const generateSignature = (params: Record<string, any>): string => {
 
   const sortedKeys = Object.keys(filteredParams).sort();
 
-  const trimmedRequestPhrase = String(REQUEST_PHRASE || "").trim();
-
   const keyValuePairs = sortedKeys.map(
     (key) => `${key.trim()}=${String(filteredParams[key]).trim()}`
   );
 
-  const signatureString = REQUEST_PHRASE.trim() + keyValuePairs.join("") + REQUEST_PHRASE.trim();
+  console.log("keyValuePairs => ", keyValuePairs);
 
-    console.log("✅ keyValuePairs => *" + keyValuePairs + "*");
-    console.log("✅ trimmedRequestPhrase => *"+trimmedRequestPhrase+"*");
+  const signatureString =
+    REQUEST_PHRASE.trim() + keyValuePairs.join("") + REQUEST_PHRASE.trim();
 
-    console.log("✅ signatureString => *"+signatureString+"*");
-    
-    const signature = crypto
+  const signature = crypto
     .createHash("sha256")
     .update(signatureString)
     .digest("hex");
-    
-    // console.log("✅" + signature);
 
   return signature;
 };
 
-
 export async function POST(request: Request) {
   try {
-    const { amount, currency, customer_email } = await request.json();
+    const { amount, currency, customer_email, plan_id } = await request.json();
 
     if (!amount || !currency || !customer_email) {
       return NextResponse.json({ error: "Not Found" }, { status: 404 });
     }
 
+    const merchant_reference = `SUB_${Date.now()}`;
+
     const initialParams = {
       command: "PURCHASE",
       access_code: ACCESS_CODE,
       merchant_identifier: MERCHANT_ID,
-      merchant_reference: `SUB_${Date.now()}`,
-      amount: 1500,
+      merchant_reference: merchant_reference,
+      amount: amount,
       currency: currency,
       language: LANGUAGE,
       customer_email: customer_email,
-      // eci: "RECURRING",
       agreement_id: `A${Date.now()}`,
       recurring_mode: "FIXED",
       recurring_transactions_count: 12,
       recurring_expiry_date: "2026-06-30",
-      return_url: "https://shiper.io/api/payment/payfort/callback",
+      return_url: RETURN_URL,
     };
 
     const signature = generateSignature(initialParams);
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email: customer_email,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!user?.id) {
+      return NextResponse.json({ error: "User Not Found" }, { status: 404 });
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        merchantReference: merchant_reference,
+      },
+    });
 
     const params = {
       ...initialParams,
       signature: signature,
     };
-
-    // const response = await fetch(PAYFORT_API, {
-    //   method: "POST",
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   },
-    //   body: JSON.stringify(params)
-    // })
-
-    // if(response.ok) {
-
-    //   const responseData = await response.json();
-
-    //   console.log("✅ Response Data => ", responseData);
-    // } else {
-    //   throw new Error("Payfort Response Error Occured");
-    // }
 
     return NextResponse.json({ params });
   } catch (error) {
