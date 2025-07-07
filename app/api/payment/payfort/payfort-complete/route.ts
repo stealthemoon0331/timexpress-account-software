@@ -87,7 +87,6 @@ export async function POST(req: Request) {
     console.log("* user => ", user)
 
     if (!user?.id) {
-      // return NextResponse.json({ error: "User Not Found" }, { status: 404 });
       return NextResponse.redirect(`${RETURN_PAGE_URL}?status=${404}`, 302);
     }
 

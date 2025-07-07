@@ -33,7 +33,7 @@ const PayFortForm = ({ amount, email, plan_id }: PayFortFormProps) => {
           amount: amount,
           currency: "USD",
           customer_email: email,
-          plan_id: plan_id
+          plan_id: plan_id,
         }),
       });
 
