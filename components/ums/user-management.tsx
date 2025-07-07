@@ -201,7 +201,9 @@ export default function UserManagement() {
   }, []);
 
   useEffect(() => {
-    fetchAvailableSystems();
+    if (loggedUser?.planId) {
+      fetchAvailableSystems();
+    }
   }, [loggedUser]);
 
   useEffect(() => {
@@ -362,14 +364,33 @@ export default function UserManagement() {
       });
 
       const fetchPlans = await response.json();
+
+      console.log("fetchPlans => ", fetchPlans);
+      console.log("loggedUser?.planId => ", loggedUser?.planId);
+
       // Check if fetchData is an array
       if (Array.isArray(fetchPlans)) {
-        setAvailableSystems(
-          fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
-        );
-        setSearchSystemQueryList(
-          fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
-        );
+        const matchedPlan = fetchPlans.find((p) => p.id === loggedUser?.planId);
+
+        const rawSystems = matchedPlan?.systems;
+
+        let systems: system[] = [];
+
+        if (Array.isArray(rawSystems)) {
+          systems = rawSystems.map((s: string) => s as system);
+        } else if (typeof rawSystems === "string") {
+          try {
+            const parsed = JSON.parse(rawSystems);
+            if (Array.isArray(parsed)) {
+              systems = parsed.map((s: string) => s as system);
+            }
+          } catch (error) {
+            console.error("Failed to parse systems string:", error);
+          }
+        }
+
+        setAvailableSystems(systems);
+        setSearchSystemQueryList(systems);
       } else {
         return false;
       }
@@ -443,7 +464,7 @@ export default function UserManagement() {
             user.id === selectedUser.id
               ? {
                   ...user,
-                  systems_with_permission: systemsWithPermission, 
+                  systems_with_permission: systemsWithPermission,
                 }
               : user
           )
@@ -737,14 +758,12 @@ export default function UserManagement() {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-64 max-h-64 overflow-y-auto space-y-2">
-                  {availableSystems?.map((system: system) => (
+                  {(Array.isArray(searchSystemQueryList)
+                    ? searchSystemQueryList
+                    : []
+                  ).map((system: system) => (
                     <div key={system} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={system}
-                        checked={searchSystemQueryList?.includes(system)}
-                        onCheckedChange={() => handleSystemSearchQuery(system)}
-                      />
-                      <Label htmlFor={system}>{system}</Label>
+                      <Checkbox id={system} /> <span>{system}</span>
                     </div>
                   ))}
                 </PopoverContent>
@@ -903,31 +922,33 @@ export default function UserManagement() {
                                 );
                               })}
 
-                              {availableSystems
-                                ?.filter(
-                                  (system: system) =>
-                                    !user.selected_systems?.includes(system)
-                                )
-                                .map((system: system) => (
-                                  <Tooltip.Provider key={system}>
-                                    <Tooltip.Root>
-                                      <Tooltip.Trigger
-                                        className="px-3 py-1 bg-gray-500 text-white rounded-full cursor-pointer"
-                                        onClick={() =>
-                                          addMoreSystem(user, system)
-                                        }
-                                      >
-                                        {system}
-                                      </Tooltip.Trigger>
-                                      <Tooltip.Portal>
-                                        <Tooltip.Content className="bg-gray-900 text-white p-2 rounded-md shadow-lg">
-                                          <div>Click to add {system}</div>
-                                          <Tooltip.Arrow className="fill-gray-900" />
-                                        </Tooltip.Content>
-                                      </Tooltip.Portal>
-                                    </Tooltip.Root>
-                                  </Tooltip.Provider>
-                                ))}
+                              {Array.isArray(availableSystems)
+                                ? availableSystems
+                                    .filter(
+                                      (system: system) =>
+                                        !user.selected_systems?.includes(system)
+                                    )
+                                    .map((system: system) => (
+                                      <Tooltip.Provider key={system}>
+                                        <Tooltip.Root>
+                                          <Tooltip.Trigger
+                                            className="px-3 py-1 bg-gray-500 text-white rounded-full cursor-pointer"
+                                            onClick={() =>
+                                              addMoreSystem(user, system)
+                                            }
+                                          >
+                                            {system}
+                                          </Tooltip.Trigger>
+                                          <Tooltip.Portal>
+                                            <Tooltip.Content className="bg-gray-900 text-white p-2 rounded-md shadow-lg">
+                                              <div>Click to add {system}</div>
+                                              <Tooltip.Arrow className="fill-gray-900" />
+                                            </Tooltip.Content>
+                                          </Tooltip.Portal>
+                                        </Tooltip.Root>
+                                      </Tooltip.Provider>
+                                    ))
+                                : null}
                             </Tooltip.Provider>
                           </div>
                         </TableCell>

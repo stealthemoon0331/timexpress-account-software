@@ -7,157 +7,187 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id                   String      @id @default(cuid())
-  name                 String?
-  email                String      @unique
-  emailVerified        DateTime?
-  image                String?     @db.Text
-  password             String?
-  tenantId             String?     @unique
-  createdAt            DateTime    @default(now())
-  updatedAt            DateTime    @updatedAt
-
-  // fields for plan management
-  cardBrand          String?  
-  cardLast4          String?  
-  planId               String?     // Foreign key to Plan
-  planActivatedAt      DateTime?
-  planExpiresAt        DateTime?
-  paypalSubscriptionId String?     @unique
-  
-
-  lastLoginAt          DateTime?
-
-  systems              Json?    // Directly storing system names as an array of strings
-
-  accounts             Account[]
-  sessions             Session[]
-  plan                 Plan?       @relation(fields: [planId], references: [id])
-
-  payments             Payment[]
-  notifications        Notification[] // Relation to Notification model
-
-  tenant               Tenants?    @relation("UserToTenant")
-}
-
-model Tenants {
-  id        String   @id @default(cuid())
-  email   String   @unique
-  tenantId  String   @unique
-  admin     User     @relation("UserToTenant", fields: [email], references: [email])
-}
-
-model Notification {
-  id          String   @id @default(cuid())
-  userId      String?    
-  title       String
-  message     String    @db.Text
-  read        Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  user        User?      @relation(fields: [userId], references: [id])
-}
-
-model Account {
-  id                String  @id @default(cuid())
+model account {
+  id                String  @id
   userId            String
-  type              String  // Keep as "oauth" for OAuth providers like Google/Facebook
+  type              String
   provider          String
-  providerAccountId String  // Unique identifier for the provider account
-  access_token      String? @db.Text // OAuth access token
-  token_type        String? // OAuth token type
-  scope             String? // OAuth scope
-  id_token          String? @db.Text // OAuth ID token
-  expires_at        Int?    // OAuth token expiration time (if available)
-  refresh_token     String? @db.Text // OAuth refresh token
-  session_state     String? // OAuth session state
+  providerAccountId String
+  access_token      String? @db.Text
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  expires_at        Int?
+  refresh_token     String? @db.Text
+  session_state     String?
+  user              user    @relation(fields: [userId], references: [id], map: "Account_userId_fkey")
 
-  user User @relation(fields: [userId], references: [id])
-
-  @@unique([provider, providerAccountId])
+  @@unique([provider, providerAccountId], map: "Account_provider_providerAccountId_key")
+  @@index([userId], map: "Account_userId_fkey")
 }
 
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-
-  user User @relation(fields: [userId], references: [id])
+model admin {
+  id        String     @id
+  name      String?
+  email     String     @unique(map: "Admin_email_key")
+  password  String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime
+  role      admin_role @default(STANDARD)
 }
 
-model VerificationToken {
-  id        String   @id @default(cuid())
-  identifier String  // email
-  token     String   @unique
-  expires   DateTime
+model customers {
+  id                      Int     @id @default(autoincrement())
+  name                    String  @db.VarChar(255)
+  username                String  @db.VarChar(255)
+  email                   String  @db.VarChar(255)
+  password                String  @db.VarChar(255)
+  tenant_id               String  @db.VarChar(255)
+  phone                   String? @db.VarChar(255)
+  mobile                  String? @db.VarChar(255)
+  fms_user_id             Int?
+  selected_systems        String? @db.VarChar(255)
+  fms_branch              String? @db.VarChar(255)
+  fms_user_role_id        Int?
+  wms_user_id             Int?
+  wms_user_role_id        Int?
+  crm_user_id             Int?
+  crm_user_role_id        Int?
+  tms_user_id             Int?
+  tms_user_role_id        Int?
+  access                  String? @db.VarChar(255)
+  teams                   String? @db.VarChar(255)
+  systems_with_permission String? @db.VarChar(255)
+  status                  Int?
+  adminId                 String? @db.VarChar(255)
+  ams_user_id             Int?
+  ams_user_role_id        String? @db.VarChar(255)
+  qcms_user_id            Int?
+  qcms_user_role_id       String? @db.VarChar(255)
+  tsms_user_id            Int?
+  tsms_user_role_id       String? @db.VarChar(255)
+  tdms_user_id            Int?
+  tdms_user_role_id       String? @db.VarChar(255)
+  hr_user_id              Int?
+  hr_user_role_id         String? @db.VarChar(255)
 }
 
-model Plan {
-  id          String   @id
-  name        String
-  description String
-  price       Float    // store as number
-  features    Json 
-  createdAt   DateTime @default(now())
-  paypalPlanId String?
+model notification {
+  id        String   @id
+  userId    String?
+  title     String
+  message   String   @db.Text
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  user      user?    @relation(fields: [userId], references: [id], map: "Notification_userId_fkey")
 
-  users       User[]   // Users linked to this plan
-  systems     Json? // Directly storing system names as an array of strings
+  @@index([userId], map: "Notification_userId_fkey")
 }
 
-model Payment {
-  id          String   @id @default(cuid())
-  userId      String
-  amount      Float
-  currency    String   // e.g., "USD"
-  status      String   // e.g., "COMPLETED", "FAILED"
-  method      String   // e.g., "paypal"
-  orderId     String   // PayPal order ID
-  createdAt   DateTime @default(now())
+model payment {
+  id        String   @id
+  userId    String
+  amount    Float
+  currency  String
+  status    String
+  method    String
+  orderId   String
+  createdAt DateTime @default(now())
+  user      user     @relation(fields: [userId], references: [id], map: "Payment_userId_fkey")
 
-  user        User     @relation(fields: [userId], references: [id])
+  @@index([userId], map: "Payment_userId_fkey")
 }
 
-model PayPalWebhook {
-  id        String   @id @default(cuid())
-  eventId   String   @unique
+model paypalwebhook {
+  id        String   @id
+  eventId   String   @unique(map: "PayPalWebhook_eventId_key")
   eventType String
   payload   String   @db.Text
   createdAt DateTime @default(now())
 }
 
-model Report {
-  id        String   @id @default(cuid())
+model plan {
+  id           String   @id
+  name         String
+  description  String
+  price        Float
+  features     String   @db.LongText
+  createdAt    DateTime @default(now())
+  paypalPlanId String?
+  systems      String?  @db.LongText
+  user         user[]
+}
+
+model report {
+  id        String   @id
   title     String
   message   String   @db.Text
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
-  userId    String?     
-  userName  String?                 
+  userId    String?
+  userName  String?
 }
 
+model session {
+  id           String   @id
+  sessionToken String   @unique(map: "Session_sessionToken_key")
+  userId       String
+  expires      DateTime
+  user         user     @relation(fields: [userId], references: [id], map: "Session_userId_fkey")
 
-model Admin {
-  id           String   @id @default(cuid())
-  name         String?
-  email        String   @unique
-  password     String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  role         Role     @default(STANDARD)
+  @@index([userId], map: "Session_userId_fkey")
 }
 
-enum Role {
+model system {
+  id   String @id
+  name String @unique(map: "System_name_key")
+}
+
+model tenants {
+  id       String @id
+  email    String @unique(map: "Tenants_email_key")
+  tenantId String @unique(map: "Tenants_tenantId_key")
+  user     user   @relation(fields: [email], references: [email], map: "Tenants_email_fkey")
+}
+
+model user {
+  id                   String         @id
+  name                 String?
+  email                String         @unique(map: "User_email_key")
+  emailVerified        DateTime?
+  image                String?        @db.Text
+  password             String?
+  tenantId             String?        @unique(map: "User_tenantId_key")
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime
+  cardBrand            String?
+  cardLast4            String?
+  planId               String?
+  planActivatedAt      DateTime?
+  planExpiresAt        DateTime?
+  paypalSubscriptionId String?        @unique(map: "User_paypalSubscriptionId_key")
+  merchantReference    String?
+  lastLoginAt          DateTime?
+  systems              String?        @db.LongText
+  account              account[]
+  notification         notification[]
+  payment              payment[]
+  session              session[]
+  tenants              tenants?
+  plan                 plan?          @relation(fields: [planId], references: [id], map: "User_planId_fkey")
+
+  @@index([planId], map: "User_planId_fkey")
+}
+
+model verificationtoken {
+  id         String   @id
+  identifier String
+  token      String   @unique(map: "VerificationToken_token_key")
+  expires    DateTime
+}
+
+enum admin_role {
   SUPER_ADMIN
   STANDARD
 }
-
-model System {
-  id     String   @id @default(cuid())
-  name   String   @unique
-}
-
-

@@ -11,8 +11,12 @@ export default function PaymentCompletePage() {
 
   useEffect(() => {
     if (status === "14000") {
+      
       toast.success("You paid successfully!");
     } else {
+      if(status === "404") {
+        toast.error("User or Plan not found");
+      }
       toast.warn("Sorry, your payment failed.");
     }
 
