@@ -7,15 +7,23 @@ import { PAYFORT_PAYMENT_PAGE_URL } from "@/app/config/setting";
 interface PayFortFormProps {
   amount: number;
   email: string | undefined | null;
+  plan_id: string;
 }
 
-const PayFortForm = ({ amount, email }: PayFortFormProps) => {
+const PayFortForm = ({ amount, email, plan_id }: PayFortFormProps) => {
+
+  const [isInitializing, setIsInitializing] = useState(false);
+
   useEffect(() => {
     initiatePayment();
-  });
+  }, []);
 
   const initiatePayment = async () => {
+    if (isInitializing) return;
+    
     try {
+
+      setIsInitializing(true);
       const res = await fetch("/api/payment/payfort/initiate", {
         method: "POST",
         headers: {
@@ -25,6 +33,7 @@ const PayFortForm = ({ amount, email }: PayFortFormProps) => {
           amount: amount,
           currency: "USD",
           customer_email: email,
+          plan_id: plan_id
         }),
       });
 
@@ -49,10 +58,11 @@ const PayFortForm = ({ amount, email }: PayFortFormProps) => {
       form.submit();
     } catch (error) {
       console.error("PayFort payment initiation failed:", error);
+    } finally {
+      setIsInitializing(false);
     }
   };
-
-  return <></>;
+  if(isInitializing)  return <div>loading...</div>;
 };
 
 export default PayFortForm;

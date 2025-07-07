@@ -116,7 +116,7 @@ export function PaymentForm({
             )}
 
             {paymentMethod === "payfort" && (
-              <PayFortForm amount={amount * 100} email={loggedUser?.email}/>
+              <PayFortForm amount={amount * 100} email={loggedUser?.email} plan_id={planId}/>
             )}
 
             <div className="rounded-md bg-muted p-4">

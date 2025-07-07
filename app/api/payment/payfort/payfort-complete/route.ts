@@ -71,29 +71,36 @@ export async function POST(req: Request) {
     const now = new Date();
     const expiryDate = addMonths(now, 1);
 
-    const user = await prisma.user.findUnique({
+    console.log("customerEmail => ", customerEmail);
+    console.log("merchantReference => ", merchantReference);
+
+
+    const user = await prisma.user.findFirst({
       where: {
-        email: customerEmail,
+        merchantReference: merchantReference,
       },
       select: {
         id: true,
       },
     });
 
+    console.log("* user => ", user)
+
     if (!user?.id) {
-      return NextResponse.json({ error: "User Not Found" }, { status: 404 });
+      // return NextResponse.json({ error: "User Not Found" }, { status: 404 });
+      return NextResponse.redirect(`${RETURN_PAGE_URL}?status=${404}`, 302);
     }
 
     const plan = await prisma.plan.findFirst({
       where: {
-        price: Number(amount),
+        price: Number(amount)/100,
       },
     });
 
     console.log("* plan => ", plan);
 
     if (!plan?.id) {
-      return NextResponse.json({ error: "Plan Not Found" }, { status: 404 });
+      return NextResponse.redirect(`${RETURN_PAGE_URL}?status=${404}`, 302);
     }
 
     await prisma.user.update({
@@ -102,17 +109,9 @@ export async function POST(req: Request) {
         planId: plan.id,
         planActivatedAt: now,
         planExpiresAt: expiryDate,
-        merchantReference: merchantReference,
       },
     });
 
-    // subscriptions[merchantReference] = {
-    //   email: customerEmail,
-    //   // agreementId,
-    //   expiry: expiryDate,
-    // };
-
-    // console.log("Subscription stored:", subscriptions[merchantReference]);
 
     // Redirect user to frontend page
     return NextResponse.redirect(

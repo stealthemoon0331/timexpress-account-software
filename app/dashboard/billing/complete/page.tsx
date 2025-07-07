@@ -14,6 +14,9 @@ export default function PaymentCompletePage() {
       
       toast.success("You paid successfully!");
     } else {
+      if(status === "404") {
+        toast.error("User or Plan not found");
+      }
       toast.warn("Sorry, your payment failed.");
     }
 

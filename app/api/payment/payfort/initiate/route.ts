@@ -40,35 +40,36 @@ const generateSignature = (params: Record<string, any>): string => {
 
   console.log("keyValuePairs => ", keyValuePairs);
 
-  const signatureString = REQUEST_PHRASE.trim() + keyValuePairs.join("") + REQUEST_PHRASE.trim();
+  const signatureString =
+    REQUEST_PHRASE.trim() + keyValuePairs.join("") + REQUEST_PHRASE.trim();
 
-    const signature = crypto
+  const signature = crypto
     .createHash("sha256")
     .update(signatureString)
     .digest("hex");
-    
+
   return signature;
 };
 
-
 export async function POST(request: Request) {
   try {
-    const { amount, currency, customer_email } = await request.json();
+    const { amount, currency, customer_email, plan_id } = await request.json();
 
     if (!amount || !currency || !customer_email) {
       return NextResponse.json({ error: "Not Found" }, { status: 404 });
     }
 
+    const merchant_reference = `SUB_${Date.now()}`;
+
     const initialParams = {
       command: "PURCHASE",
       access_code: ACCESS_CODE,
       merchant_identifier: MERCHANT_ID,
-      merchant_reference: `SUB_${Date.now()}`,
-      amount: 1500,
+      merchant_reference: merchant_reference,
+      amount: amount,
       currency: currency,
       language: LANGUAGE,
       customer_email: customer_email,
-      // eci: "RECURRING",
       agreement_id: `A${Date.now()}`,
       recurring_mode: "FIXED",
       recurring_transactions_count: 12,
@@ -77,6 +78,26 @@ export async function POST(request: Request) {
     };
 
     const signature = generateSignature(initialParams);
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email: customer_email,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!user?.id) {
+      return NextResponse.json({ error: "User Not Found" }, { status: 404 });
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        merchantReference: merchant_reference,
+      },
+    });
 
     const params = {
       ...initialParams,
