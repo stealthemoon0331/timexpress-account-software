@@ -10,12 +10,22 @@ export interface AuthContextType {
   setUser: (user: DecodedToken | null) => void;
   logout: () => void;
   checkAndUpdateAccessToken: () => Promise<void>;
-  addUserToKeycloak: (username: string, email: string, password: string, selectedSystems: system[]) => Promise<ErrorResponse>;
+  addUserToKeycloak: (
+    username: string,
+    email: string,
+    password: string,
+    selectedSystems: system[]
+  ) => Promise<ErrorResponse>;
   updateUserInKeycloak: (
     email: string,
     // newEmail: string,
     username: string,
-    newPassword: string,
+    newPassword: string
+  ) => Promise<ErrorResponse>;
+  updateUserPermissionInKeycloak: (
+    email: string,
+    system: system,
+    isAssigned: boolean
   ) => Promise<ErrorResponse>;
   removeUserFromKeycloak: (email: string) => Promise<ErrorResponse>;
 }
@@ -50,12 +60,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const checkAndUpdateAccessToken = async () => {
     if (!access_token) {
       try {
-        const response = await fetch('/api/ums/keycloak/users/token/access_token', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/content-type',
-          },
-        });
+        const response = await fetch(
+          "/api/ums/keycloak/users/token/access_token",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/content-type",
+            },
+          }
+        );
         const responseData = await response.json();
         if (responseData.token?.access_token) {
           setAccessToken(responseData.token.access_token);
@@ -70,10 +83,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } else if (isTokenExpired(access_token)) {
       try {
         if (!refresh_token) return;
-      
+
         const params = new URLSearchParams();
         params.append("refresh_token", refresh_token);
-      
+
         const res = await fetch("/api/ums/keycloak/users/token/refresh_token", {
           method: "POST",
           headers: {
@@ -81,21 +94,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           },
           body: params.toString(),
         });
-      
+
         const data = await res.json();
-      
+
         if (!res.ok || data.error) {
           console.error("Token refresh failed:", data.message || data.error);
           return;
         }
-      
+
         setAccessToken(data.access_token);
         setRefreshToken(data.refresh_token);
         setExpiresIn(data.expires_in);
       } catch (error) {
         console.error("Error refreshing token:", error);
       }
-      
     }
   };
 
@@ -115,8 +127,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     password: string,
     selectedSystems: system[]
   ): Promise<ErrorResponse> => {
-
-    const response = await fetch('/api/ums/keycloak/users/add', {
+    const response = await fetch("/api/ums/keycloak/users/add", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -125,7 +136,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         username,
         email,
         password,
-        selectedSystems
+        selectedSystems,
       }),
     });
 
@@ -142,45 +153,76 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     email: string,
     // newEmail: string,
     username: string,
-    newPassword: string,
+    newPassword: string
   ): Promise<ErrorResponse> => {
+    const response = await fetch(`/api/ums/keycloak/users/update`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        username,
+        newPassword,
+      }),
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      return {
+        error: true,
+        message: data.message || "Failed to update user in keycloak server",
+      };
+    }
 
-    const response = await fetch(
-      `/api/ums/keycloak/users/update`,
-      {
+    return { error: false, message: "User updated successfully" };
+  };
+
+  const updateUserPermissionInKeycloak = async (
+    email: string,
+    system: system,
+    isAssigned: boolean
+  ): Promise<ErrorResponse> => {
+    try {
+      const response = await fetch(`/api/ums/keycloak/users/updatePermission`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          email,
-          username,
-          newPassword,
-        }),
-      }
-    );
-    if (!response.ok) {
-      const data = await response.json();
-      return {error: true, message: data.message || "Failed to update user in keycloak server"};
-    }
+        body: JSON.stringify({ email, system, isAssigned }),
+      });
 
-    return {error: false, message: "User updated successfully"};
+      const resData: { error: boolean; message: string } =
+        await response.json();
+
+      if (!response.ok || resData.error) {
+        throw new Error(resData.message || `Server error: ${response.status}`);
+      }
+
+      return resData;
+    } catch (error: any) {
+      return {
+        error: true,
+        message: error.message || "Keycloak Server Error",
+      };
+    }
   };
 
-  const removeUserFromKeycloak = async (email: string): Promise<ErrorResponse> => {
-    const response = await fetch(
-      `/api/ums/keycloak/users/delete`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({email}),
-      }
-    );
+  const removeUserFromKeycloak = async (
+    email: string
+  ): Promise<ErrorResponse> => {
+    const response = await fetch(`/api/ums/keycloak/users/delete`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
     if (!response.ok) {
       const data = await response.json();
-      return { error: true, message: data.message || "Failed to remove user from keycloak server" };
+      return {
+        error: true,
+        message: data.message || "Failed to remove user from keycloak server",
+      };
     }
 
     return response.ok
@@ -198,6 +240,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         checkAndUpdateAccessToken,
         addUserToKeycloak,
         updateUserInKeycloak,
+        updateUserPermissionInKeycloak,
         removeUserFromKeycloak,
       }}
     >

@@ -179,7 +179,8 @@ export default function UserManagement() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
 
-  const { checkAndUpdateAccessToken } = useAuth();
+  const { checkAndUpdateAccessToken, updateUserPermissionInKeycloak } =
+    useAuth();
 
   const hasRun = useRef(false);
   const { user: loggedUser } = useUser();
@@ -434,28 +435,14 @@ export default function UserManagement() {
         );
 
     try {
-      const responseFromKecloak = await fetch(
-        `/api/ums/keycloak/users/updatePermission`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, system, isAssigned }),
-        }
+      const responseFromKecloak = await updateUserPermissionInKeycloak(
+        email,
+        system,
+        isAssigned
       );
 
-      const resData: { error: boolean; message: string } =
-        await responseFromKecloak.json();
-
-      if (!responseFromKecloak.ok) {
-        throw new Error(
-          resData.message || `Server error: ${responseFromKecloak.status}`
-        );
-      }
-
-      if (resData.error) {
-        hotToast.error(resData.message || "Something went wrong");
+      if (responseFromKecloak.error) {
+        hotToast.error(responseFromKecloak.message);
         return;
       }
 
@@ -475,13 +462,13 @@ export default function UserManagement() {
               : user
           )
         );
-        toast.success(resData.message || "Updated permission successfully");
+        toast.success("Updated permission successfully");
       } else {
-        toast.error(responseFromUMS.message || "Failed permission");
+        toast.error(responseFromUMS.message || "Failed permission update");
       }
     } catch (err: any) {
       console.error("Error assigning user:", err);
-      hotToast.error(err?.message || "Unexpected error occurred");
+      hotToast.error(err?.message || "Unexpected server error ocurred");
     } finally {
       setIsAssigning(false);
     }
@@ -923,7 +910,6 @@ export default function UserManagement() {
                                               : "All Teams"}
                                           </div>
                                         )}
-
 
                                         <Tooltip.Arrow className="fill-gray-900" />
                                       </Tooltip.Content>

@@ -74,6 +74,9 @@ export function AddMoreUserDialog({
     tdms_user_role_id: -1,
     hr_user_id: -1,
     hr_user_role_id: -1,
+    chatess_user_id: -1,
+    chatess_user_role_id: -1,
+    chatess_workspace: "",
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -97,17 +100,17 @@ export function AddMoreUserDialog({
     QCMS: "",
     TSMS: "",
     TDMS: "",
-    HR: ""
+    HR: "",
+    CHATESS: "",
   });
 
-  const { access_token, updateUserInKeycloak } = useAuth();
+  const { access_token, updateUserPermissionInKeycloak } = useAuth();
   const { user: loggedUser } = useUser();
 
   const { teams } = useData();
 
   useEffect(() => {
     if (user) {
-
       setFormData({
         name: user.name || "",
         email: user.email || "",
@@ -136,6 +139,9 @@ export function AddMoreUserDialog({
         tdms_user_role_id: user.tdms_user_role_id || "",
         hr_user_id: user.hr_user_id || -1,
         hr_user_role_id: user.hr_user_role_id || "",
+        chatess_user_id: user.chatess_user_id || -1,
+        chatess_user_role_id: user.chatess_user_role_id || "",
+        chatess_workspace: user.chatess_workspace || "",
         selected_systems: user.selected_systems || [],
         systems_with_permission: user.systems_with_permission || [],
         access: user.access || "",
@@ -152,6 +158,7 @@ export function AddMoreUserDialog({
         TSMS: getRoleName("TSMS", user.tsms_user_role_id) || "",
         TDMS: getRoleName("TDMS", user.tdms_user_role_id) || "",
         HR: getRoleName("HR", user.hr_user_role_id) || "",
+        CHATESS: getRoleName("CHATESS", user.chatess_user_role_id || ""),
       });
     }
   }, [user]);
@@ -203,6 +210,7 @@ export function AddMoreUserDialog({
       "TSMS",
       "TDMS",
       "HR",
+      "CHATESS",
     ];
 
     for (const system of systemRolesRequired) {
@@ -233,6 +241,11 @@ export function AddMoreUserDialog({
       }
     }
 
+    if (system == "CHATESS" && formData.chatess_workspace === "") {
+      toastify.warn("Please input workspace in CHATESS setting");
+      return false;
+    }
+
     return true;
   };
 
@@ -248,6 +261,7 @@ export function AddMoreUserDialog({
     let tsms_user_id = 0;
     let tdms_user_id = 0;
     let hr_user_id = 0;
+    let chatess_user_id = 0;
 
     let registered_system: system[] = user.selected_systems;
 
@@ -261,10 +275,10 @@ export function AddMoreUserDialog({
 
     setIsSending(true);
     try {
-      const keycloakResponse = await updateUserInKeycloak(
+      const keycloakResponse = await updateUserPermissionInKeycloak(
         user.email,
-        formData.username,
-        formData.password,
+        system,
+        true
       );
 
       if (!keycloakResponse.error) {
@@ -371,8 +385,22 @@ export function AddMoreUserDialog({
           updatedUser = {
             ...user,
             hr_user_id: hr_user_id,
-            tdms_user_role_id: getRoleId(systemRoleSelections["HR"], "HR"),
+            hr_user_role_id: getRoleId(systemRoleSelections["HR"], "HR"),
             systems_with_permission: [...user.systems_with_permission, "HR"],
+          };
+        } else if (system === "CHATESS") {
+          tsms_user_id = responseData.data.userid;
+          updatedUser = {
+            ...user,
+            chatess_user_id: chatess_user_id,
+            chatess_user_role_id: getRoleId(
+              systemRoleSelections["CHATESS"],
+              "CHATESS"
+            ),
+            systems_with_permission: [
+              ...user.systems_with_permission,
+              "CHATESS",
+            ],
           };
         }
 
@@ -404,6 +432,7 @@ export function AddMoreUserDialog({
               TSMS: "",
               TDMS: "",
               HR: "",
+              CHATESS: "",
             });
             setSelectedAccess(null);
             onOpenChange(false);
@@ -418,8 +447,8 @@ export function AddMoreUserDialog({
       }
 
       setIsSending(false);
-    } catch (error) {
-      hotToast.error("Error adding user: " + error);
+    } catch (error: any) {
+      hotToast.error(error.message || `Error adding user to portal ${system}`);
       setIsSending(false);
     }
   };
@@ -641,14 +670,14 @@ export function AddMoreUserDialog({
                   </div>
                 )}
                 {system === "CHATESS" && (
-                      <div className="space-y-2">
-                        <Label htmlFor="workspace">Workspace</Label>
-                        <InputWrapper
-                          id="workspace"
-                          value={formData?.chatess_workspace || ""}
-                        />
-                      </div>
-                    )}
+                  <div className="space-y-2">
+                    <Label htmlFor="workspace">Workspace</Label>
+                    <InputWrapper
+                      id="workspace"
+                      value={formData?.chatess_workspace || ""}
+                    />
+                  </div>
+                )}
 
                 {system === "TMS" && (
                   <div className="space-y-2">

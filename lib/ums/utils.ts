@@ -37,7 +37,7 @@ export function getBranchName(branchId: string): string {
 export function getRoleName(
   system: keyof typeof systemRoles,
   roleId: number | string
-): string | null {
+): string {
   return systemRoles[system].find((role) => role.roleId == roleId)?.name || "N/A";
 }
 
