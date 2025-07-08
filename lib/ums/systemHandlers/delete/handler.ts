@@ -101,7 +101,6 @@ export async function deleteUserFromCRM({ user, accessToken }: DeleteParams) {
 
 export async function deleteUserFromTMS({ user, accessToken }: DeleteParams) {
   try {
-
     const response = await fetch(
       `${TMS_API_PATH}/shypvdriverapp/personnel/deletePersonnel`,
       {
@@ -127,7 +126,6 @@ export async function deleteUserFromTMS({ user, accessToken }: DeleteParams) {
 
 export async function deleteUserFromAMS({ user }: DeleteParams) {
   try {
-
     const response = await fetch(
       `${AMS_API_PATH}/api/auth/user?id=${user.ams_user_id}`,
       {
@@ -149,7 +147,6 @@ export async function deleteUserFromAMS({ user }: DeleteParams) {
 
 export async function deleteUserFromQCMS({ user }: DeleteParams) {
   try {
-
     const response = await fetch(
       `${QCMS_API_PATH}/api/auth/user?id=${user.qcms_user_id}`,
       {
@@ -171,7 +168,6 @@ export async function deleteUserFromQCMS({ user }: DeleteParams) {
 
 export async function deleteUserFromTSMS({ user }: DeleteParams) {
   try {
-
     const response = await fetch(
       `${TSMS_API_PATH}/api/auth/user?id=${user.tsms_user_id}`,
       {
@@ -193,7 +189,6 @@ export async function deleteUserFromTSMS({ user }: DeleteParams) {
 
 export async function deleteUserFromTDMS({ user }: DeleteParams) {
   try {
-
     const response = await fetch(
       `${TDMS_API_PATH}/api/auth/user?id=${user.tdms_user_id}`,
       {
@@ -215,7 +210,6 @@ export async function deleteUserFromTDMS({ user }: DeleteParams) {
 
 export async function deleteUserFromHR({ user }: DeleteParams) {
   try {
-
     const response = await fetch(
       `${HR_API_PATH}/api/auth/user?id=${user.hr_user_id}`,
       {
@@ -237,14 +231,18 @@ export async function deleteUserFromHR({ user }: DeleteParams) {
 
 export async function deleteUserFromCHATESS({ user }: DeleteParams) {
   try {
-
-    const response = await fetch(
-      `${CHATESS_API_PATH}/api/admin/users/delete`,
-      {
-        method: "DELETE",
-        body: JSON.stringify(user.chatess_user_id)
-      }
-    );
+    console.log("* user.chatess_user_id => ", user.chatess_user_id);
+    console.log("delete api", {
+      method: "DELETE",
+      body: JSON.stringify({ id: 11 }),
+    });
+    const response = await fetch(`${CHATESS_API_PATH}/api/admin/users/delete`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: user.chatess_user_id }),
+    });
 
     if (!response.ok) {
       const error = await response.json();
@@ -253,7 +251,7 @@ export async function deleteUserFromCHATESS({ user }: DeleteParams) {
 
     return { success: true };
   } catch (error) {
-    console.error("HR deletion error:", error);
-    return { success: false, error: "Failed to delete from HR" };
+    console.error("CHATESS deletion error:", error);
+    return { success: false, error: "Failed to delete from CHATESS" };
   }
 }
