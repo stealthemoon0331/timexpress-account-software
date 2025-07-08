@@ -213,6 +213,8 @@ export default function UserManagement() {
   useEffect(() => {
     if (!users) return;
 
+    console.log("* users => ", users);
+
     const filtered = users.filter((user) => {
       const matchesSearch =
         user.name?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
@@ -921,7 +923,7 @@ export default function UserManagement() {
                                               : "All Teams"}
                                           </div>
                                         )}
-                                        
+
 
                                         <Tooltip.Arrow className="fill-gray-900" />
                                       </Tooltip.Content>

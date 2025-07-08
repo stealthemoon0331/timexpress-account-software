@@ -44,6 +44,8 @@ export async function GET() {
       [user.id]
     );
 
+    console.log(" * users => ", users);
+
     return NextResponse.json(users);
   } catch (error) {
     return NextResponse.json({ error: "❌ Data Fetching Error", status: 500 });

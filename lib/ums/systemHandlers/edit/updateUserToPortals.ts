@@ -21,6 +21,7 @@ export const updateUserToPortals = async (
   let tsms_user_role_id = -1;
   let tdms_user_role_id = -1;
   let hr_user_role_id = -1;
+  let chatess_user_role_id = -1;
 
   try {
     const results = await Promise.allSettled(
@@ -40,6 +41,7 @@ export const updateUserToPortals = async (
         });
 
         const responseData = await response.json();
+        console.log("* edit responseData => ", responseData);
         if (!response.ok || responseData.isError) {
           throw new Error(responseData.message || "Update failed");
         }
@@ -87,6 +89,10 @@ export const updateUserToPortals = async (
 
         if (result.value.system === "HR") {
           hr_user_role_id = result.value.data.role;
+        }
+
+        if (result.value.system === "CHATESS") {
+          chatess_user_role_id = result.value.data.role;
         }
 
         countsOfUpdatedSystem++;
@@ -148,6 +154,11 @@ export const updateUserToPortals = async (
       hr_user_role_id: updated_systems.includes("HR")
         ? hr_user_role_id
         : userToBeUpdated.hr_user_role_id,
+      chatess_user_id: userToBeUpdated.chatess_user_id,
+      chatess_user_role_id: updated_systems.includes("CHATESS")
+        ? chatess_user_role_id
+        : userToBeUpdated.chatess_user_role_id,
+      chatess_workspace: userToBeUpdated.chatess_workspace,
       selected_systems: userToBeUpdated.selected_systems, //
       systems_with_permission: updated_systems, //
       access: selectedAccessForTMS, //

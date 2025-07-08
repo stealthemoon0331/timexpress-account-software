@@ -145,6 +145,7 @@ export function EditUserDialog({
   // Initialize form data when user changes
   useEffect(() => {
     if (user) {
+      console.log("* user in edit dialog => ", user)
       setFormData({
         name: user.name || "",
         email: user.email || "",
@@ -175,6 +176,7 @@ export function EditUserDialog({
         hr_user_role_id: user.tdms_user_role_id || -1,
         chatess_user_id: user.chatess_user_id || 0,
         chatess_user_role_id: user.chatess_user_role_id || -1,
+        chatess_workspace: user.chatess_workspace || "",
         selected_systems: user.selected_systems || [],
         systems_with_permission: user.systems_with_permission || [],
         access: user.access || "",
@@ -668,7 +670,7 @@ export function EditUserDialog({
                           id="workspace"
                           value={formData?.chatess_workspace || ""}
                           onChange={(e) =>
-                            handleInputChange("mobile", e.target.value)
+                            handleInputChange("chatess_workspace", e.target.value)
                           }
                         />
                       </div>

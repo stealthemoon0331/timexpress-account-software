@@ -714,6 +714,10 @@ export async function updateUserInCHATESS({
 
     updateBody = {...updateBody, workspace: formData.chatess_workspace}
 
+    console.log("* updateBody => ", updateBody);
+    console.log("* chatess_user_id => ", user.chatess_user_id);
+
+
     const response = await fetch(
       `${CHATESS_API_PATH}/api/admin/users/${user.chatess_user_id}`,
       {
