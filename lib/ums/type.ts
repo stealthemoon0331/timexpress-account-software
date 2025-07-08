@@ -11,7 +11,7 @@ export type Team = {
   createdBy: number;
 };
 
-export type system = "CRM" | "WMS" | "FMS" | "TMS" | "AMS" | "QCMS" | "TSMS" | "TDMS" | "HR";
+export type system = "CRM" | "WMS" | "FMS" | "TMS" | "AMS" | "QCMS" | "TSMS" | "TDMS" | "HR" | "CHATESS";
 
 export interface FailedSystem {
   userId: number;
@@ -33,6 +33,7 @@ export interface SelectedSystemRoles {
   TSMS: string;
   TDMS: string;
   HR: string;
+  CHATESS: string;
 }
 
 export interface DecodedToken {
@@ -72,6 +73,9 @@ export type user = {
   tdms_user_role_id: number | string;
   hr_user_id: number;
   hr_user_role_id: number | string;
+  chatess_user_id: number;
+  chatess_user_role_id: number | string;
+  chatess_workspace: string | number,
   selected_systems: system[];
   systems_with_permission: system[];
   access: string;
@@ -106,6 +110,9 @@ export type FormUser = {
   tdms_user_role_id?: number | string;
   hr_user_id?: number;
   hr_user_role_id?: number | string;
+  chatess_user_id?: number;
+  chatess_user_role_id?: number | string;
+  chatess_workspace?: number | string;
   selected_systems: system[];
   systems_with_permission: system[];
   access: string;
@@ -138,6 +145,9 @@ export type FormDataType = {
   tdms_user_role_id?: string;
   hr_user_id?: number;
   hr_user_role_id?: string;
+  chatess_user_id?: number;
+  chatess_user_role_id?: number | string;
+  chatess_workspace?: number | string;
   selected_systems: string[];
   access: string;
   teams: string[];

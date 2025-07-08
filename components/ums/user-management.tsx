@@ -121,6 +121,9 @@ export default function UserManagement() {
     tdms_user_role_id: -1,
     hr_user_id: -1,
     hr_user_role_id: -1,
+    chatess_user_id: -1,
+    chatess_user_role_id: -1,
+    chatess_workspace: -1,
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -145,6 +148,7 @@ export default function UserManagement() {
     TSMS: false,
     TDMS: false,
     HR: false,
+    CHATESS: false,
     count: 0,
   });
 
@@ -676,6 +680,7 @@ export default function UserManagement() {
           TSMS: false,
           TDMS: false,
           HR: false,
+          CHATESS: false,
           count: 0,
         });
       }
@@ -839,6 +844,8 @@ export default function UserManagement() {
                                   roleId = user.tdms_user_role_id;
                                 else if (system === "HR")
                                   roleId = user.hr_user_role_id;
+                                else if (system === "CHATESS")
+                                  roleId = user.chatess_user_role_id;
                                 return (
                                   <Tooltip.Root key={system}>
                                     <Tooltip.Trigger
@@ -914,6 +921,7 @@ export default function UserManagement() {
                                               : "All Teams"}
                                           </div>
                                         )}
+                                        
 
                                         <Tooltip.Arrow className="fill-gray-900" />
                                       </Tooltip.Content>

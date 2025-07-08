@@ -52,6 +52,11 @@ export const systemRoles = {
         { id: "2", name: "User", roleId: "User" },
         { id: "3", name: "Manager", roleId: "Manager" },
     ],
+    CHATESS: [
+        { id: "1", name: "Admin", roleId: "admin" },
+        { id: "2", name: "User", roleId: "user" },
+        { id: "3", name: "Viewer", roleId: "viewer" },
+    ]
     
 } as const;
 

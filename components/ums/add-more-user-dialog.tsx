@@ -640,6 +640,15 @@ export function AddMoreUserDialog({
                     </div>
                   </div>
                 )}
+                {system === "CHATESS" && (
+                      <div className="space-y-2">
+                        <Label htmlFor="workspace">Workspace</Label>
+                        <InputWrapper
+                          id="workspace"
+                          value={formData?.chatess_workspace || ""}
+                        />
+                      </div>
+                    )}
 
                 {system === "TMS" && (
                   <div className="space-y-2">

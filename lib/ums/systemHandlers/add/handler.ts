@@ -8,6 +8,7 @@ import {
   TSMS_API_PATH,
   TDMS_API_PATH,
   HR_API_PATH,
+  CHATESS_API_PATH,
 } from "@/app/config/setting";
 import { systemRoles } from "@/lib/ums/data";
 import { system } from "@/lib/ums/type";
@@ -492,5 +493,47 @@ export async function registerUserToHR({
     isError: false,
     message: "User registered successfully",
     data: responseData?.user,
+  };
+}
+
+export async function registerUserToCHATESS({
+  ssoUser,
+  roleId,
+  system,
+}: RegistrationParams) {
+  const payload = {
+    email: ssoUser.email,
+    username: ssoUser.name,
+    password: ssoUser.password,
+    tenant_id: ssoUser.tenantId,
+    workspace: ssoUser.chatess_workspace,
+  };
+
+  const response = await fetch(`${CHATESS_API_PATH}/api/auth/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const responseData = await safeParseJSON(response);
+
+  console.log("CHATESS_API_PATH => ", HR_API_PATH);
+
+  console.log("CHATESS responseData => ", responseData);
+
+  if (!response.ok) {
+    return {
+      isError: true,
+      message: responseData?.detail || "Chatess Server Error",
+      data: null,
+    };
+  }
+
+  return {
+    isError: false,
+    message: "User registered successfully",
+    data: responseData,
   };
 }

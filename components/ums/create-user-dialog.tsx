@@ -124,6 +124,7 @@ export function CreateUserDialog({
       TSMS: "",
       TDMS: "",
       HR: "",
+      CHATESS: "",
     });
 
   const getTeamName = (teamId: string): string => {
@@ -186,6 +187,7 @@ export function CreateUserDialog({
       "TSMS",
       "TDMS",
       "HR",
+      "CHATESS",
     ];
 
     for (const system of systemRolesRequired) {
@@ -316,6 +318,7 @@ export function CreateUserDialog({
       TSMS: "",
       TDMS: "",
       HR: "",
+      CHATESS: "",
     });
     setSelectedAccess("");
   };
@@ -345,6 +348,7 @@ export function CreateUserDialog({
       TSMS: "",
       TDMS: "",
       HR: "",
+      CHATESS: "",
     });
     setSelectedAccess("");
     setSelectedTeams([]);
@@ -376,6 +380,9 @@ export function CreateUserDialog({
       tdms_user_role_id: "",
       hr_user_id: -1,
       hr_user_role_id: "",
+      chatess_user_id: -1,
+      chatess_user_role_id: "",
+      chatess_workspace: "",
       access: "",
       teams: [],
       selected_systems: [],
@@ -639,6 +646,19 @@ export function CreateUserDialog({
                               </div>
                             ))}
                         </div>
+                      </div>
+                    )}
+
+                    {system === "CHATESS" && (
+                      <div className="space-y-2">
+                        <Label htmlFor="workspace">Workspace</Label>
+                        <InputWrapper
+                          id="workspace"
+                          value={formData?.chatess_workspace || ""}
+                          onChange={(e) =>
+                            handleInputChange("chatess_workspace", e.target.value)
+                          }
+                        />
                       </div>
                     )}
 
