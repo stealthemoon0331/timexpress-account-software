@@ -32,6 +32,9 @@ export async function POST(req: Request) {
   const customerEmail = formData.get("customer_email") as string | null;
   const amount = formData.get("amount") as string | null;
   const signature = formData.get("signature") as string | null;
+  const token_name = formData.get("token_name") as string | null;
+
+  console.log("* formData => ", formData);
 
   if (
     !responseCode ||
@@ -73,6 +76,7 @@ export async function POST(req: Request) {
 
     console.log("customerEmail => ", customerEmail);
     console.log("merchantReference => ", merchantReference);
+    
 
 
     const user = await prisma.user.findFirst({
@@ -108,6 +112,7 @@ export async function POST(req: Request) {
         planId: plan.id,
         planActivatedAt: now,
         planExpiresAt: expiryDate,
+        payfortCardTokenName: token_name,
       },
     });
 
