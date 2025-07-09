@@ -70,7 +70,7 @@ export async function registerUserToFMS({
     phone: ssoUser.phone,
     branch: ssoUser.fms_branch,
     roleId: roleId,
-    tenantId: ssoUser.tenantId,
+    tenantId: ssoUser.tenant_id,
     status: 1,
   };
 
@@ -99,7 +99,7 @@ export async function registerUserToCRM({
     phone: ssoUser.phone,
     mobile: ssoUser.mobile,
     role_id: roleId,
-    tenant_id: ssoUser.tenantId,
+    tenant_id: ssoUser.tenant_id,
     status: 1,
   };
 
@@ -125,7 +125,7 @@ export async function registerUserToCRM({
       phone: ssoUser.phone,
       mobile: ssoUser.mobile,
       role_id: roleId,
-      tenantId: ssoUser.tenantId,
+      tenantId: ssoUser.tenant_id,
       status: 1,
     };
 
@@ -183,7 +183,7 @@ export async function registerUserToWMS({
       id: roleId,
       role: getRoleName(system, roleId),
     },
-    tenant_id: ssoUser.tenantId,
+    tenant_id: ssoUser.tenant_id,
     status: 1,
   };
 
@@ -266,7 +266,7 @@ export async function registerUserToAMS({
     name: ssoUser.name,
     password: ssoUser.password,
     role: roleId,
-    tenantId: ssoUser.tenantId,
+    tenantId: ssoUser.tenant_id,
     status: 1,
   };
 
@@ -314,7 +314,7 @@ export async function registerUserToQCMS({
     lastName: ssoUser.name.split(" ")[1],
     password: ssoUser.password,
     role: roleId,
-    tenantId: ssoUser.tenantId,
+    tenantId: ssoUser.tenant_id,
     status: 1,
   };
 
@@ -361,7 +361,7 @@ export async function registerUserToTSMS({
     name: ssoUser.name,
     password: ssoUser.password,
     role: roleId,
-    tenantId: ssoUser.tenantId,
+    tenantId: ssoUser.tenant_id,
     status: 1,
   };
 
@@ -403,12 +403,13 @@ export async function registerUserToTDMS({
   roleId,
   system,
 }: RegistrationParams) {
+  console.log("* TDMS ssoUser.tenant_id => ", ssoUser.tenant_id)
   const payload = {
     email: ssoUser.email,
     name: ssoUser.name,
     password: ssoUser.password,
     role: roleId,
-    tenantId: ssoUser.tenantId,
+    tenantId: ssoUser.tenant_id,
     status: 1,
   };
 
@@ -425,7 +426,7 @@ export async function registerUserToTDMS({
   if (!response.ok) {
     return {
       isError: true,
-      message: responseData?.msg,
+      message: "Internal Portal Server Error",
       data: null,
     };
   }
@@ -433,7 +434,7 @@ export async function registerUserToTDMS({
   if (!responseData?.result) {
     return {
       isError: true,
-      message: responseData?.msg,
+      message: "Internal Portal Server Error",
       data: null,
     };
   }
@@ -455,7 +456,7 @@ export async function registerUserToHR({
     name: ssoUser.name,
     password: ssoUser.password,
     role: roleId,
-    tenantId: ssoUser.tenantId,
+    tenantId: ssoUser.tenant_id,
     status: 1,
   };
 
@@ -505,7 +506,7 @@ export async function registerUserToCHATESS({
     email: ssoUser.email,
     username: ssoUser.name,
     password: ssoUser.password,
-    tenant_id: ssoUser.tenantId,
+    tenant_id: ssoUser.tenant_id,
     workspace: ssoUser.chatess_workspace,
   };
 

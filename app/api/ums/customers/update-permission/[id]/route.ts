@@ -6,7 +6,7 @@ export async function PUT(request: Request, context: { params: { id: string } })
   try {
     const { systems_with_permission } = await request.json();
 
-    const { id } = context.params; 
+    const { id } = await context.params; 
     
     if (!id) {
       return NextResponse.json(

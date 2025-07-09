@@ -249,6 +249,12 @@ export function AddMoreUserDialog({
     return true;
   };
 
+  const handleInputChange = (field: string, value: string) => {
+
+    console.log("field => ", field);
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
   const handleSubmit = async () => {
     validateForm();
 
@@ -675,6 +681,9 @@ export function AddMoreUserDialog({
                     <InputWrapper
                       id="workspace"
                       value={formData?.chatess_workspace || ""}
+                      onChange={(e) =>
+                        handleInputChange("chatess_workspace", e.target.value)
+                      }
                     />
                   </div>
                 )}
