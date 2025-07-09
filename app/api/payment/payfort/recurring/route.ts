@@ -1,39 +1,54 @@
 // app/api/payment/payfort/recurring/route.ts
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { ACCESS_CODE, MERCHANT_ID, REQUEST_PHRASE } from "@/app/config/setting";
+import { ACCESS_CODE, COMMAND, CURRENCY, LANGUAGE, MERCHANT_ID, PAYFORT_API, REQUEST_PHRASE, RETURN_PAGE_URL } from "@/app/config/setting";
+
+function generatedSignature(data: Record<string, string>, requestPhrase: string): string {
+  const sortedKeys = Object.keys(data).sort();
+  const concatenated = sortedKeys.map(k => `${k}=${data[k]}`).join('');
+  const stringToHash = `${requestPhrase}${concatenated}${requestPhrase}`;
+  return crypto.createHash('sha256').update(stringToHash).digest('hex');
+}
 
 export async function POST(request: Request) {
-  const { token, agreementId, amount } = await request.json();
+  const { token, agreement_id, customer_email, amount } = await request.json();
 
-  const params = {
-    command: "PURCHASE",
+  if(token === null && agreement_id === null && customer_email === null  && amount === null) {
+    return NextResponse.json({ error: "Request Body is not correct" }, { status: 404 });
+  }
+
+  console.log("* token => ", token);
+  console.log("* agreementId => ", agreement_id);
+  console.log("* customer_email => ", customer_email);
+  console.log("* amount => ", amount);
+
+
+  const merchant_reference = `SUB_${Date.now()}`;
+
+  const params: Record<string, string> = {
+    command: COMMAND,
     access_code: ACCESS_CODE,
     merchant_identifier: MERCHANT_ID,
-    merchant_reference: `RECUR_${Date.now()}`,
-    amount: amount,
-    currency: "USD",
+    merchant_reference,
+    amount: amount.toString(),
+    currency: CURRENCY,
+    customer_email,
+    language: LANGUAGE,
     token_name: token,
-    agreement_id: agreementId,
-    eci: "RECURRING"
+    agreement_id: agreement_id,
+    eci: "RECURRING",
+    return_url: RETURN_PAGE_URL
   };
 
-  // Generate signature
-  const sortedKeys = Object.keys(params).sort();
-  const signatureString = sortedKeys
-    .map(key => `${key}=${params[key as keyof typeof params]}`)
-    .join('');
-  
-  const signature = crypto
-    .createHash("sha256")
-    .update(`${REQUEST_PHRASE}${signatureString}${REQUEST_PHRASE}`)
-    .digest("hex");
+  const signature = generatedSignature(params, REQUEST_PHRASE);
+  const requestData = { ...params, signature };
+
 
   try {
-    const response = await fetch("https://sbpaymentservices.payfort.com/FortAPI/paymentApi", {
+    const response = await fetch(PAYFORT_API, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...params, signature })
+      body: JSON.stringify(requestData)
     });
 
     return NextResponse.json(await response.json());

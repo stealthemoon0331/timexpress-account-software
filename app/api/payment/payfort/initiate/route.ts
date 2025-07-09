@@ -60,9 +60,14 @@ export async function POST(request: Request) {
     }
 
     const merchant_reference = `SUB_${Date.now()}`;
+    const agreement_id = `A${Date.now()}`;
+    const command = "PURCHASE";
+    const recurring_mode = "FIXED";
+    const recurring_transactions_count = 12;
+    const recurring_expiry_date = "2026-06-30"
 
     const initialParams = {
-      command: "PURCHASE",
+      command: command,
       access_code: ACCESS_CODE,
       merchant_identifier: MERCHANT_ID,
       merchant_reference: merchant_reference,
@@ -70,10 +75,10 @@ export async function POST(request: Request) {
       currency: currency,
       language: LANGUAGE,
       customer_email: customer_email,
-      agreement_id: `A${Date.now()}`,
-      recurring_mode: "FIXED",
-      recurring_transactions_count: 12,
-      recurring_expiry_date: "2026-06-30",
+      agreement_id: agreement_id,
+      recurring_mode: recurring_mode,
+      recurring_transactions_count: recurring_transactions_count,
+      recurring_expiry_date: recurring_expiry_date,
       return_url: RETURN_URL,
     };
 
