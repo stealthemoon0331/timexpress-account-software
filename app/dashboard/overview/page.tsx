@@ -16,15 +16,6 @@ export default function OverviewPage() {
       <DashboardStats />
 
       <div className="flex flex-col justify-center">
-        {/* <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Usage Overview</CardTitle>
-            <CardDescription>Product usage across your organization</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <UsageOverview />
-          </CardContent>
-        </Card> */}
         <Card className="col-span-3">
           <CardHeader>
             <CardTitle>Subscription Overview</CardTitle>
@@ -35,16 +26,6 @@ export default function OverviewPage() {
           </CardContent>
         </Card>
       </div>
-
-      {/* <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>Latest actions and events in your account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <RecentActivity />
-        </CardContent>
-      </Card> */}
     </div>
   )
 }

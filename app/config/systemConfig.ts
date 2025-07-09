@@ -9,4 +9,5 @@ export const systemConfig: Record< string, { clientId: string; roleName: string 
   TDMS: { clientId: "todo-id", roleName: "tdms-access" },
   TSMS: { clientId: "timesheet-id", roleName: "tsms-access" },
   HR: { clientId: "hr_id", roleName: "hr-access" },
+  CHATESS: { clientId: "chatess-id", roleName: "chatess-access" }
 };

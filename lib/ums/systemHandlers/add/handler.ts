@@ -8,6 +8,7 @@ import {
   TSMS_API_PATH,
   TDMS_API_PATH,
   HR_API_PATH,
+  CHATESS_API_PATH,
 } from "@/app/config/setting";
 import { systemRoles } from "@/lib/ums/data";
 import { system } from "@/lib/ums/type";
@@ -69,7 +70,7 @@ export async function registerUserToFMS({
     phone: ssoUser.phone,
     branch: ssoUser.fms_branch,
     roleId: roleId,
-    tenantId: ssoUser.tenantId,
+    tenantId: ssoUser.tenant_id,
     status: 1,
   };
 
@@ -98,7 +99,7 @@ export async function registerUserToCRM({
     phone: ssoUser.phone,
     mobile: ssoUser.mobile,
     role_id: roleId,
-    tenant_id: ssoUser.tenantId,
+    tenant_id: ssoUser.tenant_id,
     status: 1,
   };
 
@@ -124,7 +125,7 @@ export async function registerUserToCRM({
       phone: ssoUser.phone,
       mobile: ssoUser.mobile,
       role_id: roleId,
-      tenantId: ssoUser.tenantId,
+      tenantId: ssoUser.tenant_id,
       status: 1,
     };
 
@@ -182,7 +183,7 @@ export async function registerUserToWMS({
       id: roleId,
       role: getRoleName(system, roleId),
     },
-    tenant_id: ssoUser.tenantId,
+    tenant_id: ssoUser.tenant_id,
     status: 1,
   };
 
@@ -265,7 +266,7 @@ export async function registerUserToAMS({
     name: ssoUser.name,
     password: ssoUser.password,
     role: roleId,
-    tenantId: ssoUser.tenantId,
+    tenantId: ssoUser.tenant_id,
     status: 1,
   };
 
@@ -313,7 +314,7 @@ export async function registerUserToQCMS({
     lastName: ssoUser.name.split(" ")[1],
     password: ssoUser.password,
     role: roleId,
-    tenantId: ssoUser.tenantId,
+    tenantId: ssoUser.tenant_id,
     status: 1,
   };
 
@@ -360,7 +361,7 @@ export async function registerUserToTSMS({
     name: ssoUser.name,
     password: ssoUser.password,
     role: roleId,
-    tenantId: ssoUser.tenantId,
+    tenantId: ssoUser.tenant_id,
     status: 1,
   };
 
@@ -402,12 +403,13 @@ export async function registerUserToTDMS({
   roleId,
   system,
 }: RegistrationParams) {
+  console.log("* TDMS ssoUser.tenant_id => ", ssoUser.tenant_id)
   const payload = {
     email: ssoUser.email,
     name: ssoUser.name,
     password: ssoUser.password,
     role: roleId,
-    tenantId: ssoUser.tenantId,
+    tenantId: ssoUser.tenant_id,
     status: 1,
   };
 
@@ -424,7 +426,7 @@ export async function registerUserToTDMS({
   if (!response.ok) {
     return {
       isError: true,
-      message: responseData?.msg,
+      message: "Internal Portal Server Error",
       data: null,
     };
   }
@@ -432,7 +434,7 @@ export async function registerUserToTDMS({
   if (!responseData?.result) {
     return {
       isError: true,
-      message: responseData?.msg,
+      message: "Internal Portal Server Error",
       data: null,
     };
   }
@@ -454,7 +456,7 @@ export async function registerUserToHR({
     name: ssoUser.name,
     password: ssoUser.password,
     role: roleId,
-    tenantId: ssoUser.tenantId,
+    tenantId: ssoUser.tenant_id,
     status: 1,
   };
 
@@ -492,5 +494,47 @@ export async function registerUserToHR({
     isError: false,
     message: "User registered successfully",
     data: responseData?.user,
+  };
+}
+
+export async function registerUserToCHATESS({
+  ssoUser,
+  roleId,
+  system,
+}: RegistrationParams) {
+  const payload = {
+    email: ssoUser.email,
+    username: ssoUser.name,
+    password: ssoUser.password,
+    tenant_id: ssoUser.tenant_id,
+    workspace: ssoUser.chatess_workspace,
+  };
+
+  const response = await fetch(`${CHATESS_API_PATH}/api/auth/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const responseData = await safeParseJSON(response);
+
+  console.log("CHATESS_API_PATH => ", HR_API_PATH);
+
+  console.log("CHATESS responseData => ", responseData);
+
+  if (!response.ok) {
+    return {
+      isError: true,
+      message: responseData?.detail || "Chatess Server Error",
+      data: null,
+    };
+  }
+
+  return {
+    isError: false,
+    message: "User registered successfully",
+    data: responseData,
   };
 }

@@ -8,6 +8,7 @@ import {
   registerUserToTSMS,
   registerUserToWMS,
   registerUserToHR,
+  registerUserToCHATESS,
 } from "@/lib/ums/systemHandlers/add/handler";
 import { system } from "@/lib/ums/type";
 import { getRoleId } from "@/lib/ums/utils";
@@ -22,6 +23,12 @@ export async function POST(
   const { system } = await context.params;
   
   const roleId = getRoleId(systemRoleSelections[system], system as system);
+
+  console.log("* ssouser => ", ssoUser);
+  console.log("* roleId => ", roleId);
+  console.log("* accessToken => ", accessToken);
+  console.log("* system => ", system);
+
   try {
     switch (system) {
       case "FMS":
@@ -138,6 +145,19 @@ export async function POST(
           error: hrResponse.isError,
           message: hrResponse.message,
           data: { system: system, userid: hrResponse.data?.id },
+        });
+      
+      case "CHATESS":
+        const chatessResponse = await registerUserToCHATESS({
+          ssoUser,
+          roleId,
+          system,
+        });
+
+        return NextResponse.json({
+          error: chatessResponse.isError,
+          message: chatessResponse.message,
+          data: { system: system, userid: chatessResponse.data?.id },
         });
 
       default:

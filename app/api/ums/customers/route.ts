@@ -39,10 +39,12 @@ export async function GET() {
       `SELECT id, name, username, email, password, tenant_id, phone, mobile, fms_user_id, fms_branch,
          fms_user_role_id, wms_user_id, wms_user_role_id, crm_user_id, crm_user_role_id, tms_user_id, 
          tms_user_role_id, ams_user_id, ams_user_role_id, qcms_user_id, qcms_user_role_id,
-         tsms_user_id, tsms_user_role_id, tdms_user_id, tdms_user_role_id, hr_user_id, hr_user_role_id, teams, access, selected_systems, systems_with_permission, status
+         tsms_user_id, tsms_user_role_id, tdms_user_id, tdms_user_role_id, hr_user_id, hr_user_role_id, chatess_user_id, chatess_user_role_id, chatess_workspace, teams, access, selected_systems, systems_with_permission, status
          FROM customers WHERE status = 1 AND adminId = ?`,
       [user.id]
     );
+
+    console.log(" * users => ", users);
 
     return NextResponse.json(users);
   } catch (error) {
@@ -70,7 +72,7 @@ export async function POST(request: Request) {
       );
     }
 
-   const customerData = await request.json();
+    const customerData = await request.json();
 
     if (
       !customerData.name ||
@@ -97,16 +99,39 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log(" Customer => ", customerData)
+    console.log(" Customer => ", customerData);
 
-    const query =
-      "INSERT INTO customers (" +
-      "name, email, username, password, phone, tenant_id, mobile, fms_user_id, fms_branch, " +
-      "fms_user_role_id, wms_user_id, wms_user_role_id, crm_user_id, crm_user_role_id, " +
-      "tms_user_id, tms_user_role_id, ams_user_id, ams_user_role_id, qcms_user_id, qcms_user_role_id, " +
-      "tsms_user_id, tsms_user_role_id, tdms_user_id, tdms_user_role_id, hr_user_id, hr_user_role_id, " +
-      "teams, access, selected_systems, systems_with_permission, status, adminId" +
-      ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    const query = `
+  INSERT INTO customers (
+    name, email, username, password, phone, tenant_id, mobile,
+    fms_user_id, fms_branch, fms_user_role_id,
+    wms_user_id, wms_user_role_id,
+    crm_user_id, crm_user_role_id,
+    tms_user_id, tms_user_role_id,
+    ams_user_id, ams_user_role_id,
+    qcms_user_id, qcms_user_role_id,
+    tsms_user_id, tsms_user_role_id,
+    tdms_user_id, tdms_user_role_id,
+    hr_user_id, hr_user_role_id,
+    chatess_user_id, chatess_user_role_id, chatess_workspace,
+    teams, access, selected_systems, systems_with_permission,
+    status, adminId
+  ) VALUES (
+    ?, ?, ?, ?, ?, ?, ?,
+    ?, ?, ?,
+    ?, ?,
+    ?, ?,
+    ?, ?,
+    ?, ?,
+    ?, ?,
+    ?, ?,
+    ?, ?,
+    ?, ?,
+    ?, ?, ?,
+    ?, ?, ?, ?,
+    ?, ?
+  )
+`;
 
     const values = [
       customerData.name,
@@ -135,6 +160,9 @@ export async function POST(request: Request) {
       customerData.tdms_user_role_id || null,
       customerData.hr_user_id || null,
       customerData.hr_user_role_id || null,
+      customerData.chatess_user_id || null,
+      customerData.chatess_user_role_id || null,
+      customerData.chatess_workspace || null,
       JSON.stringify(customerData.teams) || null,
       customerData.access || null,
       JSON.stringify(customerData.selected_systems) || null,

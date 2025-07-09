@@ -49,7 +49,7 @@ export async function PUT(req: Request) {
 
     if (!access_token) {
       return new Response(
-        JSON.stringify({ error: true, message: "Access token not found" }),
+        JSON.stringify({ error: true, message: "Access token not found. Please check your network status." }),
         {
           status: 401,
           headers: { "Content-Type": "application/json" },
@@ -112,7 +112,7 @@ export async function PUT(req: Request) {
   } catch (error) {
     console.error("Unexpected error:", error);
     return new Response(
-      JSON.stringify({ error: true, message: "Internal Server Error", details: String(error) }),
+      JSON.stringify({ error: true, message: "Internal Keycloak Server Error", details: String(error) }),
       {
         status: 500,
         headers: { "Content-Type": "application/json" },

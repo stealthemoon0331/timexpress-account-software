@@ -128,7 +128,7 @@ export function SubscriptionOverview() {
         </div>
       </div>
 
-      <div className="rounded-md border p-4">
+      {/* <div className="rounded-md border p-4">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium">Next Billing</p>
@@ -151,7 +151,7 @@ export function SubscriptionOverview() {
               </>
             )}
         </div>
-      </div>
+      </div> */}
 
       {/* <div className="flex gap-2">
         <Button

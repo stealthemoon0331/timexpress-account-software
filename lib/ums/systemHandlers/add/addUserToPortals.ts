@@ -34,6 +34,7 @@ export const addUserToPortals = async (
     let tsms_user_id = -1;
     let tdms_user_id = -1;
     let hr_user_id = -1;
+    let chatess_user_id = -1;
 
 
     let registered_system: any[] = [];
@@ -63,6 +64,8 @@ export const addUserToPortals = async (
 
         const responseData = await response.json();
 
+        console.log("responseData => ", responseData);
+
         if (responseData.error) {
           //   hotToast.error(responseData.message, { duration: 5000 });
           throw new Error(responseData.message);
@@ -87,6 +90,8 @@ export const addUserToPortals = async (
         else if (val.system === "TSMS") tsms_user_id = val.userid;
         else if (val.system === "TDMS") tdms_user_id = val.userid;
         else if (val.system === "HR") hr_user_id = val.userid;
+        else if (val.system === "CHATESS") chatess_user_id = val.userid;
+
 
         console.log("val.userid ==> ", val.userid);
         console.log("val.hr_user_id ==> ", val.hr_user_id);
@@ -151,6 +156,11 @@ export const addUserToPortals = async (
       hr_user_role_id: registered_system.includes("HR")
         ? getRoleId(seletectedSystemRoles["HR"], "HR")
         : -1,
+      chatess_user_id: registered_system.includes("CHATESS") ? chatess_user_id : -1,
+      chatess_user_role_id: registered_system.includes("CHATESS")
+        ? getRoleId(seletectedSystemRoles["CHATESS"], "CHATESS")
+        : -1,
+      chatess_workspace: ssoUser.chatess_workspace,
       selected_systems: registered_system,
       systems_with_permission: registered_system,
       access: registered_system.includes("TMS") ? selectedAccessForTMS : "0",
@@ -174,7 +184,7 @@ export const addUserToPortals = async (
     }
 
     const umsData = await umsResponse.json();
-
+    console.log("* returned umsDATA => ", umsData)
     return {
       success: true,
       data: umsData,

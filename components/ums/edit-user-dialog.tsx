@@ -131,6 +131,10 @@ export function EditUserDialog({
         user.hr_user_role_id === -1
           ? ""
           : getRoleName("HR", user.hr_user_role_id) || "",
+      CHATESS:
+        user.chatess_user_id === -1
+          ? ""
+          : getRoleName("CHATESS", user.chatess_user_role_id) || "",
     });
 
   const { access_token, updateUserInKeycloak } = useAuth();
@@ -141,6 +145,7 @@ export function EditUserDialog({
   // Initialize form data when user changes
   useEffect(() => {
     if (user) {
+      console.log("* user in edit dialog => ", user)
       setFormData({
         name: user.name || "",
         email: user.email || "",
@@ -169,6 +174,9 @@ export function EditUserDialog({
         tdms_user_role_id: user.tdms_user_role_id || -1,
         hr_user_id: user.tdms_user_id || 0,
         hr_user_role_id: user.tdms_user_role_id || -1,
+        chatess_user_id: user.chatess_user_id || 0,
+        chatess_user_role_id: user.chatess_user_role_id || -1,
+        chatess_workspace: user.chatess_workspace || "",
         selected_systems: user.selected_systems || [],
         systems_with_permission: user.systems_with_permission || [],
         access: user.access || "",
@@ -191,6 +199,7 @@ export function EditUserDialog({
         TSMS: getRoleName("TSMS", user.tdms_user_role_id) || "",
         TDMS: getRoleName("TDMS", user.tsms_user_role_id) || "",
         HR: getRoleName("HR", user.hr_user_role_id) || "",
+        CHATESS: getRoleName("CHATESS", user.chatess_user_role_id) || "",
       });
     }
   }, [user]);
@@ -265,6 +274,7 @@ export function EditUserDialog({
       "TSMS",
       "TDMS",
       "HR",
+      "CHATESS"
     ];
 
     for (const system of systemRolesRequired) {
@@ -292,6 +302,11 @@ export function EditUserDialog({
       }
     }
 
+    if(selectedSystems.includes("CHATESS") && !formData.chatess_workspace) {
+        toastify.warn("Please select workspace in CHATESS setting");
+        return false;
+    }
+
     return true;
   };
 
@@ -306,9 +321,8 @@ export function EditUserDialog({
       const keycloakUpdateResponse = await updateUserInKeycloak(
         user.email,
         formData.username,
-        formData.password,
+        formData.password
       );
-
 
       if (keycloakUpdateResponse.error) {
         throw new Error(`Keycloak Error: ${keycloakUpdateResponse.message}`);
@@ -647,6 +661,18 @@ export function EditUserDialog({
                               </div>
                             ))}
                         </div>
+                      </div>
+                    )}
+                    {system === "CHATESS" && (
+                      <div className="space-y-2">
+                        <Label htmlFor="workspace">Workspace</Label>
+                        <InputWrapper
+                          id="workspace"
+                          value={formData?.chatess_workspace || ""}
+                          onChange={(e) =>
+                            handleInputChange("chatess_workspace", e.target.value)
+                          }
+                        />
                       </div>
                     )}
                     {system === "TMS" && (

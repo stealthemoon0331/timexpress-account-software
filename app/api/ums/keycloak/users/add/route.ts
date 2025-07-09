@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     const access_token = tokenInfoJson.access_token;
 
     if (!access_token) {
-      return new Response(JSON.stringify({ error: true, message: "Access token not found" }), {
+      return new Response(JSON.stringify({ error: true, message: "Access token not found. Please check your network status." }), {
         status: 401,
         headers: { "Content-Type": "application/json" },
       });
@@ -158,7 +158,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Unexpected error:", error);
     return new Response(
-      JSON.stringify({ error: true, message: "Internal Server Error", details: String(error) }),
+      JSON.stringify({ error: true, message: "Internal Keycloak Server Error", details: String(error) }),
       {
         status: 500,
         headers: { "Content-Type": "application/json" },

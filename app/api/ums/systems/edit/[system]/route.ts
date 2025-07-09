@@ -8,6 +8,7 @@ import {
   updateUserInTSMS,
   updateUserInWMS,
   updateUserInHR,
+  updateUserInCHATESS,
 } from "@/lib/ums/systemHandlers/edit/handler";
 import { system } from "@/lib/ums/type";
 import { getRoleId } from "@/lib/ums/utils";
@@ -119,6 +120,16 @@ export async function POST(
         });
         
         return NextResponse.json(hrResponse);
+      
+      case "CHATESS":
+        const chatessResponse = await updateUserInCHATESS({
+          formData,
+          roleId,
+          user,
+          system,
+        });
+        
+        return NextResponse.json(chatessResponse);
       default:
         return NextResponse.json(
           { isError: true, message: "Invalid system" },

@@ -124,6 +124,7 @@ export function CreateUserDialog({
       TSMS: "",
       TDMS: "",
       HR: "",
+      CHATESS: "",
     });
 
   const getTeamName = (teamId: string): string => {
@@ -174,7 +175,7 @@ export function CreateUserDialog({
     if (selectedSystems.length === 0) {
       toastify.warn("Please select a system");
       return false;
-    }
+    } 
 
     const systemRolesRequired: system[] = [
       "FMS",
@@ -186,6 +187,7 @@ export function CreateUserDialog({
       "TSMS",
       "TDMS",
       "HR",
+      "CHATESS",
     ];
 
     for (const system of systemRolesRequired) {
@@ -211,6 +213,11 @@ export function CreateUserDialog({
         toastify.warn("Please select teams in TMS setting");
         return false;
       }
+    }
+
+    if(selectedSystems.includes("TDMS")) {
+      toastify.warn("Please select access");
+        return false;
     }
 
     return true;
@@ -316,6 +323,7 @@ export function CreateUserDialog({
       TSMS: "",
       TDMS: "",
       HR: "",
+      CHATESS: "",
     });
     setSelectedAccess("");
   };
@@ -345,6 +353,7 @@ export function CreateUserDialog({
       TSMS: "",
       TDMS: "",
       HR: "",
+      CHATESS: "",
     });
     setSelectedAccess("");
     setSelectedTeams([]);
@@ -376,6 +385,9 @@ export function CreateUserDialog({
       tdms_user_role_id: "",
       hr_user_id: -1,
       hr_user_role_id: "",
+      chatess_user_id: -1,
+      chatess_user_role_id: "",
+      chatess_workspace: "",
       access: "",
       teams: [],
       selected_systems: [],
@@ -491,7 +503,7 @@ export function CreateUserDialog({
               <Label>
                 Systems <span className="text-destructive">*</span>
               </Label>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {Array.isArray(availableSystems)
                   ? availableSystems.map((system: system) => (
                       <div key={system} className="flex items-center space-x-2">
@@ -639,6 +651,19 @@ export function CreateUserDialog({
                               </div>
                             ))}
                         </div>
+                      </div>
+                    )}
+
+                    {system === "CHATESS" && (
+                      <div className="space-y-2">
+                        <Label htmlFor="workspace">Workspace</Label>
+                        <InputWrapper
+                          id="workspace"
+                          value={formData?.chatess_workspace || ""}
+                          onChange={(e) =>
+                            handleInputChange("chatess_workspace", e.target.value)
+                          }
+                        />
                       </div>
                     )}
 

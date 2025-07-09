@@ -121,6 +121,9 @@ export default function UserManagement() {
     tdms_user_role_id: -1,
     hr_user_id: -1,
     hr_user_role_id: -1,
+    chatess_user_id: -1,
+    chatess_user_role_id: -1,
+    chatess_workspace: -1,
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -145,6 +148,7 @@ export default function UserManagement() {
     TSMS: false,
     TDMS: false,
     HR: false,
+    CHATESS: false,
     count: 0,
   });
 
@@ -175,7 +179,8 @@ export default function UserManagement() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
 
-  const { checkAndUpdateAccessToken } = useAuth();
+  const { checkAndUpdateAccessToken, updateUserPermissionInKeycloak } =
+    useAuth();
 
   const hasRun = useRef(false);
   const { user: loggedUser } = useUser();
@@ -208,6 +213,8 @@ export default function UserManagement() {
 
   useEffect(() => {
     if (!users) return;
+
+    console.log("* users => ", users);
 
     const filtered = users.filter((user) => {
       const matchesSearch =
@@ -428,28 +435,14 @@ export default function UserManagement() {
         );
 
     try {
-      const responseFromKecloak = await fetch(
-        `/api/ums/keycloak/users/updatePermission`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, system, isAssigned }),
-        }
+      const responseFromKecloak = await updateUserPermissionInKeycloak(
+        email,
+        system,
+        isAssigned
       );
 
-      const resData: { error: boolean; message: string } =
-        await responseFromKecloak.json();
-
-      if (!responseFromKecloak.ok) {
-        throw new Error(
-          resData.message || `Server error: ${responseFromKecloak.status}`
-        );
-      }
-
-      if (resData.error) {
-        hotToast.error(resData.message || "Something went wrong");
+      if (responseFromKecloak.error) {
+        hotToast.error(responseFromKecloak.message);
         return;
       }
 
@@ -469,13 +462,13 @@ export default function UserManagement() {
               : user
           )
         );
-        toast.success(resData.message || "Updated permission successfully");
+        toast.success("Updated permission successfully");
       } else {
-        toast.error(responseFromUMS.message || "Failed permission");
+        toast.error(responseFromUMS.message || "Failed permission update");
       }
     } catch (err: any) {
       console.error("Error assigning user:", err);
-      hotToast.error(err?.message || "Unexpected error occurred");
+      hotToast.error(err?.message || "Unexpected server error ocurred");
     } finally {
       setIsAssigning(false);
     }
@@ -676,6 +669,7 @@ export default function UserManagement() {
           TSMS: false,
           TDMS: false,
           HR: false,
+          CHATESS: false,
           count: 0,
         });
       }
@@ -839,6 +833,8 @@ export default function UserManagement() {
                                   roleId = user.tdms_user_role_id;
                                 else if (system === "HR")
                                   roleId = user.hr_user_role_id;
+                                else if (system === "CHATESS")
+                                  roleId = user.chatess_user_role_id;
                                 return (
                                   <Tooltip.Root key={system}>
                                     <Tooltip.Trigger

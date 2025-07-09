@@ -1,5 +1,5 @@
 // app/api/systems/delete/[system]/route.ts
-import { deleteUserFromAMS, deleteUserFromCRM, deleteUserFromFMS, deleteUserFromQCMS, deleteUserFromTDMS, deleteUserFromTMS, deleteUserFromTSMS, deleteUserFromWMS, deleteUserFromHR } from "@/lib/ums/systemHandlers/delete/handler";
+import { deleteUserFromAMS, deleteUserFromCRM, deleteUserFromFMS, deleteUserFromQCMS, deleteUserFromTDMS, deleteUserFromTMS, deleteUserFromTSMS, deleteUserFromWMS, deleteUserFromHR, deleteUserFromCHATESS } from "@/lib/ums/systemHandlers/delete/handler";
 import { NextRequest, NextResponse } from "next/server";
 
 
@@ -38,6 +38,9 @@ export async function DELETE(
         break;
       case "HR":
         result = await deleteUserFromHR({user});
+        break;
+      case "CHATESS":
+        result = await deleteUserFromCHATESS({user});
         break;
       default:
         return NextResponse.json(

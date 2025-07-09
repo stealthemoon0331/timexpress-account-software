@@ -10,6 +10,9 @@ export const QCMS_API_PATH = process.env.NEXT_PUBLIC_QCMS_API_PATH || "http://lo
 export const TDMS_API_PATH = process.env.NEXT_PUBLIC_TDMS_API_PATH || "http://localhost:4300";
 export const TSMS_API_PATH = process.env.NEXT_PUBLIC_TSMS_API_PATH || "http://localhost:4400";
 export const HR_API_PATH = process.env.NEXT_PUBLIC_HR_API_PATH || "http://localhost:4200";
+export const CHATESS_API_PATH = process.env.NEXT_PUBLIC_CHATESS_API_PATH;
+
+
 
 
 /**
