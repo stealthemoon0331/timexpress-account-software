@@ -70,6 +70,9 @@ model customers {
   tdms_user_role_id       String? @db.VarChar(255)
   hr_user_id              Int?
   hr_user_role_id         String? @db.VarChar(255)
+  chatess_user_id         Int?
+  chatess_user_role_id    String? @db.VarChar(255)
+  chatess_workspace       String? @db.VarChar(255)
 }
 
 model notification {
@@ -167,9 +170,10 @@ model user {
   planActivatedAt      DateTime?
   planExpiresAt        DateTime?
   paypalSubscriptionId String?        @unique(map: "User_paypalSubscriptionId_key")
-  merchantReference    String?
   lastLoginAt          DateTime?
   systems              String?        @db.LongText
+  merchantReference    String?
+  payfortCardTokenName String?
   account              account[]
   notification         notification[]
   payment              payment[]
