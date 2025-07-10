@@ -230,6 +230,8 @@ export default function UserManagement() {
       return matchesSearch && matchesSystem;
     });
 
+    console.log("* filtered users => ", filtered);
+
     setSearchedUsers(filtered);
   }, [searchQuery, users, searchSystemQueryList]);
 
