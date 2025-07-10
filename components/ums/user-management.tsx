@@ -221,16 +221,16 @@ export default function UserManagement() {
         user.name?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
         user.email?.toLowerCase().includes(searchQuery?.toLowerCase());
 
-      const matchesSystem =
-        searchSystemQueryList?.length === 0 ||
-        user.selected_systems?.some((system) =>
-          searchSystemQueryList?.includes(system)
-        );
+      const matchesSystem = 
+        searchSystemQueryList?.length === 0 || 
+        user.selected_systems?.some((system) => searchSystemQueryList?.includes(system));
 
       return matchesSearch && matchesSystem;
     });
 
     console.log("* filtered users => ", filtered);
+    console.log("* searchSystemQueryList => ", searchSystemQueryList);
+
 
     setSearchedUsers(filtered);
   }, [searchQuery, users, searchSystemQueryList]);
