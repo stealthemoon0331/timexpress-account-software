@@ -22,12 +22,6 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { accesses, branches, systemRoles } from "@/lib/ums/data";
 import { X } from "lucide-react";
-// import {
-//   CRM_API_PATH,
-//   FMS_API_PATH,
-//   TMS_API_PATH,
-//   WMS_API_PATH,
-// } from "@/app/config/setting";
 import {
   FormUser,
   SelectedSystemRoles,
@@ -226,10 +220,10 @@ export function CreateUserDialog({
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
+    const { username, email, password } = formData;
+    
     try {
-      setIsSending(true); // Set to true at the start of async operations
-
-      const { username, email, password } = formData;
+      setIsSending(true); 
 
       const keycloakResponse = await addUserToKeycloak(
         username,
@@ -273,7 +267,7 @@ export function CreateUserDialog({
         duration: 5000,
       });
     } finally {
-      setIsSending(false); // Always reset isSending in the end
+      setIsSending(false);
     }
   };
 

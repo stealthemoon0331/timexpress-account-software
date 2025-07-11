@@ -161,7 +161,7 @@ function PayPalWrapper({
   if (!isResolved) {
     return (
       <div className="text-sm text-muted-foreground">
-        Loading PayPal script...
+        Loading...
       </div>
     );
   }
@@ -170,7 +170,7 @@ function PayPalWrapper({
     <div>
       {isPending ? (
         <div className="text-sm text-muted-foreground">
-          Loading PayPal buttons...
+          Loading ...
         </div>
       ) : (
         <PayPalButtons

@@ -302,7 +302,6 @@ export function AddMoreUserDialog({
         });
 
         const responseData = await response.json();
-        await setIsSending(false);
 
         if (!response.ok) {
           const error = await response.json();
@@ -442,7 +441,6 @@ export function AddMoreUserDialog({
             });
             setSelectedAccess(null);
             onOpenChange(false);
-            setIsSending(false);
             toastify.success("Updated new user into UMS!", {
               autoClose: 3000,
             });
@@ -451,10 +449,9 @@ export function AddMoreUserDialog({
       } else {
         throw new Error(keycloakResponse.message);
       }
-
-      setIsSending(false);
     } catch (error: any) {
       hotToast.error(error.message || `Error adding user to portal ${system}`);
+    } finally {
       setIsSending(false);
     }
   };
