@@ -120,8 +120,8 @@ export default function Home() {
                 key={section}
                 onClick={() => scrollToSection(section)}
                 className={`text-sm font-medium underline-offset-4 cursor-pointer ${
-                  activeSection === section ? "underline" : "no-underline"
-                } hover:underline`}
+                  activeSection === section ? "text-[#1bb6f9]" : "no-underline"
+                }`}
               >
                 {section.charAt(0).toUpperCase() + section.slice(1)}
               </button>

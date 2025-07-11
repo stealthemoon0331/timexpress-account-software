@@ -1,15 +1,17 @@
 // /app/api/payment/paypal/webhook/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-// import { Readable } from "stream";
-// import { buffer } from "micro";
+
+
+const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID!;
+const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET!;
+// const PAYPAL_WEBHOOK_ID = process.env.PAYPAL_WEBHOOK_ID!; // Optional, but recommended for verifying source
 
 export const config = {
   api: {
     bodyParser: false,
   },
 };
-
 
 async function getRawBody(req: Request): Promise<Buffer> {
   const reader = req.body?.getReader();
@@ -21,14 +23,11 @@ async function getRawBody(req: Request): Promise<Buffer> {
       chunks.push(result.value);
     }
   }
-
   return Buffer.concat(chunks);
 }
 
 
-// const PAYPAL_WEBHOOK_ID = process.env.PAYPAL_WEBHOOK_ID!; // Optional, but recommended for verifying source
-const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID!;
-const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET!;
+
 
 async function getPayPalAccessToken() {
   const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`).toString("base64");
@@ -112,8 +111,9 @@ export async function POST(req: Request) {
   });
 
   // Save the webhook event for auditing
-  await prisma.payPalWebhook.create({
+  await prisma.paypalwebhook.create({
     data: {
+      id: Date.now(),
       eventId: body.id,
       eventType: eventType,
       payload: JSON.stringify(body),

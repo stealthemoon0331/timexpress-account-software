@@ -122,7 +122,7 @@ export default function BillingPage() {
 
     try {
       // Simulate API call
-      await fetch("/api/payment/paypal/cancel-subscription", {
+      await fetch("/api/payment/cancel-subscription", {
         method: "POST",
       });
 

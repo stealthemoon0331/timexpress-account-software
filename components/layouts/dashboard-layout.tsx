@@ -91,18 +91,12 @@ export default function DashboardLayout({
                   <SidebarMenuButton
                     asChild
                     isActive={route.active}
-                    disabled={route.disabled}
                     className={`
                       group flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200
                       ${
                         route.active
                           ? "bg-blue-50 text-[#1bb6f9] font-semibold"
                           : "text-gray-700 hover:bg-gray-100"
-                      }
-                      ${
-                        route.disabled
-                          ? "opacity-50 cursor-not-allowed"
-                          : "cursor-pointer"
                       }
                     `}
                   >
