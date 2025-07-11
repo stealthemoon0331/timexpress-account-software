@@ -66,7 +66,7 @@ export default function SystemRegistration() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const { user: loggedUser, loading } = useUser();
+  const { user: loggedUser} = useUser();
 
   const { access_token, addUserToKeycloak, updateUserInKeycloak } = useAuth();
 

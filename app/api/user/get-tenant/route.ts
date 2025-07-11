@@ -49,6 +49,13 @@ const allowedOrigins = [
   "https://wmsninja.com",
   "https://fleetp.com",
   "https://shypri.com",
+  "https://medical.chatess.com",
+  "https://logistics.chatess.com",
+  "https://hr.shypon.com",
+  "https://accounts.shypon.com",
+  "https://quote.shypon.com",
+  "https://todo.shypon.com",
+  "https://timesheet.shypon.com",  
 ];
 
 const getCorsHeaders = (req: Request) => {
