@@ -29,7 +29,7 @@ export const PricingSection = ({ plans, handleChoosePlan }: Props) => (
         {plans?.map((plan) => (
           <div
             key={plan.id}
-            className={`rounded-2xl shadow-md border p-6 flex flex-col justify-between cursor-pointer transition-transform duration-300 hover:scale-[1.02] hover:shadow-lg border-gray-200 ${
+            className={`rounded-2xl shadow-md border p-6 flex flex-col justify-between cursor-pointer transition-transform duration-300 hover:scale-[1.2] hover:shadow-lg border-gray-200 ${
               plan.current
                 ? "hover:border-[#1bb6f9]"
                 : "dark:border-gray-700 hover:border-[#1bb6f9]"
@@ -54,8 +54,8 @@ export const PricingSection = ({ plans, handleChoosePlan }: Props) => (
             <Button
               className={`w-full ${
                 plan.id === "free-trial"
-                  ? "bg-[#1bb6f9] text-white hover:bg-[#1bb6f9]"
-                  : "border-[#1bb6f9] text-[#1bb6f9] hover:bg-[#1bb6f9]"
+                  ? "bg-[#1bb6f9] text-white hover:bg-[#1bb6f9] hover:text-white"
+                  : "border-[#1bb6f9] text-[#1bb6f9] hover:bg-[#1bb6f9] hover:text-white"
               }`}
               variant={plan.id === "free-trial" ? "default" : "outline"}
               onClick={handleChoosePlan}
