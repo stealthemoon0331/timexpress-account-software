@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       subject: "Your Account Credentials",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
-          <h2>Welcome to Timexpress!</h2>
+          <h2>Welcome to Shiper!</h2>
           <p>Your account has been created. Below are your credentials:</p>
           <ul>
             <li><strong>Email:</strong> ${email}</li>
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
           <p>Please change your password after logging in for the first time.</p>
           <p>If you have any questions, feel free to contact our support team.</p>
           <br/>
-          <p>– Timexpress Team</p>
+          <p>– Shiper Team</p>
         </div>
       `,
     };

@@ -107,14 +107,14 @@ export default function Home() {
       >
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-            {/* <Image
+            <Image
               src="/logo.svg"
               alt="Shiper.io"
-              width={32}
-              height={32}
-              className="h-8 w-8"
-            /> */}
-            <span>Shiper.io</span>
+              width={96}
+              height={96}
+              // className="h-8 w-8"
+            />
+            {/* <span>Shiper.io</span> */}
           </Link>
           <nav className="hidden md:flex gap-6">
             {["home", "products", "pricing", "about"].map((section) => (
