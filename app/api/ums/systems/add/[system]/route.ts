@@ -18,8 +18,7 @@ export async function POST(
   req: NextRequest,
   context: { params: { system: string } }
 ) {
-  const { ssoUser, systemRoleSelections, accessToken, selectedAccess } =
-    await req.json();
+  const { ssoUser, systemRoleSelections, accessToken, selectedAccess } = await req.json();
   const { system } = await context.params;
   
   const roleId = getRoleId(systemRoleSelections[system], system as system);

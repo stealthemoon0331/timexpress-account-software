@@ -18,7 +18,6 @@ import {
   ListItemText,
   IconButton,
   CircularProgress,
-  Box,
 } from "@mui/material";
 import PhoneIcon from "@mui/icons-material/Phone";
 import SmartphoneIcon from "@mui/icons-material/Smartphone";
@@ -67,7 +66,7 @@ export default function SystemRegistration() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const { user: loggedUser, loading } = useUser();
+  const { user: loggedUser} = useUser();
 
   const { access_token, addUserToKeycloak, updateUserInKeycloak } = useAuth();
 
@@ -94,6 +93,7 @@ export default function SystemRegistration() {
     TSMS: "Admin",
     TDMS: "Admin",
     HR: "Admin",
+    CHATESS: "admin"
   };
 
   const tmsAdminAccess = "1";

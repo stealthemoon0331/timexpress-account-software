@@ -1,14 +1,10 @@
 "use client";
 
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  Plus,
-  Filter,
   MoreHorizontal,
   Edit,
   Trash2,
-  Key,
-  Link,
   Send,
 } from "lucide-react";
 import * as Tooltip from "@radix-ui/react-tooltip";
@@ -23,14 +19,11 @@ import {
 } from "@/components/ui/table";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { Badge } from "@/components/ui/badge";
-import { motion } from "framer-motion";
 import Pagination from "@mui/material/Pagination";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import { CreateUserDialog } from "@/components/ums/create-user-dialog";
@@ -49,7 +42,6 @@ import { PasswordResetDialog } from "@/components/ums/password-reset-dialog";
 
 import { getBranchName, getRoleName } from "@/lib/ums/utils";
 import {
-  FailedSystem,
   PermissionedSystem,
   system,
   Team,
@@ -62,22 +54,17 @@ import "@/lib/ums/css/loading.css";
 import {
   CircularProgress,
   MenuItem,
-  PaginationItem,
   Select,
   Stack,
   Typography,
 } from "@mui/material";
 import { AddMoreUserDialog } from "./add-more-user-dialog";
-import { set } from "date-fns";
 import InputWrapper from "./input-wrapper";
 import { useData } from "@/app/contexts/dataContext";
 import { Checkbox } from "./ui/checkbox";
-import { Label } from "./ui/label";
 import { useUser } from "@/app/contexts/UserContext";
-import { consoleLog } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { checkIfHasTenant } from "@/lib/tenant";
-import { updateUserToPortals } from "@/lib/ums/systemHandlers/edit/updateUserToPortals";
 import { updateUserPermission } from "@/lib/ums/systemHandlers/edit/updateUserPermission";
 
 export default function UserManagement() {
@@ -87,8 +74,7 @@ export default function UserManagement() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [isSendDialogOpen, setIsSendDialogOpen] = useState(false);
-  const [isPasswordResetDialogOpen, setIsPasswordResetDialogOpen] =
-    useState(false);
+  const [isPasswordResetDialogOpen, setIsPasswordResetDialogOpen] = useState(false);
   const [availableSystems, setAvailableSystems] = useState<system[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchSystemQueryList, setSearchSystemQueryList] = useState<system[]>(
@@ -130,42 +116,27 @@ export default function UserManagement() {
     teams: [],
   });
   const [users, setUsers] = useState<user[]>([]);
-
   const [searchedUsers, setSearchedUsers] = useState<user[]>([]);
-
-  const [permissionedSystems, setPermissionedSystems] = useState<
-    PermissionedSystem[]
-  >([]);
+  const [permissionedSystems, setPermissionedSystems] = useState<PermissionedSystem[]>([]);
   const [systemToAssign, setSystemToAssign] = useState<system | null>();
-
-  const [deletedSystem, setDeletedSystem] = useState({
-    FMS: false,
-    CRM: false,
-    WMS: false,
-    TMS: false,
-    AMS: false,
-    QCMS: false,
-    TSMS: false,
-    TDMS: false,
-    HR: false,
-    CHATESS: false,
-    count: 0,
-  });
-
   const [systemToAdd, setSystemToAdd] = useState<system>("FMS");
-
-  const { access_token, removeUserFromKeycloak } = useAuth();
-
-  const { teams } = useData();
-
-  let deletedSystemCount = 0;
-
   const [itemsPerPage, setItemsPerPage] = useState(10);
-
   const [currentPage, setCurrentPage] = useState(1);
-
   const [hasTenant, setHasTenant] = useState<boolean>(false);
   const [isTenantChecking, setTenantChecking] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
+  
+  const { access_token, removeUserFromKeycloak, checkAndUpdateAccessToken, updateUserPermissionInKeycloak } = useAuth();
+
+  const { user: loggedUser } = useUser();
+  const { teams } = useData();
+
+  const hasRun = useRef(false);
+
+  let deletedSystemCount = 0;
 
   const totalPages = Math.ceil(users.length / itemsPerPage);
 
@@ -174,37 +145,15 @@ export default function UserManagement() {
     currentPage * itemsPerPage
   );
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSending, setIsSending] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isAssigning, setIsAssigning] = useState(false);
-
-  const { checkAndUpdateAccessToken, updateUserPermissionInKeycloak } =
-    useAuth();
-
-  const hasRun = useRef(false);
-  const { user: loggedUser } = useUser();
-
   useEffect(() => {
     setIsLoading(true);
-
-    const init = async () => {
-      await checkAndUpdateAccessToken();
-      await checkAdminRegisteration();
-      const result = await fetchUsers();
-      if (result) {
-        toastify.success("Data loaded successfully!", {
-          autoClose: 3000,
-        });
-      }
-    };
 
     if (!hasRun.current) {
       hasRun.current = true;
       init();
     }
   }, []);
-
+  
   useEffect(() => {
     if (loggedUser?.planId) {
       fetchAvailableSystems();
@@ -237,6 +186,34 @@ export default function UserManagement() {
 
   useEffect(() => {}, [selectedUser]);
 
+  const init = async () => {
+    const tokenOk = await checkAndUpdateAccessToken();
+    
+    await checkAdminRegisteration();
+    
+    const result = await fetchUsers();
+    
+    if(!tokenOk) {
+      toastify.error("Server Error: currently you cant get keycloak access token!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      })
+    }
+    
+    if (result) {
+      toastify.success("Data loaded successfully!", {
+        autoClose: 3000,
+      });
+    }
+
+  };
+
   const checkAdminRegisteration = async () => {
     if (loggedUser?.email) {
       const checkingResponse = await checkIfHasTenant(loggedUser.email);
@@ -248,7 +225,16 @@ export default function UserManagement() {
           setHasTenant(false);
         }
       } else {
-        console.error(checkingResponse.errorMessage);
+        toastify.error("Error occured during tenant checking", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
       }
     }
 
@@ -336,7 +322,7 @@ export default function UserManagement() {
       } else {
         setIsLoading(false);
         toastify.error("Server Error: can not load data!", {
-          position: "bottom-right",
+          position: "top-right",
           autoClose: 5000,
           hideProgressBar: false,
           closeOnClick: true,
@@ -408,6 +394,11 @@ export default function UserManagement() {
     }
   };
 
+  const fetchTeamName = (teamId: string): string => {
+    const team = teams.find((team: Team) => team.teamId === Number(teamId));
+    return team ? team.teamName : "Unknown Team";
+  };
+
   const handleEditUser = (user: user) => {
     setSelectedUser(user);
     setIsEditDialogOpen(true);
@@ -419,61 +410,34 @@ export default function UserManagement() {
     setSelectedUser(user);
   };
 
-  const confirmUserAssign = async () => {
-    if (!selectedUser?.email || !systemToAssign) {
-      toast.warning("Please select a user and system.");
-      return;
-    }
+  const handleRowsPerPageChange = ( event: React.ChangeEvent<HTMLSelectElement>) => {
+    setItemsPerPage(parseInt(event.target.value));
+    setCurrentPage(1); // Reset to page 1 when changing rows per page
+  };
 
-    setIsAssigning(true);
+  const handleSendCredentialToUser = (user: user) => {
+    setSelectedUser(user);
 
-    const email = selectedUser.email;
-    const system = systemToAssign;
-    const isAssigned = !selectedUser.systems_with_permission.includes(system);
-    const systemsWithPermission: system[] = isAssigned
-      ? [...selectedUser.systems_with_permission, system]
-      : selectedUser.systems_with_permission.filter(
-          (s) => s !== systemToAssign
-        );
+    setIsSendDialogOpen(true);
+  };
 
-    try {
-      const responseFromKecloak = await updateUserPermissionInKeycloak(
-        email,
-        system,
-        isAssigned
-      );
+  const handleDeleteUser = (user: user) => {
+    setSelectedUser(user);
+    setIsDeleteDialogOpen(true);
+    setIsDeleting(false);
+  };
 
-      if (responseFromKecloak.error) {
-        hotToast.error(responseFromKecloak.message);
-        return;
-      }
+  const handleResetPassword = (user: any) => {
+    setSelectedUser(user);
+    setIsPasswordResetDialogOpen(true);
+  };
 
-      const responseFromUMS = await updateUserPermission(
-        selectedUser.id,
-        systemsWithPermission
-      );
-
-      if (responseFromUMS.success) {
-        setUsers((prevUsers) =>
-          prevUsers.map((user) =>
-            user.id === selectedUser.id
-              ? {
-                  ...user,
-                  systems_with_permission: systemsWithPermission,
-                }
-              : user
-          )
-        );
-        toast.success("Updated permission successfully");
-      } else {
-        toast.error(responseFromUMS.message || "Failed permission update");
-      }
-    } catch (err: any) {
-      console.error("Error assigning user:", err);
-      hotToast.error(err?.message || "Unexpected server error ocurred");
-    } finally {
-      setIsAssigning(false);
-    }
+  const handleSystemSearchQuery = (system: system) => {
+    setSearchSystemQueryList((prev: system[]) => {
+      return prev?.includes(system)
+        ? prev.filter((s) => s != system)
+        : [...prev, system];
+    });
   };
 
   const addUpdatedUser = (user: user) => {
@@ -499,23 +463,6 @@ export default function UserManagement() {
     });
   };
 
-  const getTeamName = (teamId: string): string => {
-    const team = teams.find((team: Team) => team.teamId === Number(teamId));
-    return team ? team.teamName : "Unknown Team";
-  };
-
-  const handleSendCredentialToUser = (user: user) => {
-    setSelectedUser(user);
-
-    setIsSendDialogOpen(true);
-  };
-
-  const handleDeleteUser = (user: user) => {
-    setSelectedUser(user);
-    setIsDeleteDialogOpen(true);
-    setIsDeleting(false);
-  };
-
   const deleteUserFromSystem = async (system: string) => {
     const response = await fetch(`/api/ums/systems/delete/${system}`, {
       method: "DELETE",
@@ -532,11 +479,7 @@ export default function UserManagement() {
 
     if (result.success) {
       // toastify.success(`User removed from ${system} successfully!`);
-      setDeletedSystem((prev) => ({
-        ...prev,
-        [system]: true,
-        count: prev.count + 1,
-      }));
+      
       deletedSystemCount++;
       return true;
     }
@@ -545,6 +488,21 @@ export default function UserManagement() {
     return false;
   };
 
+  const addMoreSystem = (user: user, system: system) => {
+    // const updatedUser = {
+    //   ...selectedUser,
+    //   selected_systems: [...selectedUser.selected_systems, system],
+    // };
+    // setSelectedUser(updatedUser);
+    setSystemToAdd(system);
+    setIsCreateAddDialogOpen(true);
+    setSelectedUser(user);
+  };
+
+  const addNewUser = async (newUser: user) => {
+    setUsers((prevUsers) => [...prevUsers, newUser]);
+  };
+  
   const confirmSendUserCredential = async () => {
     setIsSending(true);
 
@@ -660,20 +618,6 @@ export default function UserManagement() {
         setUsers((prevUsers) =>
           prevUsers.filter((user) => user.id !== selectedUser.id)
         );
-
-        setDeletedSystem({
-          FMS: false,
-          CRM: false,
-          WMS: false,
-          TMS: false,
-          AMS: false,
-          QCMS: false,
-          TSMS: false,
-          TDMS: false,
-          HR: false,
-          CHATESS: false,
-          count: 0,
-        });
       }
     } catch (error: any) {
       hotToast.error(error.message || "Unexpected error during user deletion");
@@ -683,44 +627,67 @@ export default function UserManagement() {
     }
   };
 
-  const addMoreSystem = (user: user, system: system) => {
-    // const updatedUser = {
-    //   ...selectedUser,
-    //   selected_systems: [...selectedUser.selected_systems, system],
-    // };
-    // setSelectedUser(updatedUser);
-    setSystemToAdd(system);
-    setIsCreateAddDialogOpen(true);
-    setSelectedUser(user);
-  };
+  const confirmUserAssign = async () => {
+    if (!selectedUser?.email || !systemToAssign) {
+      toast.warning("Please select a user and system.");
+      return;
+    }
 
-  const handleResetPassword = (user: any) => {
-    setSelectedUser(user);
-    setIsPasswordResetDialogOpen(true);
-  };
+    setIsAssigning(true);
 
-  const handleSystemSearchQuery = (system: system) => {
-    setSearchSystemQueryList((prev: system[]) => {
-      return prev?.includes(system)
-        ? prev.filter((s) => s != system)
-        : [...prev, system];
-    });
-  };
+    const email = selectedUser.email;
+    const system = systemToAssign;
+    const isAssigned = !selectedUser.systems_with_permission.includes(system);
+    const systemsWithPermission: system[] = isAssigned
+      ? [...selectedUser.systems_with_permission, system]
+      : selectedUser.systems_with_permission.filter(
+          (s) => s !== systemToAssign
+        );
 
-  const addNewUser = async (newUser: user) => {
-    setUsers((prevUsers) => [...prevUsers, newUser]);
+    try {
+      const responseFromKecloak = await updateUserPermissionInKeycloak(
+        email,
+        system,
+        isAssigned
+      );
+
+      if (responseFromKecloak.error) {
+        hotToast.error(responseFromKecloak.message);
+        return;
+      }
+
+      const responseFromUMS = await updateUserPermission(
+        selectedUser.id,
+        systemsWithPermission
+      );
+
+      if (responseFromUMS.success) {
+        setUsers((prevUsers) =>
+          prevUsers.map((user) =>
+            user.id === selectedUser.id
+              ? {
+                  ...user,
+                  systems_with_permission: systemsWithPermission,
+                }
+              : user
+          )
+        );
+        toast.success("Updated permission successfully");
+      } else {
+        toast.error(responseFromUMS.message || "Failed permission update");
+      }
+    } catch (err: any) {
+      console.error("Error assigning user:", err);
+      hotToast.error(err?.message || "Unexpected server error ocurred");
+    } finally {
+      setIsAssigning(false);
+    }
   };
 
   const goToPage = (event: React.ChangeEvent<unknown>, value: number) => {
     setCurrentPage(value);
   };
 
-  const handleRowsPerPageChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setItemsPerPage(parseInt(event.target.value));
-    setCurrentPage(1); // Reset to page 1 when changing rows per page
-  };
 
   if (isTenantChecking) {
     return (
@@ -903,7 +870,7 @@ export default function UserManagement() {
                                                   return teams.length > 0
                                                     ? teams
                                                         .map((teamId) =>
-                                                          getTeamName(teamId)
+                                                          fetchTeamName(teamId)
                                                         )
                                                         .filter(Boolean)
                                                         .join(", ")
