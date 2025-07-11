@@ -1,6 +1,7 @@
+// "use client"
+
 import { DecodedToken, ErrorResponse, system } from "@/lib/ums/type";
 import { isTokenExpired } from "@/lib/ums/utils";
-import { error } from "console";
 import { jwtDecode } from "jwt-decode";
 import { createContext, useContext, useEffect, useState } from "react";
 

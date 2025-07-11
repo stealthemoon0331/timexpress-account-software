@@ -73,7 +73,7 @@ export async function POST(req: Request) {
         If you did not request this, you can safely ignore this message — no further action is required.
       </p>
       <p>Best regards,<br /></p>
-      <p>Timexpress Team<br /></p>
+      <p>Shiper Team<br /></p>
     </div>
 </div>`,
     };

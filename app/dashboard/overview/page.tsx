@@ -1,8 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardStats } from "@/components/dashboard/dashboard-stats"
-import { UsageOverview } from "@/components/dashboard/usage-overview"
 import { SubscriptionOverview } from "@/components/dashboard/subscription-overview"
-import RecentActivity from "@/components/dashboard/recent-activity"
 
 export default function OverviewPage() {
 

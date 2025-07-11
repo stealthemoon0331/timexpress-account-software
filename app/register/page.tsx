@@ -114,7 +114,7 @@ export default function RegisterPage() {
         
 
         router.push("/dashboard/overview");
-        toast.success("Welcome to Shiper.io! Your account has been created.");
+        toast.success("Welcome to Shiper! Your account has been created.");
       }
     } catch (error) {
       console.error("Registration error:", error);
