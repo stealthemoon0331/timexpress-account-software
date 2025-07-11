@@ -112,9 +112,7 @@ export default function Home() {
               alt="Shiper.io"
               width={96}
               height={96}
-              // className="h-8 w-8"
             />
-            {/* <span>Shiper.io</span> */}
           </Link>
           <nav className="hidden md:flex gap-6">
             {["home", "products", "pricing", "about"].map((section) => (
@@ -134,13 +132,13 @@ export default function Home() {
             <Link href="/login">
               <Button
                 variant="outline"
-                className="border-upwork-green text-upwork-green hover:bg-upwork-lightgreen"
+                className="border-[#1bb6f9] text-[#1bb6f9] hover:bg-upwork-lightgreen"
               >
                 Log in
               </Button>
             </Link>
             <Link href="/register">
-              <Button className="bg-upwork-green hover:bg-upwork-darkgreen text-white">
+              <Button className="bg-[#1bb6f9] hover:bg-[#1bb6f9] text-white">
                 Start free trial
               </Button>
             </Link>
@@ -192,7 +190,7 @@ export default function Home() {
         <button
           onClick={scrollToHero}
           aria-label="Scroll to top"
-          className="fixed bottom-8 right-8 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-upwork-green text-white shadow-lg hover:bg-upwork-darkgreen transition"
+          className="fixed bottom-8 right-8 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-[#1bb6f9] text-white shadow-lg hover:bg-[#1bb6f9] transition"
         >
           <ArrowUp size={24} />
         </button>

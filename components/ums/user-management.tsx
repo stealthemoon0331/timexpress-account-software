@@ -726,7 +726,7 @@ export default function UserManagement() {
                     : []
                   ).map((system: system) => (
                     <div key={system} className="flex items-center space-x-2">
-                      <Checkbox id={system} /> <span>{system}</span>
+                      <Checkbox className="border-[#1bb6f9] bg-[#1bb6f9]" id={system} /> <span>{system}</span>
                     </div>
                   ))}
                 </PopoverContent>
@@ -736,7 +736,7 @@ export default function UserManagement() {
             <div className="flex w-full sm:w-auto justify-end sm:justify-start">
               <Button
                 onClick={() => setIsCreateDialogOpen(true)}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto bg-[#1bb6f9] hover:bg-[#3faedd]"
               >
                 <GroupAddIcon className="h-5 w-5 mr-2" />
                 New User
@@ -935,7 +935,7 @@ export default function UserManagement() {
                                 className="text-black"
                                 onClick={() => handleSendCredentialToUser(user)}
                               >
-                                <Send className="h-4 w-4 mr-2" />
+                                <Send className="h-4 w-4 mr-2 " />
                                 Send to User
                               </DropdownMenuItem>
                               <DropdownMenuItem
@@ -1099,7 +1099,7 @@ export default function UserManagement() {
                       e.preventDefault(); // prevent auto-close
                       await confirmSendUserCredential(); // control everything in here
                     }}
-                    className="bg-emerald-600 text-white hover:bg-emerald-700"
+                    className="bg-[#1bb6f9] text-white hover:bg-[#1bb6f9]"
                     disabled={isSending}
                   >
                     {isSending ? "Sending..." : "Send"}

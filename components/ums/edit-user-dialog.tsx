@@ -18,8 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
+
 import { accesses, branches, systemRoles } from "@/lib/ums/data";
 
 import { X } from "lucide-react";
@@ -31,7 +30,7 @@ import {
   Team,
   user,
 } from "@/lib/ums/type";
-import { getBranchName, getIdByRoleType, getRoleName } from "@/lib/ums/utils";
+import { getBranchName, getRoleName } from "@/lib/ums/utils";
 import { toast as toastify } from "react-toastify";
 import { toast as hotToast } from "react-hot-toast";
 import { useAuth } from "@/app/contexts/authContext";
@@ -428,7 +427,7 @@ export function EditUserDialog({
                   <Label htmlFor="edit-password">Password</Label>
                   <Button
                     variant="link"
-                    className="h-auto p-0 text-xs"
+                    className="h-auto p-0 text-xs text-[#1bb6f9]"
                     type="button"
                     onClick={() => {
                       // Toggle password reset fields visibility
@@ -775,7 +774,7 @@ export function EditUserDialog({
           >
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>
+          <Button className="bg-[#1bb6f9]" onClick={handleSubmit}>
             {isUpdating ? "Saving changes..." : "Save"}
           </Button>
         </DialogFooter>

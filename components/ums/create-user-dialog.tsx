@@ -503,6 +503,8 @@ export function CreateUserDialog({
                       <div key={system} className="flex items-center space-x-2">
                         <Checkbox
                           id={system.toLowerCase()}
+
+                          className="border-[#1bb6f9] bg-[#1bb6f9]"
                           checked={selectedSystems.includes(system)}
                           onCheckedChange={() => handleSystemToggle(system)}
                         />
@@ -760,7 +762,7 @@ export function CreateUserDialog({
           >
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>
+          <Button onClick={handleSubmit} className="bg-[#1bb6f9] hover:bg-[#40b3e4]">
             <GroupAddIcon className="h-8 w-8" />
 
             {isSending ? "Registering..." : "Register"}

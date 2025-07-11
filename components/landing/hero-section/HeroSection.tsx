@@ -24,14 +24,14 @@ export const HeroSection = () => {
 
               <div className="flex flex-col gap-4 sm:flex-row justify-center pt-8 items-center">
                 <Link href="/register">
-                  <Button className="px-8 bg-upwork-green hover:bg-upwork-darkgreen text-white w-auto">
+                  <Button className="px-8 bg-[#1bb6f9] hover:bg-[#1bb6f9] text-white w-auto">
                     Start now - It's free
                   </Button>
                 </Link>
                 <Button
                   variant="outline"
                   onClick={() => setModalOpen(true)}
-                  className="px-8 border-upwork-green text-upwork-green hover:bg-upwork-lightgreen w-auto"
+                  className="px-8 border-[#1bb6f9] text-[#1bb6f9] hover:bg-[#1bb6f9] w-auto"
                 >
                   Schedule a demo
                 </Button>

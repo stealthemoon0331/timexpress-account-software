@@ -12,9 +12,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Icons } from "@/components/icons";
-import { addUserToSystemsAndUMS } from "@/lib/ums/systemHandlers/add/addUserToPortals";
-import { useAuth } from "../contexts/authContext";
-import { AllSystems, systems } from "@/lib/data";
 
 const VerificationSuccess = () => {
   const router = useRouter();
@@ -113,7 +110,7 @@ const VerificationSuccess = () => {
                 </CardHeader>
                 <CardContent className="flex flex-col items-center justify-center space-y-4 pt-4">
                   <div className="rounded-full bg-upwork-lightgreen p-6">
-                    <Icons.check className="h-12 w-12 text-upwork-green" />
+                    <Icons.check className="h-12 w-12 text-[#1bb6f9]" />
                   </div>
                   <div className="text-center space-y-2">
                     <p className="font-medium">Verification Complete</p>
@@ -127,7 +124,7 @@ const VerificationSuccess = () => {
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-4">
                   <Button
-                    className="w-full bg-upwork-green hover:bg-upwork-darkgreen text-white"
+                    className="w-full bg-[#1bb6f9] hover:bg-[#1bb6f9] text-white"
                     onClick={() => router.push("/login")}
                   >
                     Log in to your account

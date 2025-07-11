@@ -130,8 +130,7 @@ export default function RegisterPage() {
         href="/"
         className="absolute left-4 top-4 md:left-8 md:top-8 flex items-center gap-2"
       >
-        <Image src="/logo.svg" alt="Shiper.io" width={24} height={24} />
-        <span className="font-bold">Shiper.io</span>
+        <Image src="/logo.svg" alt="Shiper.io" width={96} height={96} />
       </Link>
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[550px]">
         <Card>
@@ -226,84 +225,9 @@ export default function RegisterPage() {
                     </FormItem>
                   )}
                 />
-                {/* <FormField
-                  control={form.control}
-                  name="plan"
-                  render={({ field }) => (
-                    <FormItem className="space-y-3">
-                      <FormLabel>Subscription Plan</FormLabel>
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className="grid grid-cols-1 md:grid-cols-3 gap-4"
-                        >
-                          <FormItem className="flex flex-col items-center space-y-2 rounded-md border p-4 [&:has([data-state=checked])]:border-primary">
-                            <FormControl>
-                              <RadioGroupItem
-                                value="free-trial"
-                                className="sr-only"
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer text-center">
-                              <span className="block font-semibold">
-                                Free Trial
-                              </span>
-                              <span className="block text-sm text-muted-foreground">
-                                30 days
-                              </span>
-                              <span className="block font-semibold mt-1">
-                                $0
-                              </span>
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex flex-col items-center space-y-2 rounded-md border p-4 [&:has([data-state=checked])]:border-primary">
-                            <FormControl>
-                              <RadioGroupItem
-                                value="monthly"
-                                className="sr-only"
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer text-center">
-                              <span className="block font-semibold">
-                                Monthly
-                              </span>
-                              <span className="block text-sm text-muted-foreground">
-                                Billed monthly
-                              </span>
-                              <span className="block font-semibold mt-1">
-                                $27.50
-                              </span>
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex flex-col items-center space-y-2 rounded-md border p-4 [&:has([data-state=checked])]:border-primary">
-                            <FormControl>
-                              <RadioGroupItem
-                                value="annual"
-                                className="sr-only"
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer text-center">
-                              <span className="block font-semibold">
-                                Annual
-                              </span>
-                              <span className="block text-sm text-muted-foreground">
-                                Save 20%
-                              </span>
-                              <span className="block font-semibold mt-1">
-                                $264
-                              </span>
-                            </FormLabel>
-                          </FormItem>
-                        </RadioGroup>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
                 <Button
                   type="submit"
-                  className="w-full bg-upwork-green hover:bg-upwork-darkgreen text-white"
+                  className="w-full bg-[#1bb6f9] hover:bg-[#1bb6f9] text-white"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -323,7 +247,7 @@ export default function RegisterPage() {
               Already have an account?{" "}
               <Link
                 href="/login"
-                className="text-upwork-green underline-offset-4 hover:underline"
+                className="text-[#1bb6f9] underline-offset-4 hover:underline"
               >
                 Log in
               </Link>

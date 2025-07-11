@@ -262,14 +262,14 @@ export default function BillingPage() {
                   />
                   <label
                     htmlFor={plan.id}
-                    className={`flex h-full cursor-pointer flex-col rounded-md border p-4 hover:border-upwork-green ${
+                    className={`flex h-full cursor-pointer flex-col rounded-md border p-4 hover:border-[#1bb6f9] ${
                       selectedPlanId === plan.id
-                        ? "border-2 border-upwork-green"
+                        ? "border-2 border-[#1bb6f9]"
                         : ""
                     }`}
                   >
                     {loggedUser?.planId === plan.id && (
-                      <div className="absolute -right-2 -top-2 rounded-full bg-upwork-green px-2 py-1 text-xs text-white">
+                      <div className="absolute -right-2 -top-2 rounded-full bg-[#1bb6f9] px-2 py-1 text-xs text-white">
                         Current
                       </div>
                     )}
@@ -285,7 +285,7 @@ export default function BillingPage() {
                     <ul className="space-y-2 text-sm">
                       {plan.features.map((feature, index) => (
                         <li key={index} className="flex items-start gap-2">
-                          <CheckCircle className="w-4 h-4 text-upwork-green mt-1" />
+                          <CheckCircle className="w-4 h-4 text-[#1bb6f9] mt-1" />
                           <span>{feature}</span>
                         </li>
                       ))}
@@ -298,7 +298,7 @@ export default function BillingPage() {
           <CardFooter className="flex justify-end">
             <Button
               onClick={handleChangePlan}
-              className="bg-upwork-green hover:bg-upwork-darkgreen text-white"
+              className="bg-[#1bb6f9] hover:bg-[#1bb6f9] text-white"
               disabled={isLoading}
             >
               {isLoading ? (

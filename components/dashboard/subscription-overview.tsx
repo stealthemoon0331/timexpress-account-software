@@ -109,7 +109,7 @@ export function SubscriptionOverview() {
           </p>
           <p className="text-2xl font-bold">{planName}</p>
         </div>
-        <div className="rounded-full bg-upwork-lightgreen px-3 py-1 text-sm font-medium text-upwork-green">
+        <div className="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-[#1bb6f9]">
           {daysRemaining > 0 ? "Active" : "Expired"}
         </div>
       </div>

@@ -31,8 +31,8 @@ export const PricingSection = ({ plans, handleChoosePlan }: Props) => (
             key={plan.id}
             className={`rounded-2xl shadow-md border p-6 flex flex-col justify-between cursor-pointer transition-transform duration-300 hover:scale-[1.02] hover:shadow-lg border-gray-200 ${
               plan.current
-                ? "hover:border-upwork-darkgreen"
-                : "dark:border-gray-700 hover:border-upwork-green"
+                ? "hover:border-[#1bb6f9]"
+                : "dark:border-gray-700 hover:border-[#1bb6f9]"
             } bg-white dark:bg-gray-800`}
           >
             <div>
@@ -45,7 +45,7 @@ export const PricingSection = ({ plans, handleChoosePlan }: Props) => (
               <ul className="text-sm space-y-2 mb-6">
                 {plan.features.map((feature, idx) => (
                   <li key={idx} className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-upwork-green mt-1" />
+                    <CheckCircle className="w-4 h-4 text-[#1bb6f9] mt-1" />
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -54,8 +54,8 @@ export const PricingSection = ({ plans, handleChoosePlan }: Props) => (
             <Button
               className={`w-full ${
                 plan.id === "free-trial"
-                  ? "bg-upwork-green text-white hover:bg-upwork-darkgreen"
-                  : "border-upwork-green text-upwork-green hover:bg-upwork-lightgreen"
+                  ? "bg-[#1bb6f9] text-white hover:bg-[#1bb6f9]"
+                  : "border-[#1bb6f9] text-[#1bb6f9] hover:bg-[#1bb6f9]"
               }`}
               variant={plan.id === "free-trial" ? "default" : "outline"}
               onClick={handleChoosePlan}

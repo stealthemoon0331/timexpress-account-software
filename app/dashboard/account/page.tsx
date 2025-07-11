@@ -209,7 +209,7 @@ export default function AccountPage() {
               alt={session?.user?.name || "User"}
               className="object-cover"
             />
-            <AvatarFallback className="text-xl bg-upwork-green text-white">
+            <AvatarFallback className="text-xl bg-[#1bb6f9] text-white">
               {loading ? (
                 <Icons.spinner className="h-6 w-6 animate-spin" />
               ) : (
@@ -271,7 +271,7 @@ export default function AccountPage() {
                 />
                 <Button
                   type="submit"
-                  className="bg-upwork-green hover:bg-upwork-darkgreen text-white"
+                  className="bg-[#1bb6f9] hover:bg-[#1bb6f9] text-white"
                   disabled={isProfileLoading}
                 >
                   {isProfileLoading ? (
@@ -344,7 +344,7 @@ export default function AccountPage() {
                 />
                 <Button
                   type="submit"
-                  className="bg-upwork-green hover:bg-upwork-darkgreen text-white"
+                  className="bg-[#1bb6f9] hover:bg-[#1bb6f9] text-white"
                   disabled={isPasswordLoading}
                 >
                   {isPasswordLoading ? (

@@ -139,8 +139,8 @@ export function DashboardStats() {
                   <p className="text-3xl font-bold">{stat.value}</p>
                 </div>
               </div>
-              <div className="rounded-full bg-upwork-lightgreen p-2">
-                <stat.icon className="h-5 w-5 text-upwork-green" />
+              <div className="rounded-full bg-blue-50 p-2">
+                <stat.icon className="h-5 w-5 text-[#1bb6f9]" />
               </div>
             </div>
           </CardContent>

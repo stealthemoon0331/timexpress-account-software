@@ -88,11 +88,11 @@ export default function ResetPasswordPage() {
             {isSuccess ? (
               <div className="flex flex-col items-center justify-center space-y-4 pt-4">
                 <div className="rounded-full bg-upwork-lightgreen p-6">
-                  <Icons.check className="h-12 w-12 text-upwork-green" />
+                  <Icons.check className="h-12 w-12 text-[#1bb6f9]" />
                 </div>
                 <p className="text-center text-sm text-muted-foreground">
                   Password reset successful.{" "}
-                  <Link href="/login" className="text-upwork-green underline-offset-4 hover:underline">
+                  <Link href="/login" className="text-[#1bb6f9] underline-offset-4 hover:underline">
                     Back to login
                   </Link>
                 </p>
@@ -130,7 +130,7 @@ export default function ResetPasswordPage() {
 
                   <Button
                     type="submit"
-                    className="w-full bg-upwork-green hover:bg-upwork-darkgreen text-white"
+                    className="w-full bg-[#1bb6f9] hover:bg-[#1bb6f9] text-white"
                     disabled={isLoading}
                   >
                     {isLoading ? (

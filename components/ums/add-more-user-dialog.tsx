@@ -532,24 +532,6 @@ export function AddMoreUserDialog({
                 <InputWrapper id="mobile" value={user?.mobile || ""} disabled />
               </div>
             </div>
-
-            <div className="space-y-2">
-              <Label>
-                Systems <span className="text-destructive">*</span>
-              </Label>
-              <div className="flex flex-wrap gap-4 pt-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id={system}
-                    checked={true}
-                    // onCheckedChange={() => handleSystemToggle("CRM")}
-                  />
-                  <Label htmlFor={system} className="font-normal">
-                    {system}
-                  </Label>
-                </div>
-              </div>
-            </div>
           </div>
 
           <Tabs defaultValue={system} className="w-full">
@@ -779,7 +761,7 @@ export function AddMoreUserDialog({
           >
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>
+          <Button onClick={handleSubmit} className="bg-[#1bb6f9]">
             <GroupAddIcon className="h-8 w-8" />
 
             {isSending ? "Registering..." : "Register"}

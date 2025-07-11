@@ -149,7 +149,7 @@ export default function LoginPage() {
                     <FormItem>
                       <div className="flex items-center justify-between">
                         <FormLabel>Password</FormLabel>
-                        <Link href="/forgot-password" className="text-sm font-medium text-upwork-green hover:underline">
+                        <Link href="/forgot-password" className="text-sm font-medium text-[#1bb6f9] hover:underline">
                           Forgot password?
                         </Link>
                       </div>
@@ -176,7 +176,7 @@ export default function LoginPage() {
                 /> */}
                 <Button
                   type="submit"
-                  className="w-full bg-upwork-green hover:bg-upwork-darkgreen text-white"
+                  className="w-full bg-[#1bb6f9] hover:bg-[#1bb6f9] text-white"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -194,7 +194,7 @@ export default function LoginPage() {
           <CardFooter className="flex flex-col items-center">
             <p className="text-sm text-muted-foreground">
               Don't have an account?{" "}
-              <Link href="/register" className="text-upwork-green underline-offset-4 hover:underline">
+              <Link href="/register" className="text-[#1bb6f9] underline-offset-4 hover:underline">
                 Sign up
               </Link>
             </p>

@@ -2,10 +2,9 @@
 
 import type React from "react";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { redirect, usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
 import {
@@ -28,8 +27,6 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { signOut } from "next-auth/react";
-import { useSession } from "next-auth/react";
-import { LoggedUser } from "@/types/user";
 import { isPlanExpired } from "@/lib/utils";
 import { useUser } from "@/app/contexts/UserContext";
 import NotificationBell from "@/lib/notification-bell";
@@ -42,7 +39,7 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
 
-  const { user: loggedUser, loading } = useUser();
+  const { user: loggedUser } = useUser();
 
   const routes = [
     {
@@ -100,7 +97,7 @@ export default function DashboardLayout({
             group flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200
             ${
               route.active
-                ? "bg-green-100 text-green-700 font-semibold"
+                ? "bg-blue-50 text-[#1bb6f9] font-semibold"
                 : "text-gray-700 hover:bg-gray-100"
             }
             ${
@@ -116,7 +113,7 @@ export default function DashboardLayout({
                 h-6 w-6 transition-colors
                 ${
                   route.active
-                    ? "text-green-600"
+                    ? "text-[#1bb6f9]"
                     : "text-gray-500 group-hover:text-gray-800"
                 }
               `}

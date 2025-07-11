@@ -80,7 +80,7 @@ export default function ProductsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Products</h1>
           <p className="text-muted-foreground">Manage products and monitor usage.</p>
         </div>
-        <Button className="bg-upwork-green hover:bg-upwork-darkgreen text-white">
+        <Button className="bg-[#1bb6f9] hover:bg-[#1bb6f9] text-white">
           <Icons.plus className="mr-2 h-4 w-4" />
           New Product
         </Button>
@@ -140,7 +140,7 @@ export default function ProductsPage() {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Badge className="bg-upwork-green">Active</Badge>
+                <Badge className="bg-[#1bb6f9]">Active</Badge>
                 <Button variant="outline" size="sm">
                   <Icons.barChart className="mr-2 h-4 w-4" />
                   View Analytics

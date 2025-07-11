@@ -78,9 +78,9 @@ export default function OrganizationsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
-        return <Badge className="bg-upwork-green">Active</Badge>
+        return <Badge className="bg-[#1bb6f9]">Active</Badge>
       case "trial":
-        return <Badge className="bg-blue-500">Trial</Badge>
+        return <Badge className="bg-[#1bb6f9]">Trial</Badge>
       case "inactive":
         return <Badge variant="outline">Inactive</Badge>
       default:
@@ -95,7 +95,7 @@ export default function OrganizationsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Organizations</h1>
           <p className="text-muted-foreground">Manage organizations and their subscriptions.</p>
         </div>
-        <Button className="bg-upwork-green hover:bg-upwork-darkgreen text-white">
+        <Button className="bg-[#1bb6f9] hover:bg-[#1bb6f9] text-white">
           <Icons.plus className="mr-2 h-4 w-4" />
           New Organization
         </Button>
