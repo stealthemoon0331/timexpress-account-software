@@ -9,7 +9,7 @@ export interface AuthContextType {
   access_token: string | null;
   setUser: (user: DecodedToken | null) => void;
   logout: () => void;
-  checkAndUpdateAccessToken: () => Promise<void>;
+  checkAndUpdateAccessToken: () => Promise<boolean>;
   addUserToKeycloak: (
     username: string,
     email: string,
@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     checkAndUpdateAccessToken();
   }, []);
 
-  const checkAndUpdateAccessToken = async () => {
+  const checkAndUpdateAccessToken = async (): Promise<boolean> => {
     if (!access_token) {
       try {
         const response = await fetch(
@@ -74,15 +74,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setAccessToken(responseData.token.access_token);
           setRefreshToken(responseData.token.refresh_token);
           setExpiresIn(responseData.token.expires_in);
+          
+          return true;
         } else {
-          console.error("Failed to fetch a valid access token.");
+          return false;
         }
       } catch (error) {
-        console.error("Error fetching token:", error);
+        return false;
       }
     } else if (isTokenExpired(access_token)) {
       try {
-        if (!refresh_token) return;
+        if (!refresh_token) return false;
 
         const params = new URLSearchParams();
         params.append("refresh_token", refresh_token);
@@ -99,16 +101,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (!res.ok || data.error) {
           console.error("Token refresh failed:", data.message || data.error);
-          return;
+          return false;
         }
 
         setAccessToken(data.access_token);
         setRefreshToken(data.refresh_token);
         setExpiresIn(data.expires_in);
+
+        return true;
       } catch (error) {
         console.error("Error refreshing token:", error);
+        
+        return false;
       }
-    }
+    } 
+
+    return true;
   };
 
   const logout = () => {

@@ -24,6 +24,18 @@ interface CustomerResult {
   crm_user_role_id: number;
   tms_user_id: number;
   tms_user_role_id: number;
+  ams_user_id: number;
+  ams_user_role_id: string;
+  hr_user_id: number;
+  hr_user_role_id: string;
+  qcms_user_id: number;
+  qcms_user_role_id: string;
+  tsms_user_id: number;
+  tsms_user_role_id: string;
+  tdms_user_id: number;
+  tdms_user_role_id: string;
+  chatess_user_id: number;
+  chatess_user_role_id: string;
   teams: string;
   access: string;
   selected_systems: string;
@@ -104,7 +116,9 @@ export async function GET(req: Request) {
       const queryResult = await pool.query(
         `SELECT id, name, username, email, password, tenant_id, phone, mobile, fms_user_id, fms_branch,
    fms_user_role_id, wms_user_id, wms_user_role_id, crm_user_id, crm_user_role_id, tms_user_id,
-   tms_user_role_id, teams, access, selected_systems, systems_with_permission, status, adminId
+   tms_user_role_id, ams_user_id, ams_user_role_id, qcms_user_id, qcms_user_role_id, tsms_user_id, tsms_user_role_id, 
+   tdms_user_id, tdms_user_role_id, hr_user_id, hr_user_role_id, chatess_user_id, chatess_user_role_id,
+   teams, access, selected_systems, systems_with_permission, status, adminId
    FROM customers WHERE email = ? AND status = 1 LIMIT 1`,
         [email]
       );
@@ -167,9 +181,9 @@ export async function GET(req: Request) {
     }
 
     // Build role information with error handling
-    const buildRoleInfo = (system: system, roleId: number) => {
+    const buildRoleInfo = (system: system, roleId: number | string) => {
       try {
-        if (roleId > 0) {
+        if (roleId) {
           const roleName = getRoleName(system, roleId);
           return {
             role_id: roleId,
@@ -197,6 +211,12 @@ export async function GET(req: Request) {
         WMS: buildRoleInfo("WMS", customer.wms_user_role_id),
         CRM: buildRoleInfo("CRM", customer.crm_user_role_id),
         TMS: buildRoleInfo("TMS", customer.tms_user_role_id),
+        AMS: buildRoleInfo("AMS", customer.ams_user_role_id),
+        QCMS: buildRoleInfo("TMS", customer.tms_user_role_id),
+        TSMS: buildRoleInfo("TMS", customer.tms_user_role_id),
+        HR: buildRoleInfo("TMS", customer.tms_user_role_id),
+        TDMS: buildRoleInfo("TMS", customer.tms_user_role_id),
+        CHATESS: buildRoleInfo("TMS", customer.tms_user_role_id),
       },
     };
 
