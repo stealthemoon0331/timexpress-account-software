@@ -37,6 +37,8 @@ import { useAuth } from "@/app/contexts/authContext";
 import InputWrapper from "./input-wrapper";
 import { useData } from "@/app/contexts/dataContext";
 import { updateUserToPortals } from "@/lib/ums/systemHandlers/edit/updateUserToPortals";
+import { isPlanExpired } from "@/lib/utils";
+import { useUser } from "@/app/contexts/UserContext";
 
 interface EditUserDialogProps {
   open: boolean;
@@ -90,6 +92,8 @@ export function EditUserDialog({
 
   const [selectedAccess, setSelectedAccess] = useState<string>("");
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isExpired, setIsExpired] = useState(false);
 
   // System-specific role selections
   const [systemRoleSelections, setSystemRoleSelections] =
@@ -137,10 +141,9 @@ export function EditUserDialog({
     });
 
   const { access_token, updateUserInKeycloak } = useAuth();
-
   const { teams } = useData();
+  const { user:loggedUser } = useUser();
 
-  const [isUpdating, setIsUpdating] = useState(false);
   // Initialize form data when user changes
   useEffect(() => {
     if (user) {
@@ -236,6 +239,10 @@ export function EditUserDialog({
     setFormData(updatedFormData);
   }, [selectedTeams]);
 
+  useEffect(() => {
+      setIsExpired(isPlanExpired(loggedUser?.planExpiresAt));
+    }, [loggedUser]);
+
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -311,6 +318,11 @@ export function EditUserDialog({
 
   const handleSubmit = async () => {
     if (!validateForm()) {
+      return;
+    }
+
+    if(isExpired) {
+      toastify.warn("Sorry, your plan was expired", {autoClose: 3000});
       return;
     }
 

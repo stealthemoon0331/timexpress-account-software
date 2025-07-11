@@ -30,6 +30,7 @@ import { useAuth } from "@/app/contexts/authContext";
 import InputWrapper from "./input-wrapper";
 import { useData } from "@/app/contexts/dataContext";
 import { useUser } from "@/app/contexts/UserContext";
+import { isPlanExpired } from "@/lib/utils";
 
 interface AddUserDialogProps {
   open: boolean;
@@ -85,10 +86,8 @@ export function AddMoreUserDialog({
   const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
   const [selectedAccess, setSelectedAccess] = useState<string | null>();
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
-
   const [isSending, setIsSending] = useState(false);
-
-  // System-specific role selections
+  const [isExpired, setIsExpired] = useState(false);
   const [systemRoleSelections, setSystemRoleSelections] = useState<
     Record<string, string>
   >({
@@ -106,8 +105,11 @@ export function AddMoreUserDialog({
 
   const { access_token, updateUserPermissionInKeycloak } = useAuth();
   const { user: loggedUser } = useUser();
-
   const { teams } = useData();
+
+  useEffect(() => {
+    setIsExpired(isPlanExpired(loggedUser?.planExpiresAt));
+  }, [loggedUser])
 
   useEffect(() => {
     if (user) {
@@ -256,6 +258,11 @@ export function AddMoreUserDialog({
   };
 
   const handleSubmit = async () => {
+    if(isExpired) {
+      toastify.warn("Sorry, your plan was expired.", { autoClose: 3000 });
+      return;
+    }
+    
     validateForm();
 
     let fms_user_id = 0;

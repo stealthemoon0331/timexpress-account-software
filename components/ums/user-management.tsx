@@ -66,6 +66,7 @@ import { useUser } from "@/app/contexts/UserContext";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { checkIfHasTenant } from "@/lib/tenant";
 import { updateUserPermission } from "@/lib/ums/systemHandlers/edit/updateUserPermission";
+import { isPlanExpired } from "@/lib/utils";
 
 export default function UserManagement() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -128,6 +129,7 @@ export default function UserManagement() {
   const [isSending, setIsSending] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
+  const [isExpired, setIsExpired] = useState(false);
   
   const { access_token, removeUserFromKeycloak, checkAndUpdateAccessToken, updateUserPermissionInKeycloak } = useAuth();
 
@@ -155,6 +157,8 @@ export default function UserManagement() {
   }, []);
   
   useEffect(() => {
+     setIsExpired(isPlanExpired(loggedUser?.planExpiresAt));
+
     if (loggedUser?.planId) {
       fetchAvailableSystems();
     }
@@ -504,6 +508,11 @@ export default function UserManagement() {
   };
   
   const confirmSendUserCredential = async () => {
+    if(isExpired) {
+      toastify.warn("Sorry, your plan was expired.", { autoClose: 3000 });
+      return;
+    }
+
     setIsSending(true);
 
     const email = selectedUser?.email;
@@ -549,6 +558,11 @@ export default function UserManagement() {
   };
 
   const confirmDeleteUser = async () => {
+    if(isExpired) {
+      toastify.warn("Sorry, your plan was expired.", { autoClose: 3000 });
+      return;
+    }
+
     if (!selectedUser || !selectedUser.email) {
       hotToast.error("User data is missing");
       return;
@@ -628,6 +642,11 @@ export default function UserManagement() {
   };
 
   const confirmUserAssign = async () => {
+    if(isExpired) {
+      toastify.warn("Sorry, your plan was expired.", { autoClose: 3000 });
+      return;
+    }
+
     if (!selectedUser?.email || !systemToAssign) {
       toast.warning("Please select a user and system.");
       return;

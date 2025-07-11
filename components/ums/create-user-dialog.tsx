@@ -37,6 +37,7 @@ import InputWrapper from "./input-wrapper";
 import { useData } from "@/app/contexts/dataContext";
 import { addUserToPortals } from "@/lib/ums/systemHandlers/add/addUserToPortals";
 import { useUser } from "@/app/contexts/UserContext";
+import { isPlanExpired } from "@/lib/utils";
 
 interface CreateUserDialogProps {
   availableSystems: system[];
@@ -56,6 +57,7 @@ export function CreateUserDialog({
   const [selectedAccess, setSelectedAccess] = useState<string>();
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [isSending, setIsSending] = useState(false);
+  const [isExpired, setIsExpired] = useState(false);
   const [formData, setFormData] = useState<FormUser>({
     name: "",
     email: "",
@@ -105,6 +107,10 @@ export function CreateUserDialog({
     updatedFormData.teams = selectedTeams;
     setFormData(updatedFormData);
   }, [selectedTeams]);
+
+  useEffect(() => {
+    setIsExpired(isPlanExpired(loggedUser?.planExpiresAt));
+  }, [loggedUser]);
 
   // System-specific role selections
   const [systemRoleSelections, setSystemRoleSelections] =
@@ -169,7 +175,7 @@ export function CreateUserDialog({
     if (selectedSystems.length === 0) {
       toastify.warn("Please select a system");
       return false;
-    } 
+    }
 
     const systemRolesRequired: system[] = [
       "FMS",
@@ -209,9 +215,9 @@ export function CreateUserDialog({
       }
     }
 
-    if(selectedSystems.includes("TDMS")) {
+    if (selectedSystems.includes("TDMS")) {
       toastify.warn("Please select access");
-        return false;
+      return false;
     }
 
     return true;
@@ -220,10 +226,15 @@ export function CreateUserDialog({
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
+    if(isExpired) {
+      toastify.warn("Sorry, your plan was expired.", { autoClose: 3000 });
+      return;
+    } 
+
     const { username, email, password } = formData;
-    
+
     try {
-      setIsSending(true); 
+      setIsSending(true);
 
       const keycloakResponse = await addUserToKeycloak(
         username,
@@ -503,7 +514,6 @@ export function CreateUserDialog({
                       <div key={system} className="flex items-center space-x-2">
                         <Checkbox
                           id={system.toLowerCase()}
-
                           className="border-[#1bb6f9] bg-[#1bb6f9]"
                           checked={selectedSystems.includes(system)}
                           onCheckedChange={() => handleSystemToggle(system)}
@@ -657,7 +667,10 @@ export function CreateUserDialog({
                           id="workspace"
                           value={formData?.chatess_workspace || ""}
                           onChange={(e) =>
-                            handleInputChange("chatess_workspace", e.target.value)
+                            handleInputChange(
+                              "chatess_workspace",
+                              e.target.value
+                            )
                           }
                         />
                       </div>
@@ -755,6 +768,7 @@ export function CreateUserDialog({
         </div>
 
         <DialogFooter>
+          
           <Button
             variant="outline"
             onClick={cancelDialoghandler}
@@ -762,7 +776,10 @@ export function CreateUserDialog({
           >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} className="bg-[#1bb6f9] hover:bg-[#40b3e4]">
+          <Button
+            onClick={handleSubmit}
+            className="bg-[#1bb6f9] hover:bg-[#40b3e4]"
+          >
             <GroupAddIcon className="h-8 w-8" />
 
             {isSending ? "Registering..." : "Register"}

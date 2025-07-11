@@ -183,12 +183,12 @@ export default function BillingPage() {
               <Separator className="my-4" />
               <div className="space-y-2 text-sm">
                 <p>
-                  Your trial will end{" "}
+                  
                   {differenceInDays(
                     new Date(loggedUser?.planExpiresAt || new Date()),
                     new Date()
                   ) > 0
-                    ? `${format(
+                    ? `Your trial will end at ${format(
                         new Date(loggedUser?.planExpiresAt || new Date()),
                         "MMMM d, yyyy"
                       )}.`
