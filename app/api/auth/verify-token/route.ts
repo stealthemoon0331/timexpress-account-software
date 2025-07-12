@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const tokenRecord = await prisma.verificationToken.findFirst({
+    const tokenRecord = await prisma.verificationtoken.findFirst({
       where: { identifier: email },
       orderBy: {
         expires: "desc",
