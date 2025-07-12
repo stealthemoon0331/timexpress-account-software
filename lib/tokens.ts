@@ -6,7 +6,7 @@ export async function generateVerificationToken(email: string) {
   const token = uuidv4();
   const expires = addMinutes(new Date(), 15); // expires in 15 mins
 
-  await prisma.verificationToken.create({
+  await prisma.verificationtoken.create({
     data: {
       identifier: email,
       token,

@@ -21,8 +21,6 @@ export async function POST(req: Request) {
     // Email not verified — update user record
     const hashedPassword = await bcrypt.hash(password, 10);
 
-
-
     const updatedUser = await prisma.user.update({
       where: { email },
       data: {

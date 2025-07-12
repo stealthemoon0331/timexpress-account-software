@@ -21,6 +21,7 @@ const getBackgroundColor = (name: string): string => {
 
 export default function ProfileAvatar({ loggedUser }: { loggedUser: LoggedUser | null | UserType }) {
   const hasImage = Boolean(loggedUser?.image);
+  
   const fallbackName = loggedUser?.name || "User";
   const bgColor = getBackgroundColor(fallbackName);
 

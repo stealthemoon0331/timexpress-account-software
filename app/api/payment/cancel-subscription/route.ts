@@ -58,7 +58,7 @@ export async function POST() {
       await prisma.user.update({
         where: { id: user.id },
         data: {
-          payfortCardTokenName: null, // mark it as no longer active
+          payfortCardTokenName: null, 
         },
       });
     }
