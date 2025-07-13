@@ -99,7 +99,7 @@ export default function LoginPage() {
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
       <Link href="/" className="absolute left-4 top-4 md:left-8 md:top-8 flex items-center gap-2">
-        <Image src="/logo.svg" alt="Shiper.io" width={96} height={96} />
+        <Image src="/logo.png" alt="Shiper.io" width={96} height={96} />
         {/* <span className="font-bold">Shiper.io</span> */}
       </Link>
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[450px]">

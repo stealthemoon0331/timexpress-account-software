@@ -31,6 +31,16 @@ export async function POST(req: Request) {
       subject: "Your Account Credentials",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+         <div style="text-align: center; background-color: #333; padding: 14px">
+          <a style="text-decoration: none; outline: none" href="[Website Link]" target="_blank">
+            <img
+              style="height: 32px; vertical-align: middle"
+              height="32px"
+              src="cid:logo.png"
+              alt="logo"
+            />
+          </a>
+        </div>
           <h2>Welcome to Shiper!</h2>
           <p>Your account has been created. Below are your credentials:</p>
           <ul>
@@ -45,6 +55,13 @@ export async function POST(req: Request) {
           <p>– Shiper Team</p>
         </div>
       `,
+      attachments: [
+        {
+          filename: "logo.png",
+          path: "./public/logo.png",
+          cid: "logo.png",
+        },
+      ],
     };
 
     await transporter.sendMail(mailOptions);

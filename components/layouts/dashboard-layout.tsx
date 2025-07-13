@@ -75,7 +75,7 @@ export default function DashboardLayout({
           <SidebarHeader className="bg-white">
             <Link href="/" className="flex items-center">
               <Image
-                src="/logo.svg"
+                src="/logo.png"
                 alt="Shiper.io"
                 width={32}
                 height={32}

@@ -96,7 +96,7 @@ export function PaymentForm({
                     className="flex items-center gap-2 cursor-pointer"
                   >
                     <Image
-                      src="https://static.openfintech.io/payment_providers/payfort/logo.png?w=400&c=v0.59.26#w100"
+                      src="https://static.openfintech.io/payment_providers/payfort/logo.svg?w=400&c=v0.59.26#w100"
                       alt="Payfort"
                       width={16}
                       height={16}

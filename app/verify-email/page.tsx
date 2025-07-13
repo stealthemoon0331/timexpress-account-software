@@ -85,8 +85,7 @@ export default function VerifyEmailPage() {
         href="/"
         className="absolute left-4 top-4 md:left-8 md:top-8 flex items-center gap-2"
       >
-        <Image src="/logo.svg" alt="Shiper.io" width={24} height={24} />
-        <span className="font-bold">Shiper.io</span>
+        <Image src="/logo.png" alt="Shiper.io" width={96} height={96} />
       </Link>
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[550px]">
         <Card>

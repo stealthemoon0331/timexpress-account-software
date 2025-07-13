@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   const token = uuidv4();
   const expires = addMinutes(new Date(), 15);
 
-  await prisma.verificationToken.create({
+  await prisma.verificationtoken.create({
     data: {
       identifier: email,
       token,
@@ -58,6 +58,13 @@ export async function POST(req: Request) {
         <p>– Timexpress Team</p>
       </div>
     `,
+    attachments: [
+        {
+          filename: "logo.png",
+          path: "./public/logo.png",
+          cid: "logo.png",
+        },
+      ],
   };
 
   try {

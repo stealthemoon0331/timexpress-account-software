@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import prisma from "@/lib/prisma";
 import { generateVerificationToken } from "@/lib/tokens";
-import { SMTPHOST, SMTPPASS, SMTPPORT, SMTPUSER, } from "@/app/config/setting";
+import { SMTPHOST, SMTPPASS, SMTPPORT, SMTPUSER } from "@/app/config/setting";
 
 export async function POST(req: Request) {
   try {
@@ -76,6 +76,13 @@ export async function POST(req: Request) {
       <p>Shiper Team<br /></p>
     </div>
 </div>`,
+      attachments: [
+        {
+          filename: "logo.png",
+          path: "./public/logo.png",
+          cid: "logo.png",
+        },
+      ],
     };
 
     transporter.sendMail(mailOptions, (error, info) => {

@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     const { token, password } = resetPasswordSchema.parse(body)
 
     // Find the reset token
-    const resetToken = await prisma.verificationToken.findUnique({
+    const resetToken = await prisma.verificationtoken.findUnique({
       where: { token },
     })
 
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     })
 
     // Delete used token
-    await prisma.verificationToken.delete({
+    await prisma.verificationtoken.delete({
       where: { token },
     })
 

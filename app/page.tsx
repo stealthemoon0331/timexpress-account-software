@@ -108,7 +108,7 @@ export default function Home() {
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           <Link href="/" className="flex items-center gap-2 font-bold text-xl">
             <Image
-              src="/logo.svg"
+              src="/logo.png"
               alt="Shiper.io"
               width={96}
               height={96}
