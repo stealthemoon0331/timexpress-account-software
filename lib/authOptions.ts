@@ -41,6 +41,7 @@ export const authOptions: NextAuthOptions = {
           credentials.password,
           user.password
         );
+        
         if (!isValid) throw new Error("Invalid credentials");
 
         return {
@@ -130,7 +131,7 @@ export const authOptions: NextAuthOptions = {
             planActivatedAt: now,
             planExpiresAt: expires,
             lastLoginAt: now,
-            accounts: account
+            account: account
               ? {
                   create: {
                     type: account.type,

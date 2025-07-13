@@ -8,7 +8,7 @@ datasource db {
 }
 
 model account {
-  id                String  @id
+  id                String  @id @default(uuid())
   userId            String
   type              String
   provider          String
