@@ -66,7 +66,7 @@ export default function SystemRegistration() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const { user: loggedUser} = useUser();
+  const { user: loggedUser } = useUser();
 
   const { access_token, addUserToKeycloak, updateUserInKeycloak } = useAuth();
 
@@ -93,7 +93,7 @@ export default function SystemRegistration() {
     TSMS: "Admin",
     TDMS: "Admin",
     HR: "Admin",
-    CHATESS: "admin"
+    CHATESS: "admin",
   };
 
   const tmsAdminAccess = "1";
@@ -107,6 +107,10 @@ export default function SystemRegistration() {
   }, []);
 
   useEffect(() => {
+    console.log(
+      "* available systems in useeffect => ",
+      typeof availableSystems
+    );
     if (!Array.isArray(availableSystems)) return;
 
     setSystemOptions(
@@ -255,10 +259,13 @@ export default function SystemRegistration() {
       });
 
       const fetchPlans = await response.json();
+
       // Check if fetchData is an array
       if (Array.isArray(fetchPlans)) {
         setAvailableSystems(
-          fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
+          JSON.parse(
+            fetchPlans.find((p) => p.id === loggedUser?.planId)?.systems
+          )
         );
       } else {
         return false;
@@ -592,8 +599,6 @@ export default function SystemRegistration() {
               styles={{
                 menu: (provided) => ({
                   ...provided,
-                  maxHeight: 100,
-                  overflowY: "auto",
                   WebkitOverflowScrolling: "touch",
                   zIndex: 9999,
                 }),
