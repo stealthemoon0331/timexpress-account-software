@@ -403,7 +403,6 @@ export async function registerUserToTDMS({
   roleId,
   system,
 }: RegistrationParams) {
-  console.log("* TDMS ssoUser.tenant_id => ", ssoUser.tenant_id)
   const payload = {
     email: ssoUser.email,
     name: ssoUser.name,
@@ -470,10 +469,6 @@ export async function registerUserToHR({
 
   const responseData = await safeParseJSON(response);
 
-  console.log("HR HR_API_PATH => ", HR_API_PATH);
-
-  console.log("HR responseData => ", responseData);
-
   if (!response.ok) {
     return {
       isError: true,
@@ -507,8 +502,8 @@ export async function registerUserToCHATESS({
     username: ssoUser.name,
     password: ssoUser.password,
     tenant_id: ssoUser.tenant_id,
-    workspace: ssoUser.chatess_workspace,
   };
+
 
   const response = await fetch(`${CHATESS_API_PATH}/api/auth/register`, {
     method: "POST",
@@ -519,10 +514,6 @@ export async function registerUserToCHATESS({
   });
 
   const responseData = await safeParseJSON(response);
-
-  console.log("CHATESS_API_PATH => ", HR_API_PATH);
-
-  console.log("CHATESS responseData => ", responseData);
 
   if (!response.ok) {
     return {

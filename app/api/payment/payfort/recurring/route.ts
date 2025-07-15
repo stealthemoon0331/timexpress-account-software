@@ -17,11 +17,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Request Body is not correct" }, { status: 404 });
   }
 
-  console.log("* token => ", token);
-  console.log("* agreementId => ", agreement_id);
-  console.log("* customer_email => ", customer_email);
-  console.log("* amount => ", amount);
-
 
   const merchant_reference = `SUB_${Date.now()}`;
 

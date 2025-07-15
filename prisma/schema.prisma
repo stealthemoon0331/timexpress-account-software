@@ -76,7 +76,7 @@ model customers {
 }
 
 model notification {
-  id        String   @id
+  id        String   @id @default(uuid())
   userId    String?
   title     String
   message   String   @db.Text
@@ -123,7 +123,7 @@ model plan {
 }
 
 model report {
-  id        String   @id
+  id        String   @id @default(uuid())
   title     String
   message   String   @db.Text
   read      Boolean  @default(false)
@@ -148,7 +148,7 @@ model system {
 }
 
 model tenants {
-  id       String @id
+  id       String @id @default(uuid())
   email    String @unique(map: "Tenants_email_key")
   tenantId String @unique(map: "Tenants_tenantId_key")
   user     user   @relation(fields: [email], references: [email], map: "Tenants_email_fkey")

@@ -147,7 +147,6 @@ export function EditUserDialog({
   // Initialize form data when user changes
   useEffect(() => {
     if (user) {
-      console.log("* user in edit dialog => ", user)
       setFormData({
         name: user.name || "",
         email: user.email || "",
@@ -306,11 +305,6 @@ export function EditUserDialog({
         toastify.warn("Please select teams in TMS setting");
         return false;
       }
-    }
-
-    if(selectedSystems.includes("CHATESS") && !formData.chatess_workspace) {
-        toastify.warn("Please select workspace in CHATESS setting");
-        return false;
     }
 
     return true;
@@ -672,18 +666,6 @@ export function EditUserDialog({
                               </div>
                             ))}
                         </div>
-                      </div>
-                    )}
-                    {system === "CHATESS" && (
-                      <div className="space-y-2">
-                        <Label htmlFor="workspace">Workspace</Label>
-                        <InputWrapper
-                          id="workspace"
-                          value={formData?.chatess_workspace || ""}
-                          onChange={(e) =>
-                            handleInputChange("chatess_workspace", e.target.value)
-                          }
-                        />
                       </div>
                     )}
                     {system === "TMS" && (

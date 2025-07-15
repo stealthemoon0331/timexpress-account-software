@@ -3,7 +3,6 @@ import { system } from "../../type";
 
 export const updateUserPermission = async (id: number, systems_with_permission: system[]) => {
   try {
-    console.log("id for permission => ", id);
 
     if(!id) {
         return {

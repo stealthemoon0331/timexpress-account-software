@@ -34,8 +34,6 @@ export async function POST(req: Request) {
   const signature = formData.get("signature") as string | null;
   const token_name = formData.get("token_name") as string | null;
 
-  console.log("* formData => ", formData);
-
   if (
     !responseCode ||
     !merchantReference ||
@@ -74,11 +72,6 @@ export async function POST(req: Request) {
     const now = new Date();
     const expiryDate = addMonths(now, 1);
 
-    console.log("customerEmail => ", customerEmail);
-    console.log("merchantReference => ", merchantReference);
-    
-
-
     const user = await prisma.user.findFirst({
       where: {
         merchantReference: merchantReference,
@@ -87,8 +80,6 @@ export async function POST(req: Request) {
         id: true,
       },
     });
-
-    console.log("* user => ", user)
 
     if (!user?.id) {
       return NextResponse.redirect(`${RETURN_PAGE_URL}?status=${404}`, 302);
@@ -99,8 +90,6 @@ export async function POST(req: Request) {
         price: Number(amount)/100,
       },
     });
-
-    console.log("* plan => ", plan);
 
     if (!plan?.id) {
       return NextResponse.redirect(`${RETURN_PAGE_URL}?status=${404}`, 302);

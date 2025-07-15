@@ -243,17 +243,11 @@ export function AddMoreUserDialog({
       }
     }
 
-    if (system == "CHATESS" && formData.chatess_workspace === "") {
-      toastify.warn("Please input workspace in CHATESS setting");
-      return false;
-    }
-
     return true;
   };
 
   const handleInputChange = (field: string, value: string) => {
 
-    console.log("field => ", field);
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -661,19 +655,6 @@ export function AddMoreUserDialog({
                     </div>
                   </div>
                 )}
-                {system === "CHATESS" && (
-                  <div className="space-y-2">
-                    <Label htmlFor="workspace">Workspace</Label>
-                    <InputWrapper
-                      id="workspace"
-                      value={formData?.chatess_workspace || ""}
-                      onChange={(e) =>
-                        handleInputChange("chatess_workspace", e.target.value)
-                      }
-                    />
-                  </div>
-                )}
-
                 {system === "TMS" && (
                   <div className="space-y-2">
                     <Label htmlFor="tms-branch">
@@ -768,7 +749,7 @@ export function AddMoreUserDialog({
           >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} className="bg-[#1bb6f9]">
+          <Button onClick={handleSubmit} className="bg-[#1bb6f9] hover:bg-[#40b3e4]">
             <GroupAddIcon className="h-8 w-8" />
 
             {isSending ? "Registering..." : "Register"}

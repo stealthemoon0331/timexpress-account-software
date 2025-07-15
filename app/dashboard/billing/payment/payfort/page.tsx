@@ -38,7 +38,6 @@ const PayFortForm = ({ amount, email, plan_id }: PayFortFormProps) => {
       });
 
       const data = await res.json();
-      console.log("* params => ", data.params);
 
       const form = document.createElement("form");
       form.method = "POST";

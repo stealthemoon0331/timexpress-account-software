@@ -64,8 +64,6 @@ export const addUserToPortals = async (
 
         const responseData = await response.json();
 
-        console.log("responseData => ", responseData);
-
         if (responseData.error) {
           //   hotToast.error(responseData.message, { duration: 5000 });
           throw new Error(responseData.message);
@@ -79,8 +77,6 @@ export const addUserToPortals = async (
       if (result.status === "fulfilled") {
         const val = result.value;
 
-        console.log("val ==> ", val);
-
         if (val.system === "FMS") fms_user_id = val.userid;
         else if (val.system === "WMS") wms_user_id = val.userid;
         else if (val.system === "CRM") crm_user_id = val.userid;
@@ -91,10 +87,6 @@ export const addUserToPortals = async (
         else if (val.system === "TDMS") tdms_user_id = val.userid;
         else if (val.system === "HR") hr_user_id = val.userid;
         else if (val.system === "CHATESS") chatess_user_id = val.userid;
-
-
-        console.log("val.userid ==> ", val.userid);
-        console.log("val.hr_user_id ==> ", val.hr_user_id);
 
         registered_system.push(val.system);
         countsOfRegisteredSystem++;
@@ -184,7 +176,7 @@ export const addUserToPortals = async (
     }
 
     const umsData = await umsResponse.json();
-    console.log("* returned umsDATA => ", umsData)
+
     return {
       success: true,
       data: umsData,

@@ -660,22 +660,6 @@ export function CreateUserDialog({
                       </div>
                     )}
 
-                    {system === "CHATESS" && (
-                      <div className="space-y-2">
-                        <Label htmlFor="workspace">Workspace</Label>
-                        <InputWrapper
-                          id="workspace"
-                          value={formData?.chatess_workspace || ""}
-                          onChange={(e) =>
-                            handleInputChange(
-                              "chatess_workspace",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </div>
-                    )}
-
                     {system === "TMS" && (
                       <div className="space-y-2">
                         <Label htmlFor="tms-branch">

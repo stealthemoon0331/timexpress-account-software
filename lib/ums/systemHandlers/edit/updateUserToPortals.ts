@@ -41,7 +41,7 @@ export const updateUserToPortals = async (
         });
 
         const responseData = await response.json();
-        console.log("* edit responseData => ", responseData);
+
         if (!response.ok || responseData.isError) {
           throw new Error(responseData.message || "Update failed");
         }

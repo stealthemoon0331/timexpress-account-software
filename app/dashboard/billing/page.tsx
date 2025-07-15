@@ -53,8 +53,6 @@ export default function BillingPage() {
   useEffect(() => {
     if (!status) return;
 
-    console.log("status => ", status);
-
     if (status === "14000") {
       toast.success(`Your subscription has been updated successfully!`);
     }

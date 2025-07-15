@@ -38,8 +38,6 @@ const generateSignature = (params: Record<string, any>): string => {
     (key) => `${key.trim()}=${String(filteredParams[key]).trim()}`
   );
 
-  console.log("keyValuePairs => ", keyValuePairs);
-
   const signatureString =
     REQUEST_PHRASE.trim() + keyValuePairs.join("") + REQUEST_PHRASE.trim();
 
@@ -111,7 +109,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ params });
   } catch (error) {
-    console.log("Payment initiation error:", error);
 
     return NextResponse.json(
       { error: "Payment initiation failed" },

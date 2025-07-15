@@ -107,10 +107,6 @@ export default function SystemRegistration() {
   }, []);
 
   useEffect(() => {
-    console.log(
-      "* available systems in useeffect => ",
-      typeof availableSystems
-    );
     if (!Array.isArray(availableSystems)) return;
 
     setSystemOptions(

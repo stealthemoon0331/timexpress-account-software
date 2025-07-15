@@ -180,6 +180,8 @@ export async function deleteUserFromTSMS({ user }: DeleteParams) {
       return { success: false, error: error.message };
     }
 
+
+
     return { success: true };
   } catch (error) {
     console.error("TSMS deletion error:", error);
@@ -231,11 +233,7 @@ export async function deleteUserFromHR({ user }: DeleteParams) {
 
 export async function deleteUserFromCHATESS({ user }: DeleteParams) {
   try {
-    console.log("* user.chatess_user_id => ", user.chatess_user_id);
-    console.log("delete api", {
-      method: "DELETE",
-      body: JSON.stringify({ id: 11 }),
-    });
+
     const response = await fetch(`${CHATESS_API_PATH}/api/admin/users/delete`, {
       method: "DELETE",
       headers: {

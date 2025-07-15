@@ -23,11 +23,6 @@ export async function POST(
   
   const roleId = getRoleId(systemRoleSelections[system], system as system);
 
-  console.log("* ssouser => ", ssoUser);
-  console.log("* roleId => ", roleId);
-  console.log("* accessToken => ", accessToken);
-  console.log("* system => ", system);
-
   try {
     switch (system) {
       case "FMS":

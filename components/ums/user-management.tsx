@@ -76,7 +76,6 @@ export default function UserManagement() {
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [isSendDialogOpen, setIsSendDialogOpen] = useState(false);
   const [isPasswordResetDialogOpen, setIsPasswordResetDialogOpen] = useState(false);
-  const [availableSystems, setAvailableSystems] = useState<system[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchSystemQueryList, setSearchSystemQueryList] = useState<system[]>(
     []
@@ -119,6 +118,7 @@ export default function UserManagement() {
   const [users, setUsers] = useState<user[]>([]);
   const [searchedUsers, setSearchedUsers] = useState<user[]>([]);
   const [permissionedSystems, setPermissionedSystems] = useState<PermissionedSystem[]>([]);
+  const [availableSystems, setAvailableSystems] = useState<system[]>([]);
   const [systemToAssign, setSystemToAssign] = useState<system | null>();
   const [systemToAdd, setSystemToAdd] = useState<system>("FMS");
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -167,23 +167,21 @@ export default function UserManagement() {
   useEffect(() => {
     if (!users) return;
 
-    console.log("* users => ", users);
-
     const filtered = users.filter((user) => {
       const matchesSearch =
         user.name?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
         user.email?.toLowerCase().includes(searchQuery?.toLowerCase());
 
-      const matchesSystem = 
-        searchSystemQueryList?.length === 0 || 
-        user.selected_systems?.some((system) => searchSystemQueryList?.includes(system));
+      const matchesSystem = searchSystemQueryList?.length === 0 || user.selected_systems?.some((system: system) => searchSystemQueryList?.includes(system));
+      console.log("* user.selected_systems => ", typeof user.selected_systems);
+      console.log("* searchSystemQueryList?.length => ", searchSystemQueryList?.length);
+      console.log("* searchSystemQueryList=> ", typeof searchSystemQueryList);
+
+
+      console.log("* matchesSystem => ", matchesSystem);
 
       return matchesSearch && matchesSystem;
     });
-
-    console.log("* filtered users => ", filtered);
-    console.log("* searchSystemQueryList => ", searchSystemQueryList);
-
 
     setSearchedUsers(filtered);
   }, [searchQuery, users, searchSystemQueryList]);
@@ -364,9 +362,6 @@ export default function UserManagement() {
 
       const fetchPlans = await response.json();
 
-      console.log("fetchPlans => ", fetchPlans);
-      console.log("loggedUser?.planId => ", loggedUser?.planId);
-
       // Check if fetchData is an array
       if (Array.isArray(fetchPlans)) {
         const matchedPlan = fetchPlans.find((p) => p.id === loggedUser?.planId);
@@ -437,6 +432,7 @@ export default function UserManagement() {
   };
 
   const handleSystemSearchQuery = (system: system) => {
+    console.log("* system => ", system);
     setSearchSystemQueryList((prev: system[]) => {
       return prev?.includes(system)
         ? prev.filter((s) => s != system)
@@ -482,8 +478,6 @@ export default function UserManagement() {
     const result = await response.json();
 
     if (result.success) {
-      // toastify.success(`User removed from ${system} successfully!`);
-      
       deletedSystemCount++;
       return true;
     }
@@ -493,11 +487,6 @@ export default function UserManagement() {
   };
 
   const addMoreSystem = (user: user, system: system) => {
-    // const updatedUser = {
-    //   ...selectedUser,
-    //   selected_systems: [...selectedUser.selected_systems, system],
-    // };
-    // setSelectedUser(updatedUser);
     setSystemToAdd(system);
     setIsCreateAddDialogOpen(true);
     setSelectedUser(user);
@@ -740,12 +729,12 @@ export default function UserManagement() {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-64 max-h-64 overflow-y-auto space-y-2">
-                  {(Array.isArray(searchSystemQueryList)
-                    ? searchSystemQueryList
+                  {(Array.isArray(availableSystems)
+                    ? availableSystems
                     : []
                   ).map((system: system) => (
                     <div key={system} className="flex items-center space-x-2">
-                      <Checkbox className="border-[#1bb6f9] bg-[#1bb6f9]" id={system} /> <span>{system}</span>
+                      <Checkbox className="border-[#1bb6f9] bg-[#1bb6f9]" id={system} onCheckedChange={() => handleSystemSearchQuery(system)} checked={searchSystemQueryList.includes(system)}/> <span>{system}</span>
                     </div>
                   ))}
                 </PopoverContent>

@@ -47,9 +47,6 @@ export async function GET() {
 
     const resData = await res.json();
 
-    console.log("* resData => ", resData);
-    console.log("* res => ", res.status);
-
     if (res.status === 200 && resData.response_code === "14000") {
       const updatedUser = await prisma.user.update({
         where: { id: user.id },

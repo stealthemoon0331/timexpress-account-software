@@ -19,7 +19,6 @@ export async function getServiceToken() {
     // params.append("grant_type", "client_credentials");
 
     //   params.append("scope", 'openid profile email ums-scope');
-    console.log("Fetching token from:", `${KEYCLOAK_AUTH_ENDPOINT}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token`);
 
 
     const response = await fetch(
