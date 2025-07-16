@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         if (isTokenExpired(token)) {
           localStorage.removeItem("token");
-          window.location.href = "/signin";
+          window.location.href = "/login";
         }
         const decodedToken = jwtDecode<DecodedToken>(token);
         setUser(decodedToken);
@@ -123,7 +123,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
-    window.location.href = "/signin";
+    window.location.href = "/login";
   };
 
   // -----------------------------
