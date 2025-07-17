@@ -5,7 +5,6 @@ import {
   ACCESS_CODE,
   LANGUAGE,
   MERCHANT_ID,
-  PAYFORT_API,
   REQUEST_PHRASE,
   RETURN_URL,
 } from "@/app/config/setting";
@@ -51,7 +50,7 @@ const generateSignature = (params: Record<string, any>): string => {
 
 export async function POST(request: Request) {
   try {
-    const { amount, currency, customer_email, plan_id } = await request.json();
+    const { amount, currency, customer_email } = await request.json();
 
     if (!amount || !currency || !customer_email) {
       return NextResponse.json({ error: "Not Found" }, { status: 404 });
@@ -62,7 +61,7 @@ export async function POST(request: Request) {
     const command = "PURCHASE";
     const recurring_mode = "FIXED";
     const recurring_transactions_count = 12;
-    const recurring_expiry_date = "2026-06-30"
+    const recurring_expiry_date = "2026-06-30";
 
     const initialParams = {
       command: command,
@@ -107,9 +106,16 @@ export async function POST(request: Request) {
       signature: signature,
     };
 
+    console.log("* PayFort env values => ", {
+      ACCESS_CODE: Boolean(ACCESS_CODE),
+      MERCHANT_ID: Boolean(MERCHANT_ID),
+      REQUEST_PHRASE: Boolean(REQUEST_PHRASE),
+    });
+
+    console.log("* params => ", params);
+
     return NextResponse.json({ params });
   } catch (error) {
-
     return NextResponse.json(
       { error: "Payment initiation failed" },
       { status: 500 }
