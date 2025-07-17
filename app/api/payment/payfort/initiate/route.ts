@@ -37,8 +37,7 @@ const generateSignature = (params: Record<string, any>): string => {
     (key) => `${key.trim()}=${String(filteredParams[key]).trim()}`
   );
 
-  const signatureString =
-    REQUEST_PHRASE.trim() + keyValuePairs.join("") + REQUEST_PHRASE.trim();
+  const signatureString = REQUEST_PHRASE.trim() + keyValuePairs.join("") + REQUEST_PHRASE.trim();
 
   const signature = crypto
     .createHash("sha256")
@@ -51,6 +50,8 @@ const generateSignature = (params: Record<string, any>): string => {
 export async function POST(request: Request) {
   try {
     const { amount, currency, customer_email } = await request.json();
+
+    console.log("* amount, currency, customer_email", amount, currency, customer_email);
 
     if (!amount || !currency || !customer_email) {
       return NextResponse.json({ error: "Not Found" }, { status: 404 });
@@ -78,6 +79,8 @@ export async function POST(request: Request) {
       recurring_expiry_date: recurring_expiry_date,
       return_url: RETURN_URL,
     };
+
+    console.log("* initial Params => ", initialParams);
 
     const signature = generateSignature(initialParams);
 

@@ -13,11 +13,10 @@ export const HR_API_PATH = process.env.NEXT_PUBLIC_HR_API_PATH || "http://localh
 export const CHATESS_API_PATH = process.env.NEXT_PUBLIC_CHATESS_API_PATH;
 
 
-
-
 /**
  * Keycloak Config
  */
+
 export const KEYCLOAK_AUTH_ENDPOINT = process.env.NEXT_PUBLIC_KEYCLOAK_AUTH_ENDPOINT || "";
 export const KEYCLOAK_CLIENT_ID = process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID || "";
 export const KEYCLOAK_CLIENT_SECRET = process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_SECRET || "";
