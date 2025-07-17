@@ -1,4 +1,5 @@
 // app/api/payment/paypal/create-subscription/route.ts
+import { PAYPAL_API } from "@/app/config/setting";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -13,7 +14,7 @@ export async function POST(req: Request) {
       `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`
     ).toString("base64");
 
-    const response = await fetch("https://api-m.sandbox.paypal.com/v1/billing/subscriptions", {
+    const response = await fetch(PAYPAL_API, {
       method: "POST",
       headers: {
         "Authorization": `Basic ${auth}`,
