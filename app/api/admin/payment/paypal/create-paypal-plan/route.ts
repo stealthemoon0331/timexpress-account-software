@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
             price: 0,
             features: JSON.stringify(plan.features),
             paypalPlanId: "P-TRIAL",
-            systems: plan.systems
+            systems: JSON.stringify(plan.systems)
           },
           update: {
             name: plan.name,
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
             price: 0,
             features: JSON.stringify(plan.features),
             paypalPlanId: "P-TRIAL",
-            systems: plan.systems
+            systems: JSON.stringify(plan.systems)
           },
         })
       
@@ -66,17 +66,17 @@ export async function POST(req: NextRequest) {
           name: plan.name,
           description: plan.description,
           price: priceNumber,
-          features: plan.features,
+          features: JSON.stringify(plan.features),
           paypalPlanId: billingPlan?.id ?? null,
-          systems: plan.systems
+          systems: JSON.stringify(plan.systems)
         },
         update: {
           name: plan.name,
           description: plan.description,
           price: priceNumber,
-          features: plan.features,
+          features: JSON.stringify(plan.features),
           paypalPlanId: billingPlan?.id ?? null,
-          systems: plan.systems
+          systems: JSON.stringify(plan.systems)
         },
       })
       
