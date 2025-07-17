@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
             name: plan.name,
             description: plan.description,
             price: 0,
-            features: plan.features,
+            features: JSON.stringify(plan.features),
             paypalPlanId: "P-TRIAL",
             systems: plan.systems
           },
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
             name: plan.name,
             description: plan.description,
             price: 0,
-            features: plan.features,
+            features: JSON.stringify(plan.features),
             paypalPlanId: "P-TRIAL",
             systems: plan.systems
           },
