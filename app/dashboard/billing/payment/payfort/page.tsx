@@ -44,6 +44,8 @@ const PayFortForm = ({ amount, email, plan_id }: PayFortFormProps) => {
       form.action = PAYFORT_PAYMENT_PAGE_URL;
       form.setAttribute("accept-charset", "utf-8");
 
+      console.log("* data.params => ", data.params);
+
       Object.entries(data.params).forEach(([key, value]) => {
         const input = document.createElement("input");
         input.type = "hidden";
