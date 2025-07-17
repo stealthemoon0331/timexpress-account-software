@@ -32,7 +32,9 @@ export const DB_NAME = process.env.DB_NAME;
 export const DB_PORT = process.env.DB_PORT;
 
 
-// Database
+// Paypal
+export const PAYPAL_API = process.env.NEXT_PUBLIC_PAYPAL_API!;
+export const PAYPAL_BASE = process.env.NEXT_PUBLIC_PAYPAL_BASE!;
 
 // Payfort
 export const ACCESS_CODE = process.env.NEXT_PUBLIC_PAYFORT_ACCESS_CODE!;
@@ -40,7 +42,6 @@ export const MERCHANT_ID = process.env.NEXT_PUBLIC_PAYFORT_MERCHANT_IDENTIFIER!;
 export const PAYMENT_URL = process.env.NEXT_PUBLIC_PAYFORT_PAYMENT_URL!;
 export const REQUEST_PHRASE = process.env.NEXT_PUBLIC_PAYFORT_SHA_REQUEST_PHRASE!;
 export const RESPONSE_PHRASE = process.env.NEXT_PUBLIC_PAYFORT_SHA_RESPONSE_PHRASE!;
-export const PAYPAL_API = process.env.NEXT_PUBLIC_PAYPAL_API!;
 export const PAYFORT_PAYMENT_PAGE_URL = process.env.NEXT_PUBLIC_PAYFORT_PAYMENT_PAGE_URL!;
 export const PAYFORT_API = process.env.NEXT_PUBLIC_PAYFORT_API!;
 export const RETURN_URL = process.env.NEXT_PUBLIC_PAYFORT_RETURN_URL!;
