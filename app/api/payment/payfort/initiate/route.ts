@@ -84,6 +84,9 @@ export async function POST(request: Request) {
 
     const signature = generateSignature(initialParams);
 
+    console.log("* signature => ", signature);
+
+
     const user = await prisma.user.findUnique({
       where: {
         email: customer_email,
@@ -92,6 +95,8 @@ export async function POST(request: Request) {
         id: true,
       },
     });
+
+    console.log("* user => ", user);
 
     if (!user?.id) {
       return NextResponse.json({ error: "User Not Found" }, { status: 404 });
@@ -119,9 +124,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ params });
   } catch (error) {
-    return NextResponse.json(
-      { error: "Payment initiation failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: String(error) }, { status: 500 });
   }
 }
