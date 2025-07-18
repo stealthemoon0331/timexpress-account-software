@@ -8,6 +8,7 @@ import {
   REQUEST_PHRASE,
   RETURN_URL,
 } from "@/app/config/setting";
+import prisma from "@/lib/prisma";
 
 type InitialPaymentParamType = {
   command: string;
