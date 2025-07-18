@@ -215,9 +215,9 @@ export const products1 = [
     url: "https://www.shypv.com/go/book?login=true",
   },
   {
-    name: "PUDO",
+    name: "Middleware",
     icon: PUDO,
-    url: "https://www.pudo.ae",
+    url: "https://uslm.shiper.io",
   },
   {
     name: "Plug in'",
