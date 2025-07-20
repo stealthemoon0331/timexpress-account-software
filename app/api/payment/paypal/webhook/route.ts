@@ -1,6 +1,7 @@
 // /app/api/payment/paypal/webhook/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { PAYPAL_BASE, PAYPAL_SUBSCRIPTION_API } from "@/app/config/setting";
 
 
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID!;
@@ -32,7 +33,7 @@ async function getRawBody(req: Request): Promise<Buffer> {
 async function getPayPalAccessToken() {
   const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`).toString("base64");
 
-  const response = await fetch("https://api-m.sandbox.paypal.com/v1/oauth2/token", {
+  const response = await fetch(`${PAYPAL_BASE}/v1/oauth2/token`, {
     method: "POST",
     headers: {
       Authorization: `Basic ${auth}`,
@@ -58,6 +59,7 @@ export async function POST(req: Request) {
   const textBody = rawBody.toString("utf8");
 
   let body;
+
   try {
     body = JSON.parse(textBody);
   } catch (err) {
@@ -65,7 +67,6 @@ export async function POST(req: Request) {
   }
 
   const eventType = body.event_type;
-
   const subscriptionId = body?.resource?.id;
 
   if (!subscriptionId || !eventType) {
@@ -74,7 +75,7 @@ export async function POST(req: Request) {
 
   const accessToken = await getPayPalAccessToken();
 
-  const subscriptionRes = await fetch(`https://api-m.sandbox.paypal.com/v1/billing/subscriptions/${subscriptionId}`, {
+  const subscriptionRes = await fetch(`${PAYPAL_SUBSCRIPTION_API}/${subscriptionId}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -87,15 +88,13 @@ export async function POST(req: Request) {
   }
 
   const subscription = await subscriptionRes.json();
-
   const cardInfo = subscription.subscriber?.payment_source?.card;
   const cardBrand = cardInfo?.brand || null;
   const cardLast4 = cardInfo?.last_digits || null;
-
   const paypalPlanId = subscription.plan_id;
   const nextBillingTime = new Date(subscription.billing_info?.next_billing_time);
-
   const planId = await getPlanIdFromPayPalPlanId(paypalPlanId);
+
   if (!planId) {
     return NextResponse.json({ error: "No matching local plan" }, { status: 400 });
   }
@@ -113,7 +112,7 @@ export async function POST(req: Request) {
   // Save the webhook event for auditing
   await prisma.paypalwebhook.create({
     data: {
-      id: Date.now(),
+      id: Date.now().toString(),
       eventId: body.id,
       eventType: eventType,
       payload: JSON.stringify(body),

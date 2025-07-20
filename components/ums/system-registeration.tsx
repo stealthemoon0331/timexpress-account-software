@@ -46,7 +46,10 @@ interface FormData {
   selected_systems: system[];
 }
 
-export default function SystemRegistration() {
+interface SystemRegisterationProps {
+  planExpired: boolean;
+ }
+export default function SystemRegistration({ planExpired }: SystemRegisterationProps) {
   const [registeredUser, setRegisteredUser] = useState<FormUser | null>(null);
   const [hasTenant, setHasTenant] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -602,7 +605,7 @@ export default function SystemRegistration() {
               required
             />
           </div>
-          <Button className="w-full sm:w-auto" onClick={handleRegistration}>
+          <Button className="w-full sm:w-auto" onClick={handleRegistration} disabled={planExpired}>
             {isRegistering ? "Register..." : "Register"}
           </Button>
         </div>
@@ -611,7 +614,7 @@ export default function SystemRegistration() {
           <CardContent>
             <Typography variant="h6" component="div">
               Registration Status
-              <IconButton onClick={toggleEditMode}>
+              <IconButton onClick={toggleEditMode} disabled={planExpired}>
                 {editMode ? <CloseIcon /> : <EditIcon />}
               </IconButton>
             </Typography>
@@ -745,7 +748,7 @@ export default function SystemRegistration() {
 
                 <ListItem>
                   <div className="flex gap-2">
-                    <Button onClick={handleSaveUpdates}>
+                    <Button onClick={handleSaveUpdates} disabled={planExpired}>
                       {isUpdating ? "Saving..." : "Save"}
                     </Button>
                     <Button onClick={handleCancelEdit}>Cancel</Button>

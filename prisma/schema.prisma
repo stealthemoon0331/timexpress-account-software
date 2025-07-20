@@ -179,6 +179,7 @@ model user {
   payment              payment[]
   session              session[]
   tenants              tenants?
+  planExpired          Int
   plan                 plan?          @relation(fields: [planId], references: [id], map: "User_planId_fkey")
 
   @@index([planId], map: "User_planId_fkey")

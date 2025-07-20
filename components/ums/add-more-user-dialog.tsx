@@ -19,7 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
-import { Checkbox } from "@/components/ui/checkbox";
 import { accesses, branches, systemRoles } from "@/lib/ums/data";
 import { X } from "lucide-react";
 import { FormUser, system, Team, user } from "@/lib/ums/type";

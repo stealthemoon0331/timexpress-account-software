@@ -102,6 +102,7 @@ export async function POST(req: Request) {
         planActivatedAt: now,
         planExpiresAt: expiryDate,
         payfortCardTokenName: token_name,
+        planExpired: 0
       },
     });
 

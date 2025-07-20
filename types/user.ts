@@ -11,4 +11,5 @@ export interface LoggedUser {
     paypalSubscriptionId?: string | null;
     cardBrand: string | null;
     cardLast4: string | null;
+    planExpired: number;
   }

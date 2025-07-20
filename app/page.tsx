@@ -132,7 +132,7 @@ export default function Home() {
             <Link href="/login">
               <Button
                 variant="outline"
-                className="border-[#1bb6f9] text-[#1bb6f9] hover:bg-upwork-lightgreen"
+                className="border-[#1bb6f9] text-[#1bb6f9] hover:bg-[#1bb6f9]"
               >
                 Log in
               </Button>

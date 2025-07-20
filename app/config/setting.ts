@@ -32,7 +32,7 @@ export const DB_PORT = process.env.DB_PORT;
 
 
 // Paypal
-export const PAYPAL_API = process.env.NEXT_PUBLIC_PAYPAL_API!;
+export const PAYPAL_SUBSCRIPTION_API = process.env.NEXT_PUBLIC_PAYPAL_SUBSCRIPTION_API!;
 export const PAYPAL_BASE = process.env.NEXT_PUBLIC_PAYPAL_BASE!;
 
 // Payfort

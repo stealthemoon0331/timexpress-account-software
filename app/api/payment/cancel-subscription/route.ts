@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/authOptions";
+import { PAYPAL_SUBSCRIPTION_API } from "@/app/config/setting";
 
 export async function POST() {
   try {
@@ -26,7 +27,7 @@ export async function POST() {
       ).toString("base64");
   
       const cancelRes = await fetch(
-        `https://api-m.sandbox.paypal.com/v1/billing/subscriptions/${user.paypalSubscriptionId}/cancel`,
+        `${PAYPAL_SUBSCRIPTION_API}/${user.paypalSubscriptionId}/cancel`,
         {
           method: "POST",
           headers: {

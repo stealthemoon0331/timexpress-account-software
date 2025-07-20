@@ -1,3 +1,4 @@
+import { PAYPAL_SUBSCRIPTION_API } from "@/app/config/setting";
 import { authOptions } from "@/lib/authOptions";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
 
     // Cancel current subscription
     const cancelRes = await fetch(
-      `https://api-m.sandbox.paypal.com/v1/billing/subscriptions/${user.paypalSubscriptionId}/cancel`,
+      `${PAYPAL_SUBSCRIPTION_API}/${user.paypalSubscriptionId}/cancel`,
       {
         method: "POST",
         headers: {
@@ -55,7 +56,7 @@ export async function POST(req: Request) {
 
     // Create new subscription
     const createRes = await fetch(
-      "https://api-m.sandbox.paypal.com/v1/billing/subscriptions",
+      `${PAYPAL_SUBSCRIPTION_API}`,
       {
         method: "POST",
         headers: {

@@ -47,7 +47,7 @@ import {
   Team,
   user,
 } from "@/lib/ums/type";
-import { toast, ToastContainer, toast as toastify } from "react-toastify";
+import { ToastContainer, toast as toastify } from "react-toastify";
 import { toast as hotToast } from "react-hot-toast";
 import { useAuth } from "@/app/contexts/authContext";
 import "@/lib/ums/css/loading.css";
@@ -68,7 +68,11 @@ import { checkIfHasTenant } from "@/lib/tenant";
 import { updateUserPermission } from "@/lib/ums/systemHandlers/edit/updateUserPermission";
 import { isPlanExpired } from "@/lib/utils";
 
-export default function UserManagement() {
+interface UserManagementProps {
+  planExpired: boolean;
+}
+
+export default function UserManagement({planExpired}: UserManagementProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isCreateAddDialogOpen, setIsCreateAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -527,17 +531,17 @@ export default function UserManagement() {
 
       if (!res.ok) {
         const error = await res.json();
-        toast.error("Failed to send credentials");
+        toastify.error("Failed to send credentials");
         throw new Error(
           `Failed to send credentials: ${error.message || error}`
         );
       }
 
       result = await res.json();
-      toast.success("Sent credentials successfully!");
+      toastify.success("Sent credentials successfully!");
     } catch (err) {
       console.error("Error sending credentials:", err);
-      toast.error("Failed to send credentials");
+      toastify.error("Failed to send credentials");
     } finally {
       setIsSending(false);
       setIsSendDialogOpen(false);
@@ -637,7 +641,7 @@ export default function UserManagement() {
     }
 
     if (!selectedUser?.email || !systemToAssign) {
-      toast.warning("Please select a user and system.");
+      toastify.warning("Please select a user and system.");
       return;
     }
 
@@ -680,9 +684,9 @@ export default function UserManagement() {
               : user
           )
         );
-        toast.success("Updated permission successfully");
+        toastify.success("Updated permission successfully");
       } else {
-        toast.error(responseFromUMS.message || "Failed permission update");
+        toastify.error(responseFromUMS.message || "Failed permission update");
       }
     } catch (err: any) {
       console.error("Error assigning user:", err);
@@ -745,6 +749,7 @@ export default function UserManagement() {
               <Button
                 onClick={() => setIsCreateDialogOpen(true)}
                 className="w-full sm:w-auto bg-[#1bb6f9] hover:bg-[#3faedd]"
+                disabled={planExpired}
               >
                 <GroupAddIcon className="h-5 w-5 mr-2" />
                 New User
@@ -935,13 +940,15 @@ export default function UserManagement() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
                                 onClick={() => handleEditUser(user)}
+                                disabled={planExpired}
                               >
-                                <Edit className="h-4 w-4 mr-2" />
+                                <Edit className="h-4 w-4 mr-2"/>
                                 Edit
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-black"
                                 onClick={() => handleSendCredentialToUser(user)}
+                                disabled={planExpired}
                               >
                                 <Send className="h-4 w-4 mr-2 " />
                                 Send to User
@@ -949,6 +956,7 @@ export default function UserManagement() {
                               <DropdownMenuItem
                                 className="text-destructive"
                                 onClick={() => handleDeleteUser(user)}
+                                disabled={planExpired}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Delete

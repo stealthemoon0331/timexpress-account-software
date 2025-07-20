@@ -48,7 +48,7 @@ export async function GET() {
     const resData = await res.json();
 
     if (res.status === 200 && resData.response_code === "14000") {
-      const updatedUser = await prisma.user.update({
+      await prisma.user.update({
         where: { id: user.id },
         data: {
           planActivatedAt: new Date(),
@@ -56,6 +56,7 @@ export async function GET() {
             Date.now() +
               Number(process.env.TRIAL_DURATION) * 24 * 60 * 60 * 1000
           ),
+          planExpired: 0
         },
       });
 

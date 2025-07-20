@@ -121,7 +121,6 @@ export const authOptions: NextAuthOptions = {
 
       if (!existingUser) {
 
-
         // New user: create user + trial
         await prisma.user.create({
           data: {
@@ -149,6 +148,7 @@ export const authOptions: NextAuthOptions = {
                   },
                 }
               : undefined,
+            planExpired: 0
           },
         });
       } else {
