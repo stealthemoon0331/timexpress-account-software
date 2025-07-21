@@ -27,7 +27,6 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { signOut } from "next-auth/react";
-import { isPlanExpired } from "@/lib/utils";
 import { useUser } from "@/app/contexts/UserContext";
 import NotificationBell from "@/lib/notification-bell";
 import ProfileAvatar from "../ui/profileAvatar";
@@ -37,7 +36,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '';
 
   const { user: loggedUser } = useUser();
 

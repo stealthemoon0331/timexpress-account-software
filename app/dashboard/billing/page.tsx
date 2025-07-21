@@ -32,11 +32,13 @@ import { differenceInDays, format } from "date-fns";
 import { CheckCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
+import { CircularProgress } from "@mui/material";
 
 export default function BillingPage() {
   const { user: loggedUser, loading } = useUser();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isPlansLoading, setPlansLoading] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string>("free-trial");
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
@@ -66,10 +68,11 @@ export default function BillingPage() {
 
     const newUrl = `${window.location.pathname}?${params.toString()}`;
     router.replace(newUrl);
-
   }, [status]);
 
   const syncPlans = async () => {
+    setPlansLoading(true);
+
     try {
       const res = await fetch("/api/payment/plans", { method: "GET" });
       if (!res.ok) throw new Error("Failed to sync plans");
@@ -87,6 +90,8 @@ export default function BillingPage() {
       setPlans(parsedPlans);
     } catch (err) {
       console.error("Error loading plans:", err);
+    } finally {
+      setPlansLoading(false);
     }
   };
 
@@ -181,7 +186,6 @@ export default function BillingPage() {
               <Separator className="my-4" />
               <div className="space-y-2 text-sm">
                 <p>
-                  
                   {differenceInDays(
                     new Date(loggedUser?.planExpiresAt || new Date()),
                     new Date()
@@ -245,54 +249,66 @@ export default function BillingPage() {
               Choose the plan that best fits your needs.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <RadioGroup
-              defaultValue={selectedPlanId}
-              onValueChange={setSelectedPlanId}
-              className="grid gap-4 md:grid-cols-3"
-            >
-              {plans?.map((plan) => (
-                <div key={plan.id} className="relative">
-                  <RadioGroupItem
-                    value={plan.id}
-                    id={plan.id}
-                    className="sr-only"
-                  />
-                  <label
-                    htmlFor={plan.id}
-                    className={`flex h-full cursor-pointer flex-col rounded-md border p-4 hover:border-[#1bb6f9] ${
-                      selectedPlanId === plan.id
-                        ? "border-2 border-[#1bb6f9]"
-                        : ""
-                    }`}
-                  >
-                    {loggedUser?.planId === plan.id && (
-                      <div className="absolute -right-2 -top-2 rounded-full bg-[#1bb6f9] px-2 py-1 text-xs text-white">
-                        Current
-                      </div>
-                    )}
-                    <div className="mb-4">
-                      <h3 className="font-medium">{plan.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {plan.description}
-                      </p>
+          {isPlansLoading ? (
+            <div className="flex justify-center items-center">
+              <CircularProgress />
+            </div>
+          ) :
+           (
+            <>
+              <CardContent>
+                <RadioGroup
+                  defaultValue={selectedPlanId}
+                  onValueChange={setSelectedPlanId}
+                  className="grid gap-4 md:grid-cols-3"
+                >
+                  {plans?.map((plan) => (
+                    <div key={plan.id} className="relative">
+                      <RadioGroupItem
+                        value={plan.id}
+                        id={plan.id}
+                        className="sr-only"
+                      />
+                      <label
+                        htmlFor={plan.id}
+                        className={`flex h-full cursor-pointer flex-col rounded-md border p-4 hover:border-[#1bb6f9] ${
+                          selectedPlanId === plan.id
+                            ? "border-2 border-[#1bb6f9]"
+                            : ""
+                        }`}
+                      >
+                        {loggedUser?.planId === plan.id && (
+                          <div className="absolute -right-2 -top-2 rounded-full bg-[#1bb6f9] px-2 py-1 text-xs text-white">
+                            Current
+                          </div>
+                        )}
+                        <div className="mb-4">
+                          <h3 className="font-medium">{plan.name}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {plan.description}
+                          </p>
+                        </div>
+                        <div className="mb-4">
+                          <span className="text-2xl font-bold">
+                            $ {plan.price}
+                          </span>
+                        </div>
+                        <ul className="space-y-2 text-sm">
+                          {plan.features.map((feature, index) => (
+                            <li key={index} className="flex items-start gap-2">
+                              <CheckCircle className="w-4 h-4 text-[#1bb6f9] mt-1" />
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </label>
                     </div>
-                    <div className="mb-4">
-                      <span className="text-2xl font-bold">$ {plan.price}</span>
-                    </div>
-                    <ul className="space-y-2 text-sm">
-                      {plan.features.map((feature, index) => (
-                        <li key={index} className="flex items-start gap-2">
-                          <CheckCircle className="w-4 h-4 text-[#1bb6f9] mt-1" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </label>
-                </div>
-              ))}
-            </RadioGroup>
-          </CardContent>
+                  ))}
+                </RadioGroup>
+              </CardContent>
+            </>
+          )}
+
           <CardFooter className="flex justify-end">
             <Button
               onClick={handleChangePlan}
