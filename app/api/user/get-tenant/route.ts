@@ -40,7 +40,7 @@ interface CustomerResult {
   selected_systems: string;
   systems_with_permission: string;
   status: number;
-  adminId: number;
+  adminId: string;
 }
 
 // Allow all origins (wildcard)
@@ -119,6 +119,7 @@ export async function GET(req: Request) {
           planId: true,
           planExpiresAt: true,
           tenantId: true,
+          planExpired: true,
         },
       });
     } catch (prismaError) {
@@ -153,6 +154,7 @@ export async function GET(req: Request) {
       tenant_name: admin.name,
       subscription_status: admin.planId,
       subscription_expiry: admin.planExpiresAt,
+      subscription_expired: admin.planExpired === 1 ? true : false,
       tenant_role: {
         FMS: buildRoleInfo("FMS", customer.fms_user_role_id),
         WMS: buildRoleInfo("WMS", customer.wms_user_role_id),
