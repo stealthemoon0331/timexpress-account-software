@@ -61,9 +61,7 @@ export async function POST(request: Request) {
     const merchant_reference = `SUB_${Date.now()}`;
     const agreement_id = `A${Date.now()}`;
     const command = "PURCHASE";
-    const recurring_mode = "FIXED";
-    const recurring_transactions_count = 12;
-    const recurring_expiry_date = "2026-06-30";
+    const recurring_mode = "UNSCHEDULED";
 
     const initialParams = {
       command: command,
@@ -74,10 +72,9 @@ export async function POST(request: Request) {
       currency: currency,
       language: LANGUAGE,
       customer_email: customer_email,
+      eci: "ECOMMERCE",
       agreement_id: agreement_id,
       recurring_mode: recurring_mode,
-      recurring_transactions_count: recurring_transactions_count,
-      recurring_expiry_date: recurring_expiry_date,
       return_url: RETURN_URL,
     };
 
@@ -116,9 +113,9 @@ export async function POST(request: Request) {
     };
 
     console.log("* PayFort env values => ", {
-      ACCESS_CODE: Boolean(ACCESS_CODE),
-      MERCHANT_ID: Boolean(MERCHANT_ID),
-      REQUEST_PHRASE: Boolean(REQUEST_PHRASE),
+      ACCESS_CODE: ACCESS_CODE,
+      MERCHANT_ID: MERCHANT_ID,
+      REQUEST_PHRASE: REQUEST_PHRASE,
     });
 
     console.log("* params => ", params);
