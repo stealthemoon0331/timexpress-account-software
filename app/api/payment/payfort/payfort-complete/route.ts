@@ -33,6 +33,7 @@ export async function POST(req: Request) {
   const amount = formData.get("amount") as string | null;
   const signature = formData.get("signature") as string | null;
   const token_name = formData.get("token_name") as string | null;
+  console.log("* formData => ", formData);
 
   if (
     !responseCode ||

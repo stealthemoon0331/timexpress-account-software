@@ -104,6 +104,7 @@ export async function POST(request: Request) {
       where: { id: user.id },
       data: {
         merchantReference: merchant_reference,
+        payfortAgreementId: agreement_id
       },
     });
 

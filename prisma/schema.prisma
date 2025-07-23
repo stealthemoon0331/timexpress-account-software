@@ -173,6 +173,7 @@ model user {
   lastLoginAt          DateTime?
   systems              String?        @db.LongText
   merchantReference    String?
+  payfortAgreementId   String?
   payfortCardTokenName String?
   account              account[]
   notification         notification[]

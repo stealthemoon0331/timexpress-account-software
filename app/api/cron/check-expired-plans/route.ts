@@ -14,7 +14,6 @@ export async function GET() {
   const results = [];
 
   for (const user of expiredUsers) {
-    const agreement_id = `A${Date.now()}`;
 
     if (!user.planId) continue;
 
@@ -27,6 +26,17 @@ export async function GET() {
 
     if(!amount) continue;
 
+    const response = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        payfortAgreementId: true,
+      }
+    })
+
+    console.log("* agreement_id => ", response?.payfortAgreementId);
+
+    if(!response?.payfortAgreementId) continue;
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/payment/payfort/recurring`,
       {
@@ -38,7 +48,7 @@ export async function GET() {
         body: JSON.stringify({
           userId: user.id,
           token: user.payfortCardTokenName,
-          agreement_id: agreement_id,
+          agreement_id: response?.payfortAgreementId,
           customer_email: user.email,
           amount: amount.price * 100,
         }),
