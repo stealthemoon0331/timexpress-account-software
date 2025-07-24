@@ -25,7 +25,7 @@ export default function NotFound() {
       }}
     >
       <Image src={NotFoundImg} className="w-auto h-auto" alt="Not Found"/>
-      <button className="flex absolute z-50 bg-blue-500 p-4 mt-4 rounded-md hover:bg-blue-700 text-center" onClick={() => router.push("/")}>
+      <button className="flex z-50 bg-blue-500 p-4 mt-4 rounded-md hover:bg-blue-700 text-center" onClick={() => router.push("/")}>
         <ArrowBigLeft/> 
         <p>Back To Home</p>
       </button>
