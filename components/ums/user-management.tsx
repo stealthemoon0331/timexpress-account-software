@@ -1,12 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Send,
-} from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Send } from "lucide-react";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import HelpIcon from "@mui/icons-material/Help";
 import Pagination from "@mui/material/Pagination";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import { CreateUserDialog } from "@/components/ums/create-user-dialog";
@@ -41,12 +37,7 @@ import {
 import { PasswordResetDialog } from "@/components/ums/password-reset-dialog";
 
 import { getBranchName, getRoleName } from "@/lib/ums/utils";
-import {
-  PermissionedSystem,
-  system,
-  Team,
-  user,
-} from "@/lib/ums/type";
+import { PermissionedSystem, system, Team, user } from "@/lib/ums/type";
 import { ToastContainer, toast as toastify } from "react-toastify";
 import { toast as hotToast } from "react-hot-toast";
 import { useAuth } from "@/app/contexts/authContext";
@@ -67,19 +58,21 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { checkIfHasTenant } from "@/lib/tenant";
 import { updateUserPermission } from "@/lib/ums/systemHandlers/edit/updateUserPermission";
 import { isPlanExpired } from "@/lib/utils";
+import { BlockList } from "net";
 
 interface UserManagementProps {
   planExpired: boolean;
 }
 
-export default function UserManagement({planExpired}: UserManagementProps) {
+export default function UserManagement({ planExpired }: UserManagementProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isCreateAddDialogOpen, setIsCreateAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [isSendDialogOpen, setIsSendDialogOpen] = useState(false);
-  const [isPasswordResetDialogOpen, setIsPasswordResetDialogOpen] = useState(false);
+  const [isPasswordResetDialogOpen, setIsPasswordResetDialogOpen] =
+    useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchSystemQueryList, setSearchSystemQueryList] = useState<system[]>(
     []
@@ -121,7 +114,9 @@ export default function UserManagement({planExpired}: UserManagementProps) {
   });
   const [users, setUsers] = useState<user[]>([]);
   const [searchedUsers, setSearchedUsers] = useState<user[]>([]);
-  const [permissionedSystems, setPermissionedSystems] = useState<PermissionedSystem[]>([]);
+  const [permissionedSystems, setPermissionedSystems] = useState<
+    PermissionedSystem[]
+  >([]);
   const [availableSystems, setAvailableSystems] = useState<system[]>([]);
   const [systemToAssign, setSystemToAssign] = useState<system | null>();
   const [systemToAdd, setSystemToAdd] = useState<system>("FMS");
@@ -134,8 +129,26 @@ export default function UserManagement({planExpired}: UserManagementProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
-  
-  const { access_token, removeUserFromKeycloak, checkAndUpdateAccessToken, updateUserPermissionInKeycloak } = useAuth();
+  const [isReferenceVisible, setRefereceVisible] = useState<boolean>(false);
+
+  const systemReference: Record<string, string> = {
+    CRM: "CRM (Customer centric sales and opportunities)",
+    WMS: "WMS (Inventory system and stock)",
+    FMS: "Fleet (Your vehicles and drivers on single platform)",
+    // TMS: "TMS",
+    HR: "HR (All your staff in one place)",
+    AMS: "Accounting (Modern financial accounts)",
+    QCMS: "Quote/Contracts (Manage your commercials online)",
+    TDMS: "To Do (Organise and prioritise your day)",
+    TSMS: "Timesheet (Track your employees by hour)",
+  };
+
+  const {
+    access_token,
+    removeUserFromKeycloak,
+    checkAndUpdateAccessToken,
+    updateUserPermissionInKeycloak,
+  } = useAuth();
 
   const { user: loggedUser } = useUser();
   const { teams } = useData();
@@ -159,9 +172,9 @@ export default function UserManagement({planExpired}: UserManagementProps) {
       init();
     }
   }, []);
-  
+
   useEffect(() => {
-     setIsExpired(isPlanExpired(loggedUser?.planExpiresAt));
+    setIsExpired(isPlanExpired(loggedUser?.planExpiresAt));
 
     if (loggedUser?.planId) {
       fetchAvailableSystems();
@@ -176,11 +189,17 @@ export default function UserManagement({planExpired}: UserManagementProps) {
         user.name?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
         user.email?.toLowerCase().includes(searchQuery?.toLowerCase());
 
-      const matchesSystem = searchSystemQueryList?.length === 0 || user.selected_systems?.some((system: system) => searchSystemQueryList?.includes(system));
+      const matchesSystem =
+        searchSystemQueryList?.length === 0 ||
+        user.selected_systems?.some((system: system) =>
+          searchSystemQueryList?.includes(system)
+        );
       console.log("* user.selected_systems => ", typeof user.selected_systems);
-      console.log("* searchSystemQueryList?.length => ", searchSystemQueryList?.length);
+      console.log(
+        "* searchSystemQueryList?.length => ",
+        searchSystemQueryList?.length
+      );
       console.log("* searchSystemQueryList=> ", typeof searchSystemQueryList);
-
 
       console.log("* matchesSystem => ", matchesSystem);
 
@@ -194,30 +213,32 @@ export default function UserManagement({planExpired}: UserManagementProps) {
 
   const init = async () => {
     const tokenOk = await checkAndUpdateAccessToken();
-    
+
     await checkAdminRegisteration();
-    
+
     const result = await fetchUsers();
-    
-    if(!tokenOk) {
-      toastify.error("Server Error: currently you cant get keycloak access token!", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      })
+
+    if (!tokenOk) {
+      toastify.error(
+        "Server Error: currently you cant get keycloak access token!",
+        {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        }
+      );
     }
-    
+
     if (result) {
       toastify.success("Data loaded successfully!", {
         autoClose: 3000,
       });
     }
-
   };
 
   const checkAdminRegisteration = async () => {
@@ -413,7 +434,9 @@ export default function UserManagement({planExpired}: UserManagementProps) {
     setSelectedUser(user);
   };
 
-  const handleRowsPerPageChange = ( event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleRowsPerPageChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     setItemsPerPage(parseInt(event.target.value));
     setCurrentPage(1); // Reset to page 1 when changing rows per page
   };
@@ -499,9 +522,9 @@ export default function UserManagement({planExpired}: UserManagementProps) {
   const addNewUser = async (newUser: user) => {
     setUsers((prevUsers) => [...prevUsers, newUser]);
   };
-  
+
   const confirmSendUserCredential = async () => {
-    if(isExpired) {
+    if (isExpired) {
       toastify.warn("Sorry, your plan was expired.", { autoClose: 3000 });
       return;
     }
@@ -551,7 +574,7 @@ export default function UserManagement({planExpired}: UserManagementProps) {
   };
 
   const confirmDeleteUser = async () => {
-    if(isExpired) {
+    if (isExpired) {
       toastify.warn("Sorry, your plan was expired.", { autoClose: 3000 });
       return;
     }
@@ -635,7 +658,7 @@ export default function UserManagement({planExpired}: UserManagementProps) {
   };
 
   const confirmUserAssign = async () => {
-    if(isExpired) {
+    if (isExpired) {
       toastify.warn("Sorry, your plan was expired.", { autoClose: 3000 });
       return;
     }
@@ -700,7 +723,6 @@ export default function UserManagement({planExpired}: UserManagementProps) {
     setCurrentPage(value);
   };
 
-
   if (isTenantChecking) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -708,6 +730,10 @@ export default function UserManagement({planExpired}: UserManagementProps) {
       </div>
     );
   }
+
+  const showReference = () => {
+    setRefereceVisible((prev) => !prev);
+  };
 
   return (
     <div className="space-y-4 vh-96 overflow-y-auto px-2 sm:px-4">
@@ -738,11 +764,31 @@ export default function UserManagement({planExpired}: UserManagementProps) {
                     : []
                   ).map((system: system) => (
                     <div key={system} className="flex items-center space-x-2">
-                      <Checkbox className="border-[#1bb6f9] bg-[#1bb6f9]" id={system} onCheckedChange={() => handleSystemSearchQuery(system)} checked={searchSystemQueryList.includes(system)}/> <span>{system}</span>
+                      <Checkbox
+                        className="border-[#1bb6f9] bg-[#1bb6f9]"
+                        id={system}
+                        onCheckedChange={() => handleSystemSearchQuery(system)}
+                        checked={searchSystemQueryList.includes(system)}
+                      />{" "}
+                      <span>{system}</span>
                     </div>
                   ))}
                 </PopoverContent>
               </Popover>
+
+              <div className="relative group inline-block">
+                <HelpIcon className="text-[#1bb6f9] hover:cursor-pointer hover:text-[#4cf0fc]" />
+
+                {/* Tooltip box */}
+                <div className="absolute z-50 hidden group-hover:block bg-white text-sm text-black p-4 rounded shadow-md w-72 top-full left-1/2 transform -translate-x-1/2 mt-2">
+                  {Object.entries(systemReference).map(([key, value]) => (
+                    <p key={key} className="mb-1">
+                      <span className="font-semibold">{key}</span>:{" "}
+                      <span>{value}</span>
+                    </p>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div className="flex w-full sm:w-auto justify-end sm:justify-start">
@@ -942,7 +988,7 @@ export default function UserManagement({planExpired}: UserManagementProps) {
                                 onClick={() => handleEditUser(user)}
                                 disabled={planExpired}
                               >
-                                <Edit className="h-4 w-4 mr-2"/>
+                                <Edit className="h-4 w-4 mr-2" />
                                 Edit
                               </DropdownMenuItem>
                               <DropdownMenuItem

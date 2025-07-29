@@ -26,6 +26,6 @@ export async function checkAndExpirePlans() {
       },
     });
 
-    console.log(`⛔ Plan expired for user ${user.email}`);
+    console.log(`f Plan expired for user ${user.email}`);
   }
 }
