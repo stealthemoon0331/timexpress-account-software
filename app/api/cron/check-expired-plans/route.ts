@@ -17,6 +17,13 @@ export async function GET() {
 
     if (!user.planId) continue;
 
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        planExpired: 1
+      },
+    });
+
     const amount = await prisma.plan.findUnique({
       where: { id: user.planId },
       select: {

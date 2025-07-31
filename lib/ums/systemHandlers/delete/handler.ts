@@ -1,4 +1,3 @@
-// app/lib/systemHandlers/delete/handler.ts
 import {
   AMS_API_PATH,
   CRM_API_PATH,

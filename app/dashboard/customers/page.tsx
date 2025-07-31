@@ -28,30 +28,9 @@ export default function page() {
     if (!logggedUser?.id) return;
 
     if (isPlanExpired(logggedUser.planExpiresAt)) {
-      handlePlanExpiration(logggedUser);
+      setExpired(true);
     }
   }, [logggedUser]);
-
-  const handlePlanExpiration = async (user: LoggedUser) => {
-    try {
-      setExpired(true);
-
-      const res = await fetch("/api/user/me/plan-expired", {
-        method: "PUT",
-        body: JSON.stringify({
-          id: user.id,
-        }),
-
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if(!res.ok) throw new Error("Server error");
-
-      toastify.warn("Currently your subscription plan was expired");
-    } catch (error: any) {
-      console.error("Plan expiration status update: " + error?.message);
-    }
-  };
 
   return (
     <AuthProvider>
