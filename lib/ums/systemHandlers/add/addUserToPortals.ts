@@ -34,6 +34,7 @@ export const addUserToPortals = async (
     let tsms_user_id = -1;
     let tdms_user_id = -1;
     let hr_user_id = -1;
+    let uslm_user_id = -1;
     let chatess_user_id = -1;
 
 
@@ -86,6 +87,7 @@ export const addUserToPortals = async (
         else if (val.system === "TSMS") tsms_user_id = val.userid;
         else if (val.system === "TDMS") tdms_user_id = val.userid;
         else if (val.system === "HR") hr_user_id = val.userid;
+        else if (val.system === "USLM") uslm_user_id = val.userid;
         else if (val.system === "CHATESS") chatess_user_id = val.userid;
 
         registered_system.push(val.system);
@@ -147,6 +149,10 @@ export const addUserToPortals = async (
       hr_user_id: registered_system.includes("HR") ? hr_user_id : -1,
       hr_user_role_id: registered_system.includes("HR")
         ? getRoleId(seletectedSystemRoles["HR"], "HR")
+        : -1,
+      uslm_user_id: registered_system.includes("USLM") ? uslm_user_id : -1,
+      uslm_user_role_id: registered_system.includes("USLM")
+        ? getRoleId(seletectedSystemRoles["USLM"], "USLM")
         : -1,
       chatess_user_id: registered_system.includes("CHATESS") ? chatess_user_id : -1,
       chatess_user_role_id: registered_system.includes("CHATESS")

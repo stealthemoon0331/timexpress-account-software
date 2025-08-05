@@ -84,6 +84,8 @@ export function EditUserDialog({
     tdms_user_role_id: "",
     hr_user_id: 0,
     hr_user_role_id: "",
+    uslm_user_id: 0,
+    uslm_user_role_id: -1,
     selected_systems: [],
     systems_with_permission: [],
     access: "",
@@ -134,6 +136,10 @@ export function EditUserDialog({
         user.hr_user_role_id === -1
           ? ""
           : getRoleName("HR", user.hr_user_role_id) || "",
+      USLM:
+        user.uslm_user_role_id === -1
+          ? ""
+          : getRoleName("USLM", user.uslm_user_role_id) || "",
       CHATESS:
         user.chatess_user_id === -1
           ? ""
@@ -175,6 +181,8 @@ export function EditUserDialog({
         tdms_user_role_id: user.tdms_user_role_id || -1,
         hr_user_id: user.tdms_user_id || 0,
         hr_user_role_id: user.tdms_user_role_id || -1,
+        uslm_user_id: user.tdms_user_id || 0,
+        uslm_user_role_id: user.tdms_user_role_id || -1,
         chatess_user_id: user.chatess_user_id || 0,
         chatess_user_role_id: user.chatess_user_role_id || -1,
         chatess_workspace: user.chatess_workspace || "",
@@ -200,6 +208,7 @@ export function EditUserDialog({
         TSMS: getRoleName("TSMS", user.tdms_user_role_id) || "",
         TDMS: getRoleName("TDMS", user.tsms_user_role_id) || "",
         HR: getRoleName("HR", user.hr_user_role_id) || "",
+        USLM: getRoleName("USLM", user.uslm_user_role_id) || "",
         CHATESS: getRoleName("CHATESS", user.chatess_user_role_id) || "",
       });
     }
@@ -279,6 +288,7 @@ export function EditUserDialog({
       "TSMS",
       "TDMS",
       "HR",
+      "USLM",
       "CHATESS"
     ];
 

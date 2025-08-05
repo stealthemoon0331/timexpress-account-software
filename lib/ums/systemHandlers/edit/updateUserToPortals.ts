@@ -21,6 +21,7 @@ export const updateUserToPortals = async (
   let tsms_user_role_id = -1;
   let tdms_user_role_id = -1;
   let hr_user_role_id = -1;
+  let uslm_user_role_id = -1;
   let chatess_user_role_id = -1;
 
   try {
@@ -90,6 +91,9 @@ export const updateUserToPortals = async (
         if (result.value.system === "HR") {
           hr_user_role_id = result.value.data.role;
         }
+          if (result.value.system === "USLM") {
+          uslm_user_role_id = result.value.data.role;
+        }
 
         if (result.value.system === "CHATESS") {
           chatess_user_role_id = result.value.data.role;
@@ -154,6 +158,10 @@ export const updateUserToPortals = async (
       hr_user_role_id: updated_systems.includes("HR")
         ? hr_user_role_id
         : userToBeUpdated.hr_user_role_id,
+      uslm_user_id: userToBeUpdated.uslm_user_id,
+      uslm_user_role_id: updated_systems.includes("USLM")
+        ? uslm_user_role_id
+        : userToBeUpdated.uslm_user_role_id,
       chatess_user_id: userToBeUpdated.chatess_user_id,
       chatess_user_role_id: updated_systems.includes("CHATESS")
         ? chatess_user_role_id

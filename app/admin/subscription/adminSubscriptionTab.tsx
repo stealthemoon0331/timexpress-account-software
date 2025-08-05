@@ -24,7 +24,8 @@ const allSystems = [
   { value: "WMS", label: "WMS" },
   { value: "FMS", label: "FMS" },
   { value: "AMS", label: "AMS" }, //Accounting Management System
-  { value: "QCMS", label: "QCMS" } // Quote/Contract Management System
+  { value: "QCMS", label: "QCMS" },// Quote/Contract Management System
+  { value: "USLM", label: "USLM" } 
 ];
 
 export function AdminSubscriptionsTab() {

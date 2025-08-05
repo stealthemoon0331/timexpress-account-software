@@ -70,6 +70,8 @@ model customers {
   tdms_user_role_id       String? @db.VarChar(255)
   hr_user_id              Int?
   hr_user_role_id         String? @db.VarChar(255)
+  uslm_user_id             Int?
+  uslm_user_role_id        Int?
   chatess_user_id         Int?
   chatess_user_role_id    String? @db.VarChar(255)
   chatess_workspace       String? @db.VarChar(255)

@@ -39,7 +39,7 @@ export async function GET() {
       `SELECT id, name, username, email, password, tenant_id, phone, mobile, fms_user_id, fms_branch,
          fms_user_role_id, wms_user_id, wms_user_role_id, crm_user_id, crm_user_role_id, tms_user_id, 
          tms_user_role_id, ams_user_id, ams_user_role_id, qcms_user_id, qcms_user_role_id,
-         tsms_user_id, tsms_user_role_id, tdms_user_id, tdms_user_role_id, hr_user_id, hr_user_role_id, chatess_user_id, chatess_user_role_id, chatess_workspace, teams, access, selected_systems, systems_with_permission, status
+         tsms_user_id, tsms_user_role_id, tdms_user_id, tdms_user_role_id, hr_user_id, hr_user_role_id, uslm_user_id, uslm_user_role_id,chatess_user_id, chatess_user_role_id, chatess_workspace, teams, access, selected_systems, systems_with_permission, status
          FROM customers WHERE status = 1 AND adminId = ?`,
       [user.id]
     );
@@ -109,6 +109,7 @@ export async function POST(request: Request) {
     tsms_user_id, tsms_user_role_id,
     tdms_user_id, tdms_user_role_id,
     hr_user_id, hr_user_role_id,
+    uslm_user_id, uslm_user_role_id
     chatess_user_id, chatess_user_role_id, chatess_workspace,
     teams, access, selected_systems, systems_with_permission,
     status, adminId
@@ -125,7 +126,7 @@ export async function POST(request: Request) {
     ?, ?,
     ?, ?, ?,
     ?, ?, ?, ?,
-    ?, ?
+    ?, ?,?,?
   )
 `;
 
@@ -156,6 +157,8 @@ export async function POST(request: Request) {
       customerData.tdms_user_role_id || null,
       customerData.hr_user_id || null,
       customerData.hr_user_role_id || null,
+      customerData.uslm_user_id || null,
+      customerData.uslm_user_role_id || null,
       customerData.chatess_user_id || null,
       customerData.chatess_user_role_id || null,
       customerData.chatess_workspace || null,

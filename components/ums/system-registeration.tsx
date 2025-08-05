@@ -96,6 +96,7 @@ export default function SystemRegistration({ planExpired }: SystemRegisterationP
     TSMS: "Admin",
     TDMS: "Admin",
     HR: "Admin",
+    USLM: "Admin",
     CHATESS: "admin",
   };
 

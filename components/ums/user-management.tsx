@@ -104,6 +104,8 @@ export default function UserManagement({ planExpired }: UserManagementProps) {
     tdms_user_role_id: -1,
     hr_user_id: -1,
     hr_user_role_id: -1,
+    uslm_user_id: -1,
+    uslm_user_role_id: -1,
     chatess_user_id: -1,
     chatess_user_role_id: -1,
     chatess_workspace: -1,
@@ -141,6 +143,7 @@ export default function UserManagement({ planExpired }: UserManagementProps) {
     QCMS: "Quote/Contracts (Manage your commercials online)",
     TDMS: "To Do (Organise and prioritise your day)",
     TSMS: "Timesheet (Track your employees by hour)",
+    USLM: "Unified Shipping Label Middleware"
   };
 
   const {
@@ -861,6 +864,8 @@ export default function UserManagement({ planExpired }: UserManagementProps) {
                                   roleId = user.tdms_user_role_id;
                                 else if (system === "HR")
                                   roleId = user.hr_user_role_id;
+                                else if (system === "USLM")
+                                  roleId = user.uslm_user_role_id;
                                 else if (system === "CHATESS")
                                   roleId = user.chatess_user_role_id;
                                 return (
