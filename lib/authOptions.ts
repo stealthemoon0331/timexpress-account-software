@@ -1,5 +1,3 @@
-
-
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import FacebookProvider from "next-auth/providers/facebook";
@@ -8,6 +6,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
+import { isPlanExpired } from "./utils";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -43,7 +42,7 @@ export const authOptions: NextAuthOptions = {
           credentials.password,
           user.password
         );
-        
+
         if (!isValid) throw new Error("Invalid credentials");
 
         return {
@@ -118,9 +117,7 @@ export const authOptions: NextAuthOptions = {
         where: { id: "free-trial" },
       });
 
-
       if (!existingUser) {
-
         // New user: create user + trial
         await prisma.user.create({
           data: {
@@ -148,14 +145,18 @@ export const authOptions: NextAuthOptions = {
                   },
                 }
               : undefined,
-            planExpired: 0
+            planExpired: 0,
           },
         });
       } else {
+        const planExpired = existingUser.planActivatedAt? isPlanExpired(existingUser.planActivatedAt.toISOString())
+            ? 1
+            : 0
+          : 0;
         // Existing user: update login time
         await prisma.user.update({
           where: { email: user.email },
-          data: { lastLoginAt: now },
+          data: { lastLoginAt: now, planExpired: planExpired },
         });
 
         // Link OAuth account if it's not already linked
