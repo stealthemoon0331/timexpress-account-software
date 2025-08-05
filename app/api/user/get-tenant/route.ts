@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { PoolConnection } from "mysql2/promise";
 import prisma from "@/lib/prisma";
 import { system } from "@/lib/ums/type";
+import { isPlanExpired } from "@/lib/utils";
 
 interface CustomerResult {
   id: number;
@@ -149,12 +150,17 @@ export async function GET(req: Request) {
       }
     };
 
+    const planExpired = admin.planExpiresAt? isPlanExpired(admin.planExpiresAt.toISOString())
+                ? 1
+                : 0
+              : 0;
+
     const responseData = {
       tenant_id: customer.tenant_id,
       tenant_name: admin.name,
       subscription_status: admin.planId,
       subscription_expiry: admin.planExpiresAt,
-      subscription_expired: admin.planExpired === 1 ? true : false,
+      subscription_expired: planExpired,
       tenant_role: {
         FMS: buildRoleInfo("FMS", customer.fms_user_role_id),
         WMS: buildRoleInfo("WMS", customer.wms_user_role_id),

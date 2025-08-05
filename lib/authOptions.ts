@@ -111,6 +111,10 @@ export const authOptions: NextAuthOptions = {
 
       const existingUser = await prisma.user.findUnique({
         where: { email: user.email },
+        select: {
+          id: true,
+          planExpiresAt: true
+        }
       });
 
       const trialPlan = await prisma.plan.findUnique({
@@ -149,7 +153,7 @@ export const authOptions: NextAuthOptions = {
           },
         });
       } else {
-        const planExpired = existingUser.planActivatedAt? isPlanExpired(existingUser.planActivatedAt.toISOString())
+        const planExpired = existingUser.planExpiresAt? isPlanExpired(existingUser.planExpiresAt.toISOString())
             ? 1
             : 0
           : 0;
