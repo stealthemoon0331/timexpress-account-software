@@ -67,6 +67,8 @@ CREATE TABLE `customers` (
     `tdms_user_role_id` VARCHAR(255) NULL,
     `hr_user_id` INTEGER NULL,
     `hr_user_role_id` VARCHAR(255) NULL,
+    `uslm_user_id` INTEGER NULL,
+    `uslm_user_role_id` INTEGER NULL,
     `chatess_user_id` INTEGER NULL,
     `chatess_user_role_id` VARCHAR(255) NULL,
     `chatess_workspace` VARCHAR(255) NULL,

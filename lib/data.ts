@@ -15,6 +15,7 @@ import RTO from "@/public/icons/13.svg"
 import Bullet from "@/public/icons/12.svg"
 import PUDO from "@/public/icons/14.svg"
 import Plugin from "@/public/icons/15.svg"
+import USLM from "@/public/icons/8.svg"
 
 export interface Plan {
   id: string;
@@ -42,7 +43,7 @@ export const plans: Plan[] = [
     ],
     current: true,
     paypalPlanId: "",
-    systems: ["CRM", "WMS", "FMS"]
+    systems: ["CRM", "WMS", "FMS","USLM"]
   },
   {
     id: "starter",
@@ -120,13 +121,18 @@ export const systems = [
     id: 1,
     name: "FMS"
   },
+  {
+    id: 1,
+    name: "USLM"
+  },
 ]
 
 export const AllSystems: system[] = [
   "CRM",
   "FMS",
   "WMS",
-  "TMS"
+  "TMS",
+  "USLM"
 ]
 
 export const products = [
@@ -154,6 +160,11 @@ export const products = [
     name: "HR",
     icon: HR,
     url: "https://hr.shypon.com/",
+  },
+  {
+    name: "USLM",
+    icon: USLM,
+    url: "https://uslm.shiper.io/",
   },
   {
     name: "Accounting",

@@ -28,6 +28,8 @@ interface CustomerResult {
   ams_user_role_id: string;
   hr_user_id: number;
   hr_user_role_id: string;
+  uslm_user_id: number;
+  uslm_user_role_id: number;
   qcms_user_id: number;
   qcms_user_role_id: string;
   tsms_user_id: number;
@@ -89,7 +91,7 @@ export async function GET(req: Request) {
         `SELECT id, name, username, email, password, tenant_id, phone, mobile, fms_user_id, fms_branch,
          fms_user_role_id, wms_user_id, wms_user_role_id, crm_user_id, crm_user_role_id, tms_user_id,
          tms_user_role_id, ams_user_id, ams_user_role_id, qcms_user_id, qcms_user_role_id, tsms_user_id, tsms_user_role_id, 
-         tdms_user_id, tdms_user_role_id, hr_user_id, hr_user_role_id, chatess_user_id, chatess_user_role_id,
+         tdms_user_id, tdms_user_role_id, hr_user_id, hr_user_role_id,uslm_user_id, uslm_user_role_id,chatess_user_id, chatess_user_role_id,
          teams, access, selected_systems, systems_with_permission, status, adminId
          FROM customers WHERE email = ? AND status = 1 LIMIT 1`,
         [email]
@@ -170,6 +172,7 @@ export async function GET(req: Request) {
         QCMS: buildRoleInfo("QCMS", customer.qcms_user_role_id),
         TSMS: buildRoleInfo("TSMS", customer.tsms_user_role_id),
         HR: buildRoleInfo("HR", customer.hr_user_role_id),
+        USLM: buildRoleInfo("USLM", customer.uslm_user_role_id),
         TDMS: buildRoleInfo("TDMS", customer.tdms_user_role_id),
         CHATESS: buildRoleInfo("CHATESS", customer.chatess_user_role_id),
       },

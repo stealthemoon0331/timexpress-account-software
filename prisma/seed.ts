@@ -16,6 +16,9 @@ async function main() {
     {
       name: "FMS",
     },
+    {
+      name: "USLM",
+    }
   ];
 
   const plans = [
@@ -32,7 +35,7 @@ async function main() {
       ],
       current: true,
       paypalPlanId: "",
-      systems: ["CRM", "WMS", "FMS"],
+      systems: ["CRM", "WMS", "FMS","USLM"],
     },
     {
       id: "starter",

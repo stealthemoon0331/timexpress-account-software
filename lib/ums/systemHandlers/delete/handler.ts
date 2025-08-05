@@ -8,6 +8,7 @@ import {
   TSMS_API_PATH,
   WMS_API_PATH,
   HR_API_PATH,
+  USLM_API_PATH,
   CHATESS_API_PATH,
 } from "@/app/config/setting";
 import { user } from "@/lib/ums/type";
@@ -227,6 +228,27 @@ export async function deleteUserFromHR({ user }: DeleteParams) {
   } catch (error) {
     console.error("HR deletion error:", error);
     return { success: false, error: "Failed to delete from HR" };
+  }
+}
+
+export async function deleteUserFromUSLM({ user }: DeleteParams) {
+  try {
+    const response = await fetch(
+      `${USLM_API_PATH}/api/auth/user?id=${user.uslm_user_id}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("USLM user deletion error:", error);
+    return { success: false, error: "Failed to delete from USLM" };
   }
 }
 

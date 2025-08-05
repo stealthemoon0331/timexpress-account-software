@@ -1,6 +1,6 @@
 import { Branch, system, Team } from "./type";
 
-export const availableSystems: system[] = ["WMS", "CRM", "FMS"];
+export const availableSystems: system[] = ["WMS", "CRM", "FMS","USLM"];
 
 // Mock data for system-specific roles
 export const systemRoles = {
@@ -51,6 +51,10 @@ export const systemRoles = {
         { id: "1", name: "Admin", roleId: "Admin" },
         { id: "2", name: "User", roleId: "User" },
         { id: "3", name: "Manager", roleId: "Manager" },
+    ],
+     USLM: [
+        { id: "1", name: "Admin", roleId:1},
+        { id: "2", name: "User", roleId:2},
     ],
     CHATESS: [
         { id: "1", name: "Admin", roleId: "admin" },

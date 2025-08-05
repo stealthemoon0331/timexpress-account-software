@@ -11,7 +11,7 @@ export type Team = {
   createdBy: number;
 };
 
-export type system = "CRM" | "WMS" | "FMS" | "TMS" | "AMS" | "QCMS" | "TSMS" | "TDMS" | "HR" | "CHATESS";
+export type system = "CRM" | "WMS" | "FMS" | "TMS" | "AMS" | "QCMS" | "TSMS" | "TDMS" | "HR" | "USLM" |"CHATESS";
 
 export interface FailedSystem {
   userId: number;
@@ -33,6 +33,7 @@ export interface SelectedSystemRoles {
   TSMS: string;
   TDMS: string;
   HR: string;
+  USLM: string;
   CHATESS: string;
 }
 
@@ -73,6 +74,8 @@ export type user = {
   tdms_user_role_id: number | string;
   hr_user_id: number;
   hr_user_role_id: number | string;
+  uslm_user_id: number;
+  uslm_user_role_id: number | string;
   chatess_user_id: number;
   chatess_user_role_id: number | string;
   chatess_workspace: string | number,
@@ -110,6 +113,8 @@ export type FormUser = {
   tdms_user_role_id?: number | string;
   hr_user_id?: number;
   hr_user_role_id?: number | string;
+  uslm_user_id?: number;
+  uslm_user_role_id?: number | string;
   chatess_user_id?: number;
   chatess_user_role_id?: number | string;
   chatess_workspace?: number | string;
@@ -145,6 +150,8 @@ export type FormDataType = {
   tdms_user_role_id?: string;
   hr_user_id?: number;
   hr_user_role_id?: string;
+  uslm_user_id?: number;
+  uslm_user_role_id?: number;
   chatess_user_id?: number;
   chatess_user_role_id?: number | string;
   chatess_workspace?: number | string;

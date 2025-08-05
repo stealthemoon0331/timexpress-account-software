@@ -8,6 +8,7 @@ import {
   TSMS_API_PATH,
   WMS_API_PATH,
   HR_API_PATH,
+  USLM_API_PATH,
   CHATESS_API_PATH,
 } from "@/app/config/setting";
 import { systemRoles } from "@/lib/ums/data";
@@ -683,7 +684,79 @@ export async function updateUserInHR({
     };
   }
 }
+export async function updateUserInUSLM({
+  formData,
+  roleId,
+  accessToken,
+  user,
+  system,
+}: UpdateParams) {
+  // USLM update implementation
+  try {
 
+    if(!user.uslm_user_id) {
+      throw new Error("Update field. Your data was not initialized");
+    } 
+
+    let updateBody = {}
+
+    if (formData.email) {
+      updateBody = { ...updateBody, email: formData.email };
+    }
+
+    if (formData.name) {
+      updateBody = { ...updateBody, name: formData.name };
+    }
+
+    if(roleId) {
+      updateBody = {...updateBody, role: roleId}
+    }
+
+    const response = await fetch(
+      `${USLM_API_PATH}/api/auth/user?id=${user.uslm_user_id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updateBody)
+      }
+    );
+    let responseData: any = null;
+
+    try {
+      // Try to parse response only if there is content
+      const text = await response.text();
+      responseData = text ? JSON.parse(text) : {};
+    } catch (jsonErr) {
+      console.warn("Failed to parse response JSON:", jsonErr);
+    }
+
+    if (!response.ok) {
+      
+      return {
+        isError: true,
+        message: responseData.msg || `Failed to update user in USLM`,
+        data: null,
+      };
+    }
+
+    return {
+      isError: false,
+      message: "USLM user updated successfully",
+      system: system,
+      data: responseData.user,
+    };
+  } catch (error) {
+    console.error("USLM update error:", error, " : ", typeof error);
+
+    return {
+      isError: true,
+      message: error instanceof Error ? error.message : String(error),
+      data: null,
+    };
+  }
+}
 export async function updateUserInCHATESS({
   formData,
   roleId,

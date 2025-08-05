@@ -8,6 +8,7 @@ import {
   TSMS_API_PATH,
   TDMS_API_PATH,
   HR_API_PATH,
+  USLM_API_PATH,
   CHATESS_API_PATH,
 } from "@/app/config/setting";
 import { systemRoles } from "@/lib/ums/data";
@@ -460,6 +461,63 @@ export async function registerUserToHR({
   };
 
   const response = await fetch(`${HR_API_PATH}/api/auth/signup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const responseData = await safeParseJSON(response);
+
+  if (!response.ok) {
+    return {
+      isError: true,
+      message: responseData?.msg,
+      data: null,
+    };
+  }
+
+  if (!responseData?.result) {
+    return {
+      isError: true,
+      message: responseData?.msg,
+      data: null,
+    };
+  }
+
+  return {
+    isError: false,
+    message: "User registered successfully",
+    data: responseData?.user,
+  };
+}
+
+export async function registerUserToUSLM({
+  ssoUser,
+  roleId,
+  system,
+}: RegistrationParams) {
+  // Split full name into firstName and lastName
+const fullName = (ssoUser.name || "").trim();
+const nameParts = fullName.split(" ");
+const firstName = nameParts[0] || "Unknown";
+const lastName = nameParts.slice(1).join(" ") || "Unknown"; // fallback here
+
+  const payload = {
+    email: ssoUser.email,
+    name: ssoUser.name,
+    password: ssoUser.password,
+    role: {
+      id: roleId,
+      role: getRoleName(system, roleId),
+    },
+    tenantId: ssoUser.tenant_id,
+    status: 1,
+  };
+  console.log("Registering user with payload:", payload);
+
+  const response = await fetch(`${USLM_API_PATH}/api/auth/signup`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

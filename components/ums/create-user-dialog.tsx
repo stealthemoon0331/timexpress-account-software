@@ -86,6 +86,8 @@ export function CreateUserDialog({
     tdms_user_role_id: "",
     hr_user_id: -1,
     hr_user_role_id: "",
+    uslm_user_id: -1,
+    uslm_user_role_id: -1,
     selected_systems: [],
     access: "",
     teams: [""],
@@ -124,6 +126,7 @@ export function CreateUserDialog({
       TSMS: "",
       TDMS: "",
       HR: "",
+      USLM: "",
       CHATESS: "",
     });
 
@@ -187,6 +190,7 @@ export function CreateUserDialog({
       "TSMS",
       "TDMS",
       "HR",
+      "USLM",
       "CHATESS",
     ];
 
@@ -311,6 +315,8 @@ export function CreateUserDialog({
       tdms_user_role_id: "",
       hr_user_id: -1,
       hr_user_role_id: "",
+      uslm_user_id: -1,
+      uslm_user_role_id: -1,
       access: "",
       teams: [],
       selected_systems: [],
@@ -328,6 +334,7 @@ export function CreateUserDialog({
       TSMS: "",
       TDMS: "",
       HR: "",
+      USLM: "",
       CHATESS: "",
     });
     setSelectedAccess("");
@@ -358,6 +365,7 @@ export function CreateUserDialog({
       TSMS: "",
       TDMS: "",
       HR: "",
+      USLM: "",
       CHATESS: "",
     });
     setSelectedAccess("");
@@ -390,6 +398,8 @@ export function CreateUserDialog({
       tdms_user_role_id: "",
       hr_user_id: -1,
       hr_user_role_id: "",
+      uslm_user_id: -1,
+      uslm_user_role_id: "",
       chatess_user_id: -1,
       chatess_user_role_id: "",
       chatess_workspace: "",

@@ -74,6 +74,8 @@ export function AddMoreUserDialog({
     tdms_user_role_id: -1,
     hr_user_id: -1,
     hr_user_role_id: -1,
+    uslm_user_id: -1,
+    uslm_user_role_id: -1,
     chatess_user_id: -1,
     chatess_user_role_id: -1,
     chatess_workspace: "",
@@ -99,6 +101,7 @@ export function AddMoreUserDialog({
     TSMS: "",
     TDMS: "",
     HR: "",
+    USLM: "",
     CHATESS: "",
   });
 
@@ -140,6 +143,8 @@ export function AddMoreUserDialog({
         tdms_user_role_id: user.tdms_user_role_id || "",
         hr_user_id: user.hr_user_id || -1,
         hr_user_role_id: user.hr_user_role_id || "",
+        uslm_user_id: user.uslm_user_id || -1,
+        uslm_user_role_id: user.uslm_user_role_id || -1,
         chatess_user_id: user.chatess_user_id || -1,
         chatess_user_role_id: user.chatess_user_role_id || "",
         chatess_workspace: user.chatess_workspace || "",
@@ -159,6 +164,7 @@ export function AddMoreUserDialog({
         TSMS: getRoleName("TSMS", user.tsms_user_role_id) || "",
         TDMS: getRoleName("TDMS", user.tdms_user_role_id) || "",
         HR: getRoleName("HR", user.hr_user_role_id) || "",
+        USLM: getRoleName("USLM", user.uslm_user_role_id) || "",
         CHATESS: getRoleName("CHATESS", user.chatess_user_role_id || ""),
       });
     }
@@ -211,6 +217,7 @@ export function AddMoreUserDialog({
       "TSMS",
       "TDMS",
       "HR",
+      "USLM",
       "CHATESS",
     ];
 
@@ -267,6 +274,7 @@ export function AddMoreUserDialog({
     let tsms_user_id = 0;
     let tdms_user_id = 0;
     let hr_user_id = 0;
+    let uslm_user_id = 0;
     let chatess_user_id = 0;
 
     let registered_system: system[] = user.selected_systems;
@@ -393,6 +401,14 @@ export function AddMoreUserDialog({
             hr_user_role_id: getRoleId(systemRoleSelections["HR"], "HR"),
             systems_with_permission: [...user.systems_with_permission, "HR"],
           };
+        } else if (system === "USLM") {
+          tsms_user_id = responseData.data.userid;
+          updatedUser = {
+            ...user,
+            uslm_user_id: uslm_user_id,
+            uslm_user_role_id: getRoleId(systemRoleSelections["USLM"], "USLM"),
+            systems_with_permission: [...user.systems_with_permission, "USLM"],
+          };
         } else if (system === "CHATESS") {
           tsms_user_id = responseData.data.userid;
           updatedUser = {
@@ -437,6 +453,7 @@ export function AddMoreUserDialog({
               TSMS: "",
               TDMS: "",
               HR: "",
+              USLM: "",
               CHATESS: "",
             });
             setSelectedAccess(null);

@@ -8,6 +8,7 @@ import {
   updateUserInTSMS,
   updateUserInWMS,
   updateUserInHR,
+  updateUserInUSLM,
   updateUserInCHATESS,
 } from "@/lib/ums/systemHandlers/edit/handler";
 import { system } from "@/lib/ums/type";
@@ -120,6 +121,16 @@ export async function POST(
         });
         
         return NextResponse.json(hrResponse);
+
+        case "USLM":
+        const uslmResponse = await updateUserInUSLM({
+          formData,
+          roleId,
+          user,
+          system,
+        });
+        
+        return NextResponse.json(uslmResponse);
       
       case "CHATESS":
         const chatessResponse = await updateUserInCHATESS({

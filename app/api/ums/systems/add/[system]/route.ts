@@ -8,6 +8,7 @@ import {
   registerUserToTSMS,
   registerUserToWMS,
   registerUserToHR,
+  registerUserToUSLM,
   registerUserToCHATESS,
 } from "@/lib/ums/systemHandlers/add/handler";
 import { system } from "@/lib/ums/type";
@@ -140,6 +141,72 @@ export async function POST(
           message: hrResponse.message,
           data: { system: system, userid: hrResponse.data?.id },
         });
+        case "USLM":
+  //       try{
+  //       const uslmResponse = await registerUserToUSLM({
+  //         ssoUser,
+  //         roleId,
+  //         system,
+  //       });
+  //       console.log("USLM registration: ", ssoUser, roleId, system);
+  //       return NextResponse.json({
+  //         error: uslmResponse.isError,
+  //         message: uslmResponse.message,
+  //         data: { system: system, userid: uslmResponse.data?.id },
+  //       });
+  //     }catch (err) {
+  //   console.error("USLM registration failed:", err);
+  //   return NextResponse.json(
+  //     {
+  //       error: true,
+  //       message: "USLM registration failed",
+  //       data: { system: system },
+  //     },
+  //     { status: 500 }
+  //   );
+  // }
+  case "USLM":
+  try {
+    const uslmResponse = await registerUserToUSLM({
+      ssoUser,
+      roleId,
+      system,
+    });
+
+    console.log("USLM registration: ", ssoUser, roleId, system);
+    console.log("USLM registration response:", uslmResponse);
+
+    return NextResponse.json({
+      error: uslmResponse.isError,
+      message: uslmResponse.message,
+      data: {
+        system,
+        userid: uslmResponse?.data?.id || null,
+      },
+    });
+  } catch (err: any) {
+    console.error("USLM registration failed:", err);
+    
+    // Optional: Log more if it's a FetchError or contains a response
+    if (err?.response) {
+      try {
+        const errorBody = await err.response.text();
+        console.error("USLM error response body:", errorBody);
+      } catch (parseErr) {
+        console.error("Error reading response body:", parseErr);
+      }
+    }
+
+    return NextResponse.json(
+      {
+        error: true,
+        message: "USLM registration failed",
+        data: { system },
+      },
+      { status: 500 }
+    );
+  }
+
       
       case "CHATESS":
         const chatessResponse = await registerUserToCHATESS({

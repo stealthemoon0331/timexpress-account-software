@@ -31,6 +31,8 @@ export const createUserTableQuery = `
         tdms_user_role_id VARCHAR(255),
         hr_user_id INT,
         hr_user_role_id VARCHAR(255),
+        uslm_user_id INT,
+        uslm_user_role_id INT,
         access VARCHAR(255),
         teams VARCHAR(255),
         systems_with_permission VARCHAR(255),

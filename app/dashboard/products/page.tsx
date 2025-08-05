@@ -69,6 +69,15 @@ export default function ProductsPage() {
       organizations: 37,
       status: "active",
     },
+     {
+      id: "7",
+      name: "USLM",
+      description: "Unified Shipping Label Middleware",
+      icon: "/icons/inventory.svg",
+      users: 1532,
+      organizations: 56,
+      status: "active",
+    },
   ]
 
   const filteredProducts = products.filter((product) => product.name.toLowerCase().includes(searchTerm.toLowerCase()))
