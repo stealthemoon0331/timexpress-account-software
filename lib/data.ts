@@ -196,11 +196,6 @@ export const products = [
     icon: Customs,
     url: "https://hurricanecommerce.com",
   },
-  {
-    name: "Courier",
-    icon: Courier,
-    url: "https://parcels.shypv.com/",
-  },
   // {
   //   name: "Timex C2C Express",
   //   icon: "https://shiper.io/assets/img/newimg/11.svg",
@@ -215,6 +210,11 @@ export const products = [
 ];
 
 export const products1 = [
+    {
+    name: "Courier",
+    icon: Courier,
+    url: "https://parcels.shypv.com/",
+  },
   {
     name: "RTO",
     icon: RTO,
