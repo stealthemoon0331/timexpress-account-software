@@ -55,7 +55,7 @@ export const ProductsSection = ({ products, products1 }: Props) => (
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-6">
         {products1.map((product) => (
           <Link href={product.url} key={product.name} className="text-center">
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col justify-center items-center">
               <div className="bg-white w-20 h-20 shadow-xl rounded-md p-3 mb-2 hover:-translate-y-1 transition-transform duration-200">
                 <Image
                   src={product.icon || "/placeholder.svg"}
