@@ -109,7 +109,7 @@ export async function POST(request: Request) {
     tsms_user_id, tsms_user_role_id,
     tdms_user_id, tdms_user_role_id,
     hr_user_id, hr_user_role_id,
-    uslm_user_id, uslm_user_role_id
+    uslm_user_id, uslm_user_role_id,
     chatess_user_id, chatess_user_role_id, chatess_workspace,
     teams, access, selected_systems, systems_with_permission,
     status, adminId
